@@ -37,7 +37,7 @@
                 android:text="@string/add_car"
                 android:textColor="@color/purple_500"
                 android:textSize="24sp"
-                android:theme="@style/Bold_Primary_Color_TextView_style"
+                style="@style/Bold_Primary_Color_TextView_style"
                 android:gravity="center"
                 android:layout_marginBottom="8dp"/>
 
@@ -48,7 +48,7 @@
                 android:layout_marginBottom="8dp"
                 android:textSize="15sp"
 
-                android:theme="@style/Regular_Primary_Color_TextView_style" />
+                style="@style/Regular_Primary_Color_TextView_style" />
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/vichelNumber_edt"
@@ -62,7 +62,7 @@
                 android:textColor="@color/colorPrimary"
                 android:textColorHint="@color/colorPrimary"
                 android:layout_marginBottom="20dp"
-                android:theme="@style/Regular_Primary_Color_TextView_style"
+                style="@style/Regular_Primary_Color_TextView_style"
                 android:layout_marginTop="10dp"
                 android:textSize="16.5sp"/>
 
@@ -78,7 +78,7 @@
                 android:textColor="@color/colorPrimary"
                 android:textColorHint="@color/colorPrimary"
                 android:layout_marginBottom="20dp"
-                android:theme="@style/Regular_Primary_Color_TextView_style"
+                style="@style/Regular_Primary_Color_TextView_style"
                 android:textSize="16.5sp"/>
 
             <androidx.appcompat.widget.AppCompatSpinner
@@ -90,7 +90,7 @@
                 android:background="@drawable/edit_text_background"
                 android:padding="10dp"
                 android:layout_marginBottom="20dp"
-                android:theme="@style/Regular_Primary_Color_TextView_style"/>
+                style="@style/Regular_Primary_Color_TextView_style"/>
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/notes_txt"
@@ -107,7 +107,7 @@
                 android:textColor="@color/colorPrimary"
                 android:textColorHint="@color/colorPrimary"
                 android:layout_marginBottom="20dp"
-                android:theme="@style/Regular_Primary_Color_TextView_style"
+                style="@style/Regular_Primary_Color_TextView_style"
                 android:textSize="16.sp"/>
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -122,7 +122,7 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:textColor="@color/white"
-                android:theme="@style/Bold_White_Color_TextView_style"
+                style="@style/Bold_White_Color_TextView_style"
                 android:background="@drawable/first_button_background"/>
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -136,7 +136,7 @@
                 android:textSize="18sp"
                 android:layout_margin="@dimen/_10sdp"
                 android:textColor="@color/white"
-                android:theme="@style/Bold_White_Color_TextView_style"
+                style="@style/Bold_White_Color_TextView_style"
                 android:background="@drawable/second_button_background"/>
 
         </LinearLayout>

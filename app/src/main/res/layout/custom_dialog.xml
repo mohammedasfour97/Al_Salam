@@ -23,7 +23,7 @@
         android:textStyle="bold"
         android:textColor="@color/purple_500"
         android:textSize="24dp"
-        android:theme="@style/Bold_Primary_Color_TextView_style"
+        style="@style/Bold_Primary_Color_TextView_style"
         android:layout_marginBottom="8dp"/>
 
     <TextView
@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="subtitle"
-        android:theme="@style/Regular_Primary_Color_TextView_style"
+        style="@style/Regular_Primary_Color_TextView_style"
         android:visibility="gone" />
 
     <EditText
@@ -49,7 +49,7 @@
         android:inputType="textMultiLine"
         android:textColorHint="@color/colorPrimary"
         android:layout_marginBottom="20dp"
-        android:theme="@style/Regular_Primary_Color_TextView_style"
+        style="@style/Regular_Primary_Color_TextView_style"
         android:layout_marginTop="10dp"
         android:textSize="16.5dp"/>
 
@@ -67,7 +67,7 @@
         android:paddingBottom="14dp"
         android:paddingLeft="20dp"
         android:paddingTop="14dp"
-        android:theme="@style/Regular_Primary_Color_TextView_style"
+        style="@style/Regular_Primary_Color_TextView_style"
         android:textColorHint="#ffffff"
         android:layout_marginBottom="20dp"
         android:layout_marginTop="10dp"
@@ -82,7 +82,7 @@
         android:layout_marginRight="28dp"
         android:gravity="top"
         android:visibility="gone"
-        android:theme="@style/Regular_Primary_Color_TextView_style"
+        style="@style/Regular_Primary_Color_TextView_style"
         android:background="@drawable/edit_text_background"
         android:hint="text"
         android:inputType="text"
@@ -110,7 +110,7 @@
         android:layout_marginBottom="10dp"
         android:textColor="@color/white"
         android:visibility="gone"
-        android:theme="@style/Regular_White_Color_TextView_style"
+        style="@style/Regular_White_Color_TextView_style"
         android:background="@drawable/first_button_background"/>
 
     <TextView
@@ -127,7 +127,7 @@
         android:layout_marginBottom="10dp"
         android:textColor="@color/white"
         android:visibility="gone"
-        android:theme="@style/Regular_White_Color_TextView_style"
+        style="@style/Regular_White_Color_TextView_style"
         android:background="@drawable/second_button_background"/>
     <TextView
         android:id="@+id/third_button"
@@ -142,7 +142,7 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="25dp"
         android:textColor="@color/white"
-        android:theme="@style/Regular_White_Color_TextView_style"
+        style="@style/Regular_White_Color_TextView_style"
         android:visibility="gone"
         android:background="@drawable/third_button_background"/>
 
