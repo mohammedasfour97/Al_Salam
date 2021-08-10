@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/fragment_login_main_img"
+            android:layout_width="@dimen/_150sdp"
+            android:layout_height="@dimen/_150sdp"
+            android:layout_marginBottom="@dimen/_20sdp"
+            android:src="@drawable/car_img"/>
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/fragment_login_username_edt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_10sdp"
+            android:layout_margin="@dimen/_10sdp"
+            android:background="@drawable/white_solid_prim_stroke"
+            android:drawablePadding="@dimen/_5sdp"
+            android:textColor="@color/purple_500"
+            android:textSize="20sp"
+            android:hint="@string/username"
+            android:gravity="left"
+            android:drawableRight="@drawable/ic_baseline_gray_email_24"
+            android:theme="@style/Regular_Primary_Color_TextView_style"
+            android:imeOptions="actionNext"
+            android:singleLine="true" />
+
+        <androidx.appcompat.widget.AppCompatEditText
+            android:id="@+id/fragment_login_password_edt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/white_solid_prim_stroke"
+            android:layout_margin="@dimen/_10sdp"
+            android:drawableRight="@drawable/ic_baseline_gray_password_24"
+            android:textColor="@color/purple_500"
+            android:padding="@dimen/_10sdp"
+            android:drawablePadding="@dimen/_5sdp"
+            android:theme="@style/Regular_Primary_Color_TextView_style"
+            android:hint="@string/password"
+            android:textSize="20sp"
+            android:inputType="textPassword"
+            android:drawableEnd="@drawable/ic_baseline_gray_password_24" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fragment_login_login_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/purple_500"
+            android:layout_margin="@dimen/_30sdp"
+            app:cornerRadius="10dp"
+            android:textSize="20sp"
+            android:padding="@dimen/_5sdp"
+            android:text="@string/login"
+            android:theme="@style/Bold_White_Color_TextView_style"/>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</layout>

@@ -16,7 +16,14 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url "https://jitpack.io" }
+        maven { url 'https://oss.sonatype.org/content/repositories/ksoap2-android-releases/' }
         jcenter() // Warning: this repository is going to shut down soon
+    }
+    configurations.all {
+        resolutionStrategy.dependencySubstitution {
+            substitute module('org.hamcrest:hamcrest-core:1.1') with module('junit:junit:4.10')
+        }
     }
 }
 

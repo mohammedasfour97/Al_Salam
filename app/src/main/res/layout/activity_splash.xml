@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="#C9F0FF">
+
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_235sdp"
+        android:src="@drawable/car_img_gif" />
+
+    <com.eyalbira.loadingdots.LoadingDots
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:LoadingDots_auto_play="true"
+        app:LoadingDots_dots_color="@color/purple_500"
+        app:LoadingDots_dots_count="6"
+        app:LoadingDots_dots_size="25dp"
+        app:LoadingDots_dots_space="2dp"
+        app:LoadingDots_jump_duration="200"
+        app:LoadingDots_jump_height="7dp"
+        app:LoadingDots_loop_duration="800"
+        app:LoadingDots_loop_start_delay="100" />
+
+
+</LinearLayout>

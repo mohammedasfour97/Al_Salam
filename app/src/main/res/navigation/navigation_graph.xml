@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_graph"
+    app:startDestination="@id/fragment_login">
+
+    <fragment
+        android:id="@+id/fragment_login"
+        android:name="com.alsalameg.UI.LoginFragment"
+        tools:layout="@layout/fragment_login">
+
+        <action
+            android:id="@+id/action_fragment_login_to_fragment_map"
+            app:destination="@id/fragment_map"
+            app:popUpTo="@id/fragment_login"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_left"
+            app:exitAnim="@anim/wait_anim"
+            app:popEnterAnim="@anim/wait_anim"
+            app:popExitAnim="@anim/slide_right" />
+
+        <action
+            android:id="@+id/action_fragment_login_to_fragment_main_records"
+            app:destination="@id/fragment_main_records"
+            app:popUpTo="@+id/fragment_login"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_left"
+            app:exitAnim="@anim/wait_anim"
+            app:popEnterAnim="@anim/wait_anim"
+            app:popExitAnim="@anim/slide_right"/>
+
+        <action
+            android:id="@+id/action_fragment_login_to_fragment_listen_records"
+            app:destination="@id/fragment_listen_to_records"
+            app:popUpTo="@+id/fragment_login"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_left"
+            app:exitAnim="@anim/wait_anim"
+            app:popEnterAnim="@anim/wait_anim"
+            app:popExitAnim="@anim/slide_right"/>
+
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/fragment_map"
+        android:name="com.alsalameg.UI.MapFragment"
+        tools:layout="@layout/fragment_user_map">
+
+    <action
+        android:id="@+id/action_fragment_map_to_fragment_login"
+        app:destination="@id/fragment_login"
+        app:enterAnim="@anim/slide_left"
+        app:exitAnim="@anim/wait_anim"
+        app:popEnterAnim="@anim/wait_anim"
+        app:popExitAnim="@anim/slide_right"/>
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/fragment_main_records"
+        android:name="com.alsalameg.UI.MainRecordFragment"
+        tools:layout="@layout/fragment_main_records">
+
+        <action
+            android:id="@+id/action_fragment_main_records_to_fragment_login"
+            app:destination="@id/fragment_login"
+            app:popUpTo="@id/fragment_main_records"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_left"
+            app:exitAnim="@anim/wait_anim"
+            app:popEnterAnim="@anim/wait_anim"
+            app:popExitAnim="@anim/slide_right"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragment_listen_to_records"
+        android:name="com.alsalameg.UI.ListenRecordsFragment"
+        tools:layout="@layout/fragment_listen_records">
+
+        <action
+            android:id="@+id/action_fragment_listen_to_fragment_login"
+            app:destination="@id/fragment_login"
+            app:popUpTo="@id/fragment_listen_to_records"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_left"
+            app:exitAnim="@anim/wait_anim"
+            app:popEnterAnim="@anim/wait_anim"
+            app:popExitAnim="@anim/slide_right"/>
+    </fragment>
+
+</navigation>

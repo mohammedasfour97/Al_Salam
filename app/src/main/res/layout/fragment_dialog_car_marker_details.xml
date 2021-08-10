@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/white_solid_prim_stroke_30"
+            android:gravity="right">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/close_btn"
+                android:layout_width="@dimen/_20sdp"
+                android:layout_height="@dimen/_20sdp"
+                android:background="@drawable/prim_solid_circle"
+                android:src="@drawable/ic_baseline_close_24"
+                android:layout_gravity="start"/>
+
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/icon"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/ic_car_red"
+                android:layout_marginBottom="8dp"
+                android:layout_gravity="center" />
+
+            <TextView
+                android:id="@+id/vehicle_numTxtTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:textSize="15sp"
+                android:theme="@style/Regular_Primary_Color_TextView_style" />
+
+            <TextView
+                android:id="@+id/vehicle_kindTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:textSize="15sp"
+                android:theme="@style/Regular_Primary_Color_TextView_style" />
+
+            <TextView
+                android:id="@+id/vehicle_makerTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:textSize="15sp"
+                android:theme="@style/Regular_Primary_Color_TextView_style" />
+
+            <TextView
+                android:id="@+id/vehicle_colorTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:textSize="15sp"
+                android:theme="@style/Regular_Primary_Color_TextView_style" />
+
+            <TextView
+                android:id="@+id/bankTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:textSize="15sp"
+                android:theme="@style/Regular_Primary_Color_TextView_style" />
+
+            <TextView
+                android:id="@+id/regionTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:textSize="15sp"
+                android:theme="@style/Regular_Primary_Color_TextView_style" />
+
+            <TextView
+                android:id="@+id/districtTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:textSize="15sp"
+                android:theme="@style/Regular_Primary_Color_TextView_style" />
+
+            <TextView
+                android:id="@+id/statusTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:textSize="15sp"
+                android:theme="@style/Regular_Primary_Color_TextView_style" />
+
+            <!--            <TextView-->
+            <!--                android:id="@+id/statusTxt"-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginTop="@dimen/_10sdp"-->
+            <!--                android:layout_marginRight="@dimen/_10sdp"-->
+            <!--                android:layout_marginLeft="@dimen/_10sdp"-->
+            <!--                android:textSize="15sp"-->
+            <!--                android:textColor="@color/white"-->
+            <!--                android:theme="@style/Regular_White_Color_TextView_style" />-->
+
+
+            <TextView
+                android:id="@+id/notesTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:textSize="15sp"
+                android:theme="@style/Regular_Primary_Color_TextView_style" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/confirm_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/_30sdp"
+                android:layout_marginLeft="@dimen/_30sdp"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:layout_marginBottom="@dimen/_10sdp"
+                android:text="@string/confirm"
+                android:textColor="@color/white"
+                android:padding="@dimen/_5sdp"
+                android:textSize="15sp"
+                android:theme="@style/Bold_White_Color_TextView_style"/>
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </androidx.core.widget.NestedScrollView>
+    </layout>

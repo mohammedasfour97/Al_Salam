@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottom_navigation"
+    app:startDestination="@+id/navigation_make_record">
+
+    <fragment
+        android:id="@+id/navigation_make_record"
+        android:name="com.alsalameg.UI.MakeRecordsFragment"
+        android:label="@string/record"
+        tools:layout="@layout/fragment_make_records">
+    <action
+        android:id="@+id/action_fragment_make_records_to_fragment_listen_records"
+        app:destination="@id/navigation_listen_records" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_listen_records"
+        android:name="com.alsalameg.UI.ListenRecordsFragment"
+        android:label="@string/my_records"
+        tools:layout="@layout/fragment_listen_records" />
+
+</navigation>

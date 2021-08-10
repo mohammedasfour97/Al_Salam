@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto">
+
+<!--    <data>-->
+<!--        <variable-->
+<!--            name="order"-->
+<!--            type="com.alsalameg.Models.Record" />-->
+<!--    </data>-->
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/_10sdp"
+        map:cardCornerRadius="@dimen/_30sdp"
+        map:cardPreventCornerOverlap="true">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/prim_solid_top_redius"
+                android:gravity="right">
+
+                <ImageView
+                    android:id="@+id/deleteBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_10sdp"
+                    android:src="@drawable/ic_baseline_delete_forever_24"
+                    android:layout_gravity="start"/>
+
+                <TextView
+                    android:id="@+id/vehicle_numTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/_10sdp"
+                    android:layout_marginLeft="@dimen/_10sdp"
+                    android:textSize="15sp"
+                    android:textColor="@color/white"
+                    android:theme="@style/Regular_White_Color_TextView_style" />
+
+                <TextView
+                    android:id="@+id/vehcile_typeTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:layout_marginRight="@dimen/_10sdp"
+                    android:layout_marginLeft="@dimen/_10sdp"
+                    android:textSize="15sp"
+                    android:textColor="@color/white"
+                    android:theme="@style/Regular_White_Color_TextView_style" />
+
+                <TextView
+                    android:id="@+id/locationTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:layout_marginRight="@dimen/_10sdp"
+                    android:layout_marginLeft="@dimen/_10sdp"
+                    android:textSize="15sp"
+                    android:textColor="@color/white"
+                    android:theme="@style/Regular_White_Color_TextView_style" />
+
+                <TextView
+                    android:id="@+id/districtTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:layout_marginRight="@dimen/_10sdp"
+                    android:layout_marginLeft="@dimen/_10sdp"
+                    android:textSize="15sp"
+                    android:textColor="@color/white"
+                    android:theme="@style/Regular_White_Color_TextView_style" />
+
+                <TextView
+                    android:id="@+id/sortingTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:layout_marginRight="@dimen/_10sdp"
+                    android:layout_marginLeft="@dimen/_10sdp"
+                    android:textSize="15sp"
+                    android:textColor="@color/white"
+                    android:theme="@style/Regular_White_Color_TextView_style" />
+
+                <!--            <TextView-->
+                <!--                android:id="@+id/statusTxt"-->
+                <!--                android:layout_width="wrap_content"-->
+                <!--                android:layout_height="wrap_content"-->
+                <!--                android:layout_marginTop="@dimen/_10sdp"-->
+                <!--                android:layout_marginRight="@dimen/_10sdp"-->
+                <!--                android:layout_marginLeft="@dimen/_10sdp"-->
+                <!--                android:textSize="15sp"-->
+                <!--                android:textColor="@color/white"-->
+                <!--                android:theme="@style/Regular_White_Color_TextView_style" />-->
+
+                <TextView
+                    android:id="@+id/regionTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:layout_marginRight="@dimen/_10sdp"
+                    android:layout_marginLeft="@dimen/_10sdp"
+                    android:textSize="15sp"
+                    android:textColor="@color/white"
+                    android:theme="@style/Regular_White_Color_TextView_style" />
+
+                <TextView
+                    android:id="@+id/createDateTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:layout_marginRight="@dimen/_10sdp"
+                    android:layout_marginLeft="@dimen/_10sdp"
+                    android:textSize="15sp"
+                    android:textColor="@color/white"
+                    android:theme="@style/Regular_White_Color_TextView_style" />
+
+                <TextView
+                    android:id="@+id/editDateTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:layout_marginRight="@dimen/_10sdp"
+                    android:layout_marginLeft="@dimen/_10sdp"
+                    android:textSize="15sp"
+                    android:textColor="@color/white"
+                    android:theme="@style/Regular_White_Color_TextView_style" />
+
+                <TextView
+                    android:id="@+id/notesTxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/_10sdp"
+                    android:layout_marginRight="@dimen/_10sdp"
+                    android:layout_marginLeft="@dimen/_10sdp"
+                    android:textSize="15sp"
+                    android:textColor="@color/white"
+                    android:theme="@style/Regular_White_Color_TextView_style" />
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <com.google.android.gms.maps.MapView
+                android:id="@+id/item_record_map"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/_150sdp"
+                map:liteMode="true"/>
+
+            <androidx.coordinatorlayout.widget.CoordinatorLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <include
+                    android:id="@+id/item_record_records_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    layout="@layout/recycler"/>
+
+                <ProgressBar
+                    android:id="@+id/progress"
+                    android:layout_width="@dimen/_50sdp"
+                    android:layout_height="@dimen/_50sdp"
+                    android:layout_gravity="center"
+                    android:theme="@style/ProgressBar_style"
+                    android:visibility="gone" />
+            </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
+            <!--<include
+                android:id="@+id/item_record_player"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/item_record_player"
+                android:layout_marginTop="@dimen/_10sdp"/>
+                -->
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>
+
