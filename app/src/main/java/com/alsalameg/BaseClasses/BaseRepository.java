@@ -1,7 +1,7 @@
 package com.alsalameg.BaseClasses;
 
 import com.alsalameg.Api.WebService;
-import com.alsalameg.Components.DaggerWebServiceComponent;
+import com.alsalameg.MyApplication;
 
 import javax.inject.Inject;
 
@@ -12,7 +12,7 @@ public class BaseRepository {
 
     public BaseRepository(){
 
-        DaggerWebServiceComponent.builder().webService(new WebService()).build().Inject(this);
+        MyApplication.getWebServiceComponent().Inject(this);
     }
 
 

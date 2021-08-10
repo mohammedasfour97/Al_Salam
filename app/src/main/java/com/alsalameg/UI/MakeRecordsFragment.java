@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.alsalameg.AudioRecorder;
 import com.alsalameg.BaseClasses.BaseFragment;
 import com.alsalameg.Constants;
+import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.UI.FragmentDialogs.AddCarDetailsFragment;
 import com.alsalameg.Utils;
@@ -119,10 +120,10 @@ public class MakeRecordsFragment extends BaseFragment {
                             @Override
                             public void exec() {
 
-                                ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USERID, "");
-                                ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USERNAME, "");
-                                ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USER_PASSWORD, "");
-                                ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USER_TYPE, "");
+                                MyApplication.getTinyDB().putString(Constants.KEY_USERID, "");
+                                MyApplication.getTinyDB().putString(Constants.KEY_USERNAME, "");
+                                MyApplication.getTinyDB().putString(Constants.KEY_USER_PASSWORD, "");
+                                MyApplication.getTinyDB().putString(Constants.KEY_USER_TYPE, "");
 
                                 ((MainActivity) getActivity()).navController.navigate(R.id.action_fragment_main_records_to_fragment_login);
                             }
@@ -149,8 +150,8 @@ public class MakeRecordsFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
 
-                if (((MainActivity)getActivity()).tinyDB.getString("master_id") != null &&
-                !((MainActivity)getActivity()).tinyDB.getString("master_id").equals(""))
+                if (MyApplication.getTinyDB().getString("master_id") != null &&
+                !MyApplication.getTinyDB().getString("master_id").equals(""))
                     fragmentMakeRecordsBinding.fragmentMakeRecordsRecorderLayout.setVisibility(View.VISIBLE);
                 else
                     showFailedDialog(getResources().getString(R.string.add_master_fir), true);
@@ -399,15 +400,19 @@ public class MakeRecordsFragment extends BaseFragment {
 
                     if (s.equals("DONE")){
 
-                        makeRecordsViewModel.insertRecordToMasterLiveDatag(((MainActivity)getActivity()).tinyDB.getString("master_id"),
+                        makeRecordsViewModel.insertRecordToMasterLiveDatag(MyApplication.getTinyDB().getString("master_id"),
                                 recordFileName, "3gp", String.valueOf(utils.getImageSizeFromUriInMegaByte
-                                                (Uri.fromFile(recordFile), getContext())), ((MainActivity)getActivity()).tinyDB.
+                                                (Uri.fromFile(recordFile), getContext())), MyApplication.getTinyDB().
                                         getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(), uploadRecordToMasterObserver);
 
                     }
 
-                    else
+                    else{
+
+                        hideProgress();
                         showFailedDialog(getResources().getString(R.string.error_upload_record), true);
+                    }
+
 
                 }
             }
@@ -620,7 +625,7 @@ public class MakeRecordsFragment extends BaseFragment {
     public void onStop() {
         super.onStop();
 
-        ((MainActivity)getActivity()).tinyDB.putString("master_id", "");
+        MyApplication.getTinyDB().putString("master_id", "");
     }
 
 

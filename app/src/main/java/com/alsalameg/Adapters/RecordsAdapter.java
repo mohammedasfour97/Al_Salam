@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.alsalameg.BaseClasses.BaseFragment;
 import com.alsalameg.Constants;
+import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.Models.Record;
 import com.alsalameg.UI.MainActivity;
@@ -82,7 +83,7 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
             @Override
             public void onClick(View v) {
 
-                deleteRecord(record.getId(), ((MainActivity)fragment.getActivity()).tinyDB.getString(Constants.KEY_USERID), position);
+                deleteRecord(record.getId(), MyApplication.getTinyDB().getString(Constants.KEY_USERID), position);
             }
         });
 

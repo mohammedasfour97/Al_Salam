@@ -15,15 +15,27 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 
+import javax.inject.Singleton;
+
+import dagger.Module;
+import dagger.Provides;
+
 /**
  * Created by Mohamed on 4/7/2018.
  */
-
+@Module
 public class TinyDB {
 
   private SharedPreferences preferences;
   private String DEFAULT_APP_IMAGEDATA_DIRECTORY;
   private String lastImagePath = "";
+
+  @Singleton
+  @Provides
+  TinyDB getTinyDB(){
+
+    return this;
+  }
 
   public TinyDB(Context appContext) {
     preferences = PreferenceManager.getDefaultSharedPreferences(appContext);

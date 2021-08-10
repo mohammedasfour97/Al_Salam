@@ -26,6 +26,7 @@ import android.widget.Toast;
 import com.alsalameg.BaseClasses.BaseFragment;
 import com.alsalameg.Constants;
 import com.alsalameg.Models.Car;
+import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.UI.FragmentDialogs.AddCarDetailsFragment;
 import com.alsalameg.UI.FragmentDialogs.CarMarkerDetailsFragment;
@@ -93,10 +94,10 @@ public class MapFragment extends BaseFragment {
                             @Override
                             public void exec() {
 
-                                ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USERID, "");
-                                ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USERNAME, "");
-                                ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USER_PASSWORD, "");
-                                ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USER_TYPE, "");
+                                MyApplication.getTinyDB().putString(Constants.KEY_USERID, "");
+                                MyApplication.getTinyDB().putString(Constants.KEY_USERNAME, "");
+                                MyApplication.getTinyDB().putString(Constants.KEY_USER_PASSWORD, "");
+                                MyApplication.getTinyDB().putString(Constants.KEY_USER_TYPE, "");
 
                                 ((MainActivity)getActivity()).navController.navigate(R.id.action_fragment_map_to_fragment_login);
                             }
@@ -228,7 +229,7 @@ public class MapFragment extends BaseFragment {
 
         showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg), false);
 
-        mapViewModel.getCarsList(((MainActivity)getActivity()).tinyDB.getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(),
+        mapViewModel.getCarsList(MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(),
                 carMarkObserver(googleMap));
     }
 

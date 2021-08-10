@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.alsalameg.BaseClasses.BaseDialog;
 import com.alsalameg.Constants;
+import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.TinyDB;
 import com.alsalameg.Models.User;
@@ -26,7 +27,6 @@ public class SplashActivity extends AppCompatActivity {
 
     /** Duration of wait **/
     private final int SPLASH_DISPLAY_LENGTH = 3000;
-    private TinyDB tinyDB;
     private LoginViewModel loginViewModel;
     private Observer<User> userObserver;
     private BaseDialog baseDialog;
@@ -42,8 +42,6 @@ public class SplashActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_splash);
-
-        tinyDB = new TinyDB(this);
 
         baseDialog = new BaseDialog(this);
 
@@ -64,7 +62,7 @@ public class SplashActivity extends AppCompatActivity {
                         if (!user.isError()) {
 
                             intent.putExtra(Constants.KEY_USER_TYPE, user.getType());
-                            tinyDB.putString(Constants.KEY_USER_TYPE, user.getType());
+                            MyApplication.getTinyDB().putString(Constants.KEY_USER_TYPE, user.getType());
                         }
 
                         else {
@@ -91,12 +89,14 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                if (tinyDB.getString(Constants.KEY_USERID)!=null && !TextUtils.isEmpty(tinyDB.getString(Constants.KEY_USERID))){
+                if (MyApplication.getTinyDB().getString(Constants.KEY_USERID)!=null && !TextUtils.isEmpty(MyApplication.getTinyDB()
+                        .getString(Constants.KEY_USERID))){
 
                     baseDialog.awesomeProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg),
                             false).show();
 
-                    loginViewModel.userMutableLiveData(tinyDB.getString(Constants.KEY_USERNAME), tinyDB.getString(Constants.KEY_USER_PASSWORD))
+                    loginViewModel.userMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERNAME), MyApplication.getTinyDB()
+                            .getString(Constants.KEY_USER_PASSWORD))
                             .observe(SplashActivity.this, userObserver);
                 }
 

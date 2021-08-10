@@ -2,6 +2,8 @@ package com.alsalameg.Modules;
 
 import android.content.Context;
 
+import javax.inject.Singleton;
+
 import dagger.Module;
 import dagger.Provides;
 
@@ -14,6 +16,7 @@ public class ContextModule {
         this.context = context;
     }
 
+    @Singleton
     @Provides
     Context getContext(){
 

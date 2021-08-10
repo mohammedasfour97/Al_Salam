@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.alsalameg.Components.DaggerUtilsComponents;
-import com.alsalameg.Components.UtilsComponents;
 import com.alsalameg.R;
 import com.alsalameg.Utils;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;

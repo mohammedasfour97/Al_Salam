@@ -37,7 +37,7 @@
                 android:text="@string/add_car"
                 android:textColor="@color/purple_500"
                 android:textSize="24sp"
-                style="@style/Bold_Primary_Color_TextView_style"
+                android:fontFamily="@font/cairo_regular"
                 android:gravity="center"
                 android:layout_marginBottom="8dp"/>
 
@@ -78,7 +78,7 @@
                 android:textColor="@color/colorPrimary"
                 android:textColorHint="@color/colorPrimary"
                 android:layout_marginBottom="20dp"
-                style="@style/Regular_Primary_Color_TextView_style"
+                android:fontFamily="@font/cairo_regular"
                 android:textSize="16.5sp"/>
 
             <androidx.appcompat.widget.AppCompatSpinner
@@ -107,7 +107,7 @@
                 android:textColor="@color/colorPrimary"
                 android:textColorHint="@color/colorPrimary"
                 android:layout_marginBottom="20dp"
-                style="@style/Regular_Primary_Color_TextView_style"
+                android:fontFamily="@font/cairo_regular"
                 android:textSize="16.sp"/>
 
             <androidx.appcompat.widget.AppCompatTextView

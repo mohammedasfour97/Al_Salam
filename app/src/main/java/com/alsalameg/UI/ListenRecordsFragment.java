@@ -9,6 +9,7 @@ import com.alsalameg.Adapters.MastersAdapter;
 import com.alsalameg.BaseClasses.BaseFragment;
 import com.alsalameg.Constants;
 import com.alsalameg.Models.Master;
+import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.ViewModels.ListenRecordsViewModel;
 import com.alsalameg.databinding.FragmentListenRecordsBinding;
@@ -46,7 +47,7 @@ public class ListenRecordsFragment extends BaseFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        isRecorderListener = ((MainActivity) getActivity()).tinyDB.getString(Constants.KEY_USER_TYPE).equals("Recorded");
+        isRecorderListener = MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded");
 
         initUI();
         setListeners();
@@ -91,10 +92,10 @@ public class ListenRecordsFragment extends BaseFragment {
                                 else
                                     ((MainActivity)getActivity()).navController.navigate(R.id.action_fragment_listen_to_fragment_login);
 
-                                ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USERID, "");
-                                ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USERNAME, "");
-                                ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USER_PASSWORD, "");
-                                ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USER_TYPE, "");
+                                MyApplication.getTinyDB().putString(Constants.KEY_USERID, "");
+                                MyApplication.getTinyDB().putString(Constants.KEY_USERNAME, "");
+                                MyApplication.getTinyDB().putString(Constants.KEY_USER_PASSWORD, "");
+                                MyApplication.getTinyDB().putString(Constants.KEY_USER_TYPE, "");
 
                             }
                         }, new Closure() {
@@ -152,7 +153,7 @@ public class ListenRecordsFragment extends BaseFragment {
 
         showDefaultProgressDialog();
 
-        listenRecordsViewModel.getMasterListMutableLiveData(((MainActivity)getActivity()).tinyDB.getString(Constants.KEY_USERID)).observe(
+        listenRecordsViewModel.getMasterListMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(
                 getViewLifecycleOwner(), getMasterListObserver);
     }
 }

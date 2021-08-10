@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.alsalameg.BaseClasses.BaseDialog;
 import com.alsalameg.Constants;
 import com.alsalameg.Models.IDName;
+import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.UI.MainActivity;
 import com.alsalameg.Utils;
@@ -156,7 +157,7 @@ public class AddCarDetailsFragment extends DialogFragment {
                                         }
                                     }, true).show();
 
-                            ((MainActivity)getActivity()).tinyDB.putString("master_id", "");
+                            MyApplication.getTinyDB().putString("master_id", "");
 
                             dismiss();
                             break;
@@ -171,9 +172,9 @@ public class AddCarDetailsFragment extends DialogFragment {
                                     .show();
 
                             if (recordOrForm.equals("record"))
-                                ((MainActivity)getActivity()).tinyDB.putString("master_id", s);
+                                MyApplication.getTinyDB().putString("master_id", s);
                             else
-                                ((MainActivity)getActivity()).tinyDB.putString("master_id", "");
+                                MyApplication.getTinyDB().putString("master_id", "");
                             dismiss();
 
                     }
@@ -205,7 +206,7 @@ public class AddCarDetailsFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
 
-                ((MainActivity)getActivity()).tinyDB.putString("master_id", "");
+                MyApplication.getTinyDB().putString("master_id", "");
 
                 dismiss();
             }
@@ -290,7 +291,7 @@ public class AddCarDetailsFragment extends DialogFragment {
 
         makeRecordsViewModel.insertMasterRecordString(vichelNum, vichelType, selectedAddress,
                 new Utils(getActivity()).chooseNonNull(selectedSubLocality, selectedSubAdminArea), lonitude, latitude,
-                ((MainActivity)getActivity()).tinyDB.getString(Constants.KEY_USERID), selectedRegionID, notes, type)
+                MyApplication.getTinyDB().getString(Constants.KEY_USERID), selectedRegionID, notes, type)
                 .observe(getViewLifecycleOwner(), addMasterObserver);
     }
 }

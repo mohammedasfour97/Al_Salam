@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import com.alsalameg.BaseClasses.BaseFragment;
 import com.alsalameg.Constants;
+import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.Models.User;
 import com.alsalameg.ViewModels.LoginViewModel;
@@ -47,10 +48,10 @@ public class LoginFragment extends BaseFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (!TextUtils.isEmpty(((MainActivity)getActivity()).tinyDB.getString(Constants.KEY_USER_TYPE))){
+        if (!TextUtils.isEmpty(MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE))){
 
-            fragmentLoginBinding.fragmentLoginUsernameEdt.setText(((MainActivity)getActivity()).tinyDB.getString(Constants.KEY_USERNAME));
-            fragmentLoginBinding.fragmentLoginPasswordEdt.setText(((MainActivity)getActivity()).tinyDB.getString(Constants.KEY_USER_PASSWORD));
+            fragmentLoginBinding.fragmentLoginUsernameEdt.setText(MyApplication.getTinyDB().getString(Constants.KEY_USERNAME));
+            fragmentLoginBinding.fragmentLoginPasswordEdt.setText(MyApplication.getTinyDB().getString(Constants.KEY_USER_PASSWORD));
         }
         setListeners();
         initObservers();
@@ -97,7 +98,7 @@ public class LoginFragment extends BaseFragment {
 
                         if (!user.isError()) {
 
-                            ((MainActivity) getActivity()).tinyDB.putString(Constants.KEY_USERID, user.getId());
+                            MyApplication.getTinyDB().putString(Constants.KEY_USERID, user.getId());
 
 
                             switch (user.getType()) {
@@ -117,12 +118,12 @@ public class LoginFragment extends BaseFragment {
                                     break;
                             }
 
-                            ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USERID, user.getId());
-                            ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USERNAME, fragmentLoginBinding.
+                            MyApplication.getTinyDB().putString(Constants.KEY_USERID, user.getId());
+                            MyApplication.getTinyDB().putString(Constants.KEY_USERNAME, fragmentLoginBinding.
                                     fragmentLoginUsernameEdt.getText().toString());
-                            ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USER_PASSWORD, fragmentLoginBinding.
+                            MyApplication.getTinyDB().putString(Constants.KEY_USER_PASSWORD, fragmentLoginBinding.
                                     fragmentLoginPasswordEdt.getText().toString());
-                            ((MainActivity)getActivity()).tinyDB.putString(Constants.KEY_USER_TYPE, user.getType());
+                            MyApplication.getTinyDB().putString(Constants.KEY_USER_TYPE, user.getType());
 
                         }
 

@@ -13,7 +13,6 @@ import android.os.Looper;
 import android.widget.Toast;
 
 import com.alsalameg.Components.DaggerNavigationControllerComponent;
-import com.alsalameg.Components.NavigationControllerComponent;
 import com.alsalameg.Constants;
 import com.alsalameg.Modules.NavigationControllerModule;
 import com.alsalameg.R;
@@ -21,14 +20,12 @@ import com.alsalameg.TinyDB;
 
 import javax.inject.Inject;
 
-@Module
 public class MainActivity extends AppCompatActivity {
 
     @Inject
     NavHostFragment navHostFragment;
     public NavController navController;
     private boolean doubleBackToExitPressedOnce;
-    public TinyDB tinyDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +39,6 @@ public class MainActivity extends AppCompatActivity {
         navController = navHostFragment.getNavController();
 
         boolean doubleBackToExitPressedOnce = false;
-
-        tinyDB = new TinyDB(this);
 
         checkPreviousLoginToNavigate();
     }
