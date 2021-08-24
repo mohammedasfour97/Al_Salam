@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 
 import com.alsalameg.Components.DaggerUtilsComponents;
+import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.Utils;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
@@ -22,15 +23,12 @@ public class BaseFragment extends Fragment {
 
     private BaseDialog baseDialog;
 
-    @Inject
-    public Utils utils;
-
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         baseDialog = new BaseDialog(getContext());
-        DaggerUtilsComponents.builder().utils(new Utils(getActivity())).build().inject(this);
+
     }
 
     public void showInfoDialogWithTwoButtons(String title, String message, String positive_button_message,

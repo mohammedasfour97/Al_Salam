@@ -401,7 +401,7 @@ public class MakeRecordsFragment extends BaseFragment {
                     if (s.equals("DONE")){
 
                         makeRecordsViewModel.insertRecordToMasterLiveDatag(MyApplication.getTinyDB().getString("master_id"),
-                                recordFileName, "3gp", String.valueOf(utils.getImageSizeFromUriInMegaByte
+                                recordFileName, "3gp", String.valueOf(Utils.getImageSizeFromUriInMegaByte
                                                 (Uri.fromFile(recordFile), getContext())), MyApplication.getTinyDB().
                                         getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(), uploadRecordToMasterObserver);
 
@@ -479,7 +479,6 @@ public class MakeRecordsFragment extends BaseFragment {
         }
 
 
-
     private boolean checkLocationPermission() {
 
         if (!Constants.checkLocationPermission(getActivity())) {
@@ -550,8 +549,7 @@ public class MakeRecordsFragment extends BaseFragment {
 
             if (!parentFile.exists()) parentFile.mkdirs();
 
-        recordFileName = getActivity().getApplicationContext().getPackageName() + "_" +
-                dateFormat.format(new Date()) + ".3gp";
+        recordFileName = getActivity().getApplicationContext().getPackageName() + "_" + dateFormat.format(new Date()) + ".mp3";
 
         recordFilePath = parentFile.getAbsolutePath() + "/" + recordFileName;
 
@@ -622,11 +620,9 @@ public class MakeRecordsFragment extends BaseFragment {
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onDestroy() {
+        super.onDestroy();
 
         MyApplication.getTinyDB().putString("master_id", "");
     }
-
-
 }

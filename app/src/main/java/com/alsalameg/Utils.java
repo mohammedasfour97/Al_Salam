@@ -3,6 +3,7 @@ package com.alsalameg;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
+import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -40,10 +41,10 @@ import static android.text.TextUtils.isEmpty;
 @Module
 public class Utils {
 
-    private Activity activity;
+    private Application application;
 
-    public Utils(Activity activity) {
-        this.activity = activity;
+    public Utils(Application application) {
+        this.application = application;
     }
 
     @Provides
@@ -187,7 +188,7 @@ public class Utils {
         return value;
     }
 
-    public String chooseNonNull(String first, String second){
+    public static String chooseNonNull(String first, String second){
 
         if (first!=null)
             return first;
@@ -205,12 +206,12 @@ public class Utils {
         else return "";
     }
 
-    public String generateUniqueNumber(){
+    public static String generateUniqueNumber(){
 
         return new SimpleDateFormat("yyyyMMddHHmmss", Locale.US).format(new Date());
     }
 
-    public String formatDate(String format, String date ){
+    public static String formatDate(String format, String date ){
 
         DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         DateFormat outputFormat = new SimpleDateFormat(format);
@@ -224,12 +225,12 @@ public class Utils {
         }
     }
 
-    public String getStringKeyValue(Context context, int key, String value){
+    public static String getStringKeyValue(Context context, int key, String value){
 
         return context.getResources().getString(key) + " " + ":" + " " + value;
     }
 
-    public void hideIfEmpty(List<View> viewList, List<String> values){
+    public static void hideIfEmpty(List<View> viewList, List<String> values){
 
         for (int a=0 ; a<viewList.size() ; a++){
 
@@ -267,7 +268,7 @@ public class Utils {
     public void setLocale(String languageCode) {
         Locale locale = new Locale(languageCode);
         Locale.setDefault(locale);
-        Resources resources = this.activity.getResources();
+        Resources resources = this.application.getResources();
         Configuration config = resources.getConfiguration();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             config.setLocale(locale);
@@ -275,7 +276,7 @@ public class Utils {
         resources.updateConfiguration(config, resources.getDisplayMetrics());
     }
 
-    public double getImageSizeFromUriInMegaByte(Uri filePath, Context context) {
+    public static double getImageSizeFromUriInMegaByte(Uri filePath, Context context) {
         String scheme = filePath.getScheme();
         double dataSize = 0;
         if (scheme.equals(ContentResolver.SCHEME_CONTENT)) {

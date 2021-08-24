@@ -12,6 +12,7 @@ import com.alsalameg.BaseClasses.BaseFragment;
 import com.alsalameg.Models.Master;
 import com.alsalameg.R;
 import com.alsalameg.Models.Record;
+import com.alsalameg.Utils;
 import com.alsalameg.ViewModels.ListenRecordsViewModel;
 import com.alsalameg.databinding.ItemRecordBinding;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
@@ -148,20 +149,20 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
         holder.values.add(master.getVehicleType());
         holder.values.add(master.getVehicleNumber());
 
-        fragment.utils.hideIfEmpty(holder.viewList, holder.values);
+        Utils.hideIfEmpty(holder.viewList, holder.values);
 
-        holder.itemRecordBinding.createDateTxt.setText(fragment.utils.getStringKeyValue(context, R.string.date_create,
-                fragment.utils.formatDate("ss-mm-HH  dd-MM-yyyy", master.getDateCreate())));
-        holder.itemRecordBinding.editDateTxt.setText(fragment.utils.getStringKeyValue(context, R.string.date_edit,
-                fragment.utils.formatDate("ss-mm-HH  dd-MM-yyyy", master.getDateEdit())));
-        holder.itemRecordBinding.districtTxt.setText(fragment.utils.getStringKeyValue(context, R.string.district,master.getDistrict()));
-        holder.itemRecordBinding.locationTxt.setText(fragment.utils.getStringKeyValue(context, R.string.location,master.getLocation()));
-        holder.itemRecordBinding.notesTxt.setText(fragment.utils.getStringKeyValue(context, R.string.notes,master.getNotes()));
-        holder.itemRecordBinding.regionTxt.setText(fragment.utils.getStringKeyValue(context, R.string.region,master.getRegions()));
-        holder.itemRecordBinding.sortingTxt.setText(fragment.utils.getStringKeyValue(context, R.string.status,master.getSorting()));
-        holder.itemRecordBinding.vehcileTypeTxt.setText(fragment.utils.getStringKeyValue(context, R.string.vichel_type,
+        holder.itemRecordBinding.createDateTxt.setText(Utils.getStringKeyValue(context, R.string.date_create,
+                Utils.formatDate("ss-mm-HH  dd-MM-yyyy", master.getDateCreate())));
+        holder.itemRecordBinding.editDateTxt.setText(Utils.getStringKeyValue(context, R.string.date_edit,
+                Utils.formatDate("ss-mm-HH  dd-MM-yyyy", master.getDateEdit())));
+        holder.itemRecordBinding.districtTxt.setText(Utils.getStringKeyValue(context, R.string.district,master.getDistrict()));
+        holder.itemRecordBinding.locationTxt.setText(Utils.getStringKeyValue(context, R.string.location,master.getLocation()));
+        holder.itemRecordBinding.notesTxt.setText(Utils.getStringKeyValue(context, R.string.notes,master.getNotes()));
+        holder.itemRecordBinding.regionTxt.setText(Utils.getStringKeyValue(context, R.string.region,master.getRegions()));
+        holder.itemRecordBinding.sortingTxt.setText(Utils.getStringKeyValue(context, R.string.status,master.getSorting()));
+        holder.itemRecordBinding.vehcileTypeTxt.setText(Utils.getStringKeyValue(context, R.string.vichel_type,
                 master.getVehicleType()));
-        holder.itemRecordBinding.vehicleNumTxt.setText(fragment.utils.getStringKeyValue(context, R.string.vichel_num,
+        holder.itemRecordBinding.vehicleNumTxt.setText(Utils.getStringKeyValue(context, R.string.vichel_num,
                 master.getVehicleNumber()));
 
 

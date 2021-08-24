@@ -218,7 +218,7 @@ public class AddCarDetailsFragment extends DialogFragment {
 
                 recordOrForm = "record";
 
-                insertMasterRecordString(new Utils(getActivity()).generateUniqueNumber(), "", "", true);
+                insertMasterRecordString(Utils.generateUniqueNumber(), "", "", true);
             }
         });
 
@@ -290,7 +290,7 @@ public class AddCarDetailsFragment extends DialogFragment {
                 (R.string.loading_msg),false).show();
 
         makeRecordsViewModel.insertMasterRecordString(vichelNum, vichelType, selectedAddress,
-                new Utils(getActivity()).chooseNonNull(selectedSubLocality, selectedSubAdminArea), lonitude, latitude,
+                Utils.chooseNonNull(selectedSubLocality, selectedSubAdminArea), lonitude, latitude,
                 MyApplication.getTinyDB().getString(Constants.KEY_USERID), selectedRegionID, notes, type)
                 .observe(getViewLifecycleOwner(), addMasterObserver);
     }

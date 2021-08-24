@@ -7,6 +7,7 @@ import com.alsalameg.Api.WebService;
 import com.alsalameg.Components.ContextComponent;
 
 import com.alsalameg.Components.DaggerContextComponent;
+import com.alsalameg.Components.DaggerUtilsComponents;
 import com.alsalameg.Components.DaggerWebServiceComponent;
 import com.alsalameg.Components.WebServiceComponent;
 import com.alsalameg.Modules.ContextModule;
@@ -39,6 +40,8 @@ public class MyApplication extends Application {
         contextComponent.inject(this);
 
         webServiceComponent = DaggerWebServiceComponent.builder().webService(new WebService()).build();
+
+        new Utils(this).setLocale("ar");
 
         tinyDBInstance = new TinyDB(getApplicationContext());
     }

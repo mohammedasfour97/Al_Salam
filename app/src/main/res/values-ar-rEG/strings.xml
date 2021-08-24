@@ -91,4 +91,6 @@
     <string name="confir_car_succ">تم التأكيد والإرسال لهذه السيارة بنجاح</string>
     <string name="sure_conf_this_car">هل تريد بالفعل التأكيد والإرسال لهذه السيارة ؟</string>
     <string name="fail_confirm">فشل فى التأكيد , حاول مرة أخرى</string>
+    <string name="user_records">تسجيلات المستخدم</string>
+    <string name="listen_records">سماع التسجيلات</string>
 </resources>
