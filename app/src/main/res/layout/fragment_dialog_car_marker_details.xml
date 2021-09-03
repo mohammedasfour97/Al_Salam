@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -81,7 +81,7 @@
                 style="@style/Regular_Primary_Color_TextView_style" />
 
             <TextView
-                android:id="@+id/regionTxt"
+                android:id="@+id/customer_nameTxt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/_10sdp"
@@ -91,7 +91,17 @@
                 style="@style/Regular_Primary_Color_TextView_style" />
 
             <TextView
-                android:id="@+id/districtTxt"
+                android:id="@+id/contract_numTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:textSize="15sp"
+                style="@style/Regular_Primary_Color_TextView_style" />
+
+            <TextView
+                android:id="@+id/shasTxt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="@dimen/_10sdp"
@@ -141,10 +151,26 @@
                 android:layout_marginTop="@dimen/_20sdp"
                 android:layout_marginBottom="@dimen/_10sdp"
                 android:text="@string/confirm"
+                app:icon="@drawable/ic_baseline_check_24"
                 android:textColor="@color/white"
                 android:padding="@dimen/_5sdp"
                 android:textSize="15sp"
                 style="@style/Bold_White_Color_TextView_style"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/no_car_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/_30sdp"
+                android:layout_marginLeft="@dimen/_30sdp"
+                android:layout_marginBottom="@dimen/_10sdp"
+                android:text="@string/no_car"
+                app:icon="@drawable/ic_baseline_close_24"
+                android:textColor="@color/white"
+                android:padding="@dimen/_5sdp"
+                android:textSize="15sp"
+                style="@style/Bold_Default_TextView_style"
+                android:backgroundTint="@color/red"/>
         </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.core.widget.NestedScrollView>
     </layout>

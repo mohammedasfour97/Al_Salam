@@ -17,6 +17,7 @@ public class WebService {
     @Provides
     WebService webService(){return this;}
 
+
     public ArrayList<HashMap<String, String>> getUserInfoService(String username , String Password) {
         MasterSlayer MS = new MasterSlayer("GetLogin");
         /**1 - any parameter send */
@@ -81,6 +82,7 @@ public class WebService {
 
         return MS.Call_result();
     }
+
 
     public ArrayList<HashMap<String, String>> getRegions() {
         MasterSlayer MS = new MasterSlayer("GetRegions");
@@ -343,6 +345,7 @@ public class WebService {
 
         return MS.Call();
     }
+
 
     public ArrayList<HashMap<String, String>> confirmCar(String id, String confirmation, String latitude, String longitude) {
 

@@ -77,16 +77,20 @@ public class CarMarkerDetailsFragment extends DialogFragment {
     private void setData(){
 
         fragmentDialogCarMarkerDetailsBinding.bankTxt.setText(getResources().getString(R.string.bank) + " " + car.getBank());
-        fragmentDialogCarMarkerDetailsBinding.districtTxt.setText(getResources().getString(R.string.district) + " : " + car.getDistrict());
+        fragmentDialogCarMarkerDetailsBinding.customerNameTxt.setText(getResources().getString(R.string.cust_name) + " : " +
+                car.getCustomer());
         fragmentDialogCarMarkerDetailsBinding.notesTxt.setText(getResources().getString(R.string.notes) + " : " + car.getNotes());
-        fragmentDialogCarMarkerDetailsBinding.regionTxt.setText(getResources().getString(R.string.region) + " : " + car.getRegions());
+        fragmentDialogCarMarkerDetailsBinding.contractNumTxt.setText(getResources().getString(R.string.cont_num) + " : " +
+                car.getContractNumber());
         fragmentDialogCarMarkerDetailsBinding.statusTxt.setText(getResources().getString(R.string.status) + " : " + car.getStatus());
+        fragmentDialogCarMarkerDetailsBinding.shasTxt.setText(getResources().getString(R.string.shas_num) + " : " + car.getShasNumber());
         fragmentDialogCarMarkerDetailsBinding.vehicleColorTxt.setText(getResources().getString(R.string.car_color) + " " + car.getColor());
         fragmentDialogCarMarkerDetailsBinding.vehicleKindTxt.setText(getResources().getString(R.string.car_kind) + " " + car.getKind());
         fragmentDialogCarMarkerDetailsBinding.vehicleMakerTxt.setText(getResources().getString(R.string.maker) + " " + car.getMaker());
         fragmentDialogCarMarkerDetailsBinding.vehicleNumTxtTxt.setText(getResources().getString(R.string.vichel_num) + " : " +
                 car.getPlateNumber());
     }
+
 
     private void setListeners(){
 
@@ -102,26 +106,16 @@ public class CarMarkerDetailsFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
 
-                baseDialog.awesomeInfoWithTwoButtonsDialog(getResources().getString(R.string.sure), getResources()
-                                .getString(R.string.sure_conf_this_car), getResources().getString(R.string.yes), getResources().getString(R.string.no),
-                        new Closure() {
-                            @Override
-                            public void exec() {
+                sendCarReport(true);
 
-                                baseDialog.awesomeProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg),
-                                        false).show();
+            }
+        });
 
-                                mapViewModel.getConfirmCarMutableLiveData(car.getId(), "true", String.valueOf(latLng.latitude),
-                                        String.valueOf(latLng.longitude)).observe(getViewLifecycleOwner(), confirmCarObserver());
-                            }
-                        }, new Closure() {
-                            @Override
-                            public void exec() {
+        fragmentDialogCarMarkerDetailsBinding.noCarButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-                                baseDialog.hideInfoDialogWithTwoButton();
-                            }
-                        }, true).show();
-
+                sendCarReport(false);
             }
         });
     }
@@ -150,6 +144,43 @@ public class CarMarkerDetailsFragment extends DialogFragment {
                 }
             }
         };
+    }
+
+
+    private void sendCarReport(boolean confirmation){
+
+        String conf , sureMessage;
+
+        if (confirmation){
+
+            conf = "1";
+            sureMessage = getResources().getString(R.string.sure_conf_this_car);
+        }
+
+        else {
+
+            conf = "0";
+            sureMessage = getResources().getString(R.string.sure_no_car);
+        }
+
+        baseDialog.awesomeInfoWithTwoButtonsDialog(getResources().getString(R.string.sure), sureMessage, getResources().getString(R.string.yes),
+                getResources().getString(R.string.no), new Closure() {
+                    @Override
+                    public void exec() {
+
+                        baseDialog.awesomeProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg),
+                                false).show();
+
+                        mapViewModel.getConfirmCarMutableLiveData(car.getId(), conf, String.valueOf(latLng.latitude),
+                                String.valueOf(latLng.longitude)).observe(getViewLifecycleOwner(), confirmCarObserver());
+                    }
+                }, new Closure() {
+                    @Override
+                    public void exec() {
+
+                        baseDialog.hideInfoDialogWithTwoButton();
+                    }
+                }, true).show();
     }
 }
 

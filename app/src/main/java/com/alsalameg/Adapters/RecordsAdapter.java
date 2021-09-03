@@ -32,6 +32,7 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
     private Context context;
     private ListenRecordsViewModel listenRecordsViewModel;
     private BaseFragment fragment;
+    private OnDeleteMaster onDeleteMaster;
 
     public class RecordsViewHolder extends RecyclerView.ViewHolder {
 
@@ -45,10 +46,11 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
 
     }
 
-    public RecordsAdapter(List<Record> recordList, Context context, BaseFragment fragment) {
+    public RecordsAdapter(List<Record> recordList,OnDeleteMaster onDeleteMaster, Context context, BaseFragment fragment) {
         this.recordList = recordList;
         this.context = context;
         this.fragment = fragment;
+        this.onDeleteMaster = onDeleteMaster;
 
         listenRecordsViewModel = ViewModelProviders.of(fragment).get(ListenRecordsViewModel.class);
     }
@@ -83,7 +85,10 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
             @Override
             public void onClick(View v) {
 
-                deleteRecord(record.getId(), MyApplication.getTinyDB().getString(Constants.KEY_USERID), position);
+                if (recordList.size() == 1)
+                    onDeleteMaster.deleteMaster();
+                else
+                    deleteRecord(record.getId(), MyApplication.getTinyDB().getString(Constants.KEY_USERID), position);
             }
         });
 
@@ -92,6 +97,16 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
     @Override
     public int getItemCount() {
         return recordList.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return Long.parseLong(recordList.get(position).getId());
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return Integer.parseInt(recordList.get(position).getId());
     }
 
 

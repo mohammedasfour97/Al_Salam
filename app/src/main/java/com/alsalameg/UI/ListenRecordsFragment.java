@@ -107,6 +107,14 @@ public class ListenRecordsFragment extends BaseFragment {
                         }, false);
             }
         });
+
+        fragmentListenRecordsBinding.standardToolbarRefreshBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                requestMasters();
+            }
+        });
     }
     private void initRecyclerView(){
 
@@ -116,6 +124,7 @@ public class ListenRecordsFragment extends BaseFragment {
         fragmentListenRecordsBinding.fragmentListenRecordsrecycler.recyclerview.setLayoutManager(mLayoutManager);
         fragmentListenRecordsBinding.fragmentListenRecordsrecycler.recyclerview.addItemDecoration(new DividerItemDecoration(getContext(),
                 LinearLayoutManager.VERTICAL));
+        mastersAdapter.setHasStableIds(true);
         fragmentListenRecordsBinding.fragmentListenRecordsrecycler.recyclerview.setAdapter(mastersAdapter);
     }
 
@@ -139,6 +148,7 @@ public class ListenRecordsFragment extends BaseFragment {
                         if (masters.isEmpty())
                             showSnackBar(R.string.no_records);
                         else {
+                            masterList.clear();
                             masterList.addAll(masters);
                             mastersAdapter.notifyDataSetChanged();
                         }

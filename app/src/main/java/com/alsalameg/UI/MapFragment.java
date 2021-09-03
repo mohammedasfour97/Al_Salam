@@ -18,6 +18,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.UI.FragmentDialogs.AddCarDetailsFragment;
 import com.alsalameg.UI.FragmentDialogs.CarMarkerDetailsFragment;
+import com.alsalameg.UI.FragmentDialogs.SameMultipleLatlongMarksFragment;
 import com.alsalameg.ViewModels.MapViewModel;
 import com.alsalameg.databinding.FragmentUserMapBinding;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
@@ -49,6 +51,7 @@ import com.google.android.gms.tasks.CancellationToken;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.OnTokenCanceledListener;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MapFragment extends BaseFragment {
@@ -60,6 +63,8 @@ public class MapFragment extends BaseFragment {
     private SupportMapFragment mapFragment;
     private OnMapReadyCallback callback;
     private LatLng latLng;
+    private List<Marker> markerList, markers;
+    private Marker selectedMarker;
 
     // vars for api
     private MapViewModel mapViewModel;
@@ -83,7 +88,7 @@ public class MapFragment extends BaseFragment {
         fetchCurrentLocation();
     }
 
-    private void setListeners(){
+    private void setListeners() {
 
         fragmentMapBinding.fragmentMapLogoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,11 +104,11 @@ public class MapFragment extends BaseFragment {
                                 MyApplication.getTinyDB().putString(Constants.KEY_USER_PASSWORD, "");
                                 MyApplication.getTinyDB().putString(Constants.KEY_USER_TYPE, "");
 
-                                ((MainActivity)getActivity()).navController.navigate(R.id.action_fragment_map_to_fragment_login);
+                                ((MainActivity) getActivity()).navController.navigate(R.id.action_fragment_map_to_fragment_login);
                             }
                         }, new Closure() {
                             @Override
-                            public void exec() {
+                            public void exec() {/////////
 
                                 hideInfoDialogWithTwoButton();
                             }
@@ -156,7 +161,7 @@ public class MapFragment extends BaseFragment {
 
                 hideProgress();
 
-                if (checkPermission()){
+                if (checkPermission()) {
 
                     googleMap.setMyLocationEnabled(true);
                     latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
@@ -168,20 +173,56 @@ public class MapFragment extends BaseFragment {
 
                 final int[] click = {0};
 
+                markers = new ArrayList<>();
+
                 googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
 
-                        click[0]++;
+                        markers.clear();
 
-                        if (click[0]==2){
+                        for (Marker marker1 : markerList) {
+
+                            if (marker.getPosition().longitude + marker.getPosition().latitude == marker1.getPosition().longitude +
+                                    marker1.getPosition().latitude)
+                                markers.add(marker1);
+
+                        }
+
+                        if (markers.size() > 1) {
 
                             FragmentManager fm = getActivity().getSupportFragmentManager();
-                            CarMarkerDetailsFragment carMarkerDetailsFragment = new CarMarkerDetailsFragment((Car)marker.getTag(), latLng);
-                            carMarkerDetailsFragment.show(fm, "fragment_new_activity");
+                            SameMultipleLatlongMarksFragment sameMultipleLatlongMarksFragment =
+                                    new SameMultipleLatlongMarksFragment(markers, latLng);
+                            sameMultipleLatlongMarksFragment.show(fm, "fragment_new_activity");
+                        } else {
 
-                            click[0] = 0;
+                            if (selectedMarker == null)
+                                selectedMarker = marker;
+
+                            if (selectedMarker.getPosition().longitude + marker.getPosition().latitude ==
+                                    marker.getPosition().longitude + marker.getPosition().latitude) {
+
+                                click[0]++;
+
+                                if (click[0] == 2) {
+
+                                    FragmentManager fm = getActivity().getSupportFragmentManager();
+                                    CarMarkerDetailsFragment carMarkerDetailsFragment = new CarMarkerDetailsFragment(
+                                            (Car) marker.getTag(), latLng);
+                                    carMarkerDetailsFragment.show(fm, "fragment_new_activity");
+
+                                    click[0] = 0;
+
+                                }
+                            } else {
+
+                                selectedMarker = marker;
+                                click[0] = 1;
+                            }
+
                         }
+
 
                         return false;
                     }
@@ -225,7 +266,7 @@ public class MapFragment extends BaseFragment {
     }
 
 
-    private void requestCarsLocations(GoogleMap googleMap){
+    private void requestCarsLocations(GoogleMap googleMap) {
 
         showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg), false);
 
@@ -241,6 +282,8 @@ public class MapFragment extends BaseFragment {
 
                 if (cars != null) {
 
+                    markerList = new ArrayList<>();
+
                     if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
 
                         hideProgress();
@@ -249,25 +292,23 @@ public class MapFragment extends BaseFragment {
 
                             if (!cars.get(0).getId().equals("")) {
 
+                                Marker marker;
+
                                 for (Car car : cars) {
 
-                                    Marker marker = googleMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(
+                                    marker = googleMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(
                                             car.getLatitude()), Double.parseDouble(car.getLongitude()))).icon(getMark(car.getStatus()))
                                             .title(car.getPlateNumber() + " , " + car.getKind() + " , " + car.getBank()));
 
                                     marker.setTag(car);
+                                    markerList.add(marker);
                                     marker.showInfoWindow();
-
                                 }
-                            }
-
-                            else {
+                            } else {
 
                                 showFailedDialog(getResources().getString(R.string.fail_load_cars), true);
                             }
-                        }
-
-                        else
+                        } else
                             showFailedDialog(getResources().getString(R.string.no_cars), true);
                     }
                 }
@@ -276,12 +317,13 @@ public class MapFragment extends BaseFragment {
     }
 
 
-    private BitmapDescriptor getMark(String carStatus){
+    private BitmapDescriptor getMark(String carStatus) {
 
-        switch (carStatus){
+        switch (carStatus) {
 
             case "مجمع الشغل":
                 return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE);
+
             case "احالات جديده":
                 return BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN);
 

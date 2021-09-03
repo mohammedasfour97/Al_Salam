@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -185,7 +186,8 @@ public class MakeRecordsFragment extends BaseFragment {
             }
         });
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkRecordPermission()) {return;} {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkRecordPermission())
+        {return;}
 
             fragmentMakeRecordsBinding.fragmentMakeRecordsRecordButton.setEnabled(true);
 
@@ -206,7 +208,6 @@ public class MakeRecordsFragment extends BaseFragment {
                             audioRecorder.start(recordFilePath);
                         } catch (IOException e) {
                             e.printStackTrace();
-
                         }
                     }
                 }
@@ -271,7 +272,7 @@ public class MakeRecordsFragment extends BaseFragment {
                 }
             });
 
-        }
+
     }
 
 
@@ -544,10 +545,10 @@ public class MakeRecordsFragment extends BaseFragment {
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US);
 
-        parentFile = new File(Environment.getExternalStorageDirectory(), "com.alsalameg/records");
+            parentFile = new File(getActivity().getExternalFilesDir("com.alsalameg"), "records");
 
-
-            if (!parentFile.exists()) parentFile.mkdirs();
+            if (!parentFile.exists())
+                parentFile.mkdirs();
 
         recordFileName = getActivity().getApplicationContext().getPackageName() + "_" + dateFormat.format(new Date()) + ".mp3";
 

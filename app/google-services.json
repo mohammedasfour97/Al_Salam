@@ -1,0 +1,77 @@
+{
+  "project_info": {
+    "project_number": "582305388565",
+    "firebase_url": "https://social-f4153.firebaseio.com",
+    "project_id": "social-f4153",
+    "storage_bucket": "social-f4153.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582305388565:android:0dc581accd2cededc0961c",
+        "android_client_info": {
+          "package_name": "com.alsalameg"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "582305388565-jkr8lsbdo2a5j4cnl14aa4a7rk4g1jir.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEJbFM0VPGNj_qlOpItHng3hvM7kPA7hA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "582305388565-jkr8lsbdo2a5j4cnl14aa4a7rk4g1jir.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582305388565:android:3ada28d4e543f226",
+        "android_client_info": {
+          "package_name": "com.moh.asf.football"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "582305388565-girf7u0tso5piu29vcvlp4airjilid7a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.moh.asf.football",
+            "certificate_hash": "d2c82cc34deb5e99ed601c0d2059f85947aaf8f9"
+          }
+        },
+        {
+          "client_id": "582305388565-jkr8lsbdo2a5j4cnl14aa4a7rk4g1jir.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDEJbFM0VPGNj_qlOpItHng3hvM7kPA7hA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "582305388565-jkr8lsbdo2a5j4cnl14aa4a7rk4g1jir.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

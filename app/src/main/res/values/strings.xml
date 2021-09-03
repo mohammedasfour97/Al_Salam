@@ -86,11 +86,18 @@
     <string name="car_color">لون السيارة : </string>
     <string name="bank">البنك : </string>
     <string name="maker">الشركة المصنعة : </string>
+    <string name="cust_name">اسم العميل</string>
+    <string name="cont_num">رقم العقد</string>
+    <string name="shas_num">رقم الشاسيه</string>
     <string name="fail_load_cars">لا يمكن تحميل السيارات</string>
     <string name="no_cars">لا يوجد سيارات</string>
-    <string name="confir_car_succ">تم التأكيد والإرسال لهذه السيارة بنجاح</string>
+    <string name="confir_car_succ">تم بنجاح</string>
     <string name="sure_conf_this_car">هل تريد بالفعل التأكيد والإرسال لهذه السيارة ؟</string>
     <string name="fail_confirm">فشل فى التأكيد , حاول مرة أخرى</string>
     <string name="user_records">تسجيلات المستخدم</string>
     <string name="listen_records">سماع التسجيلات</string>
+    <string name="no_car">لا يوجد سيارة</string>
+    <string name="sure_no_car">هل تريد بالفعل الإبلاغ عن عدم وجود هذه السيارة ؟</string>
+    <string name="longitude">خط الطول</string>
+    <string name="latitude">دائرة العرض</string>
 </resources>

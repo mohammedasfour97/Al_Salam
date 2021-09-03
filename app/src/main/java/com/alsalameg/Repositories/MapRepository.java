@@ -74,6 +74,16 @@ public class MapRepository extends BaseRepository {
                     carList.add(car);
                 }
 
+                carList.get(0).setLatitude("31.212249");
+                carList.get(0).setLongitude("29.919864");
+                carList.get(0).setStatus("مجمع الشغل");
+
+                carList.get(1).setLatitude("31.212249");
+                carList.get(1).setLongitude("29.919864");
+
+                carList.get(2).setLatitude("31.212249");
+                carList.get(2).setLongitude("29.919864");
+                carList.get(2).setStatus("احاله اليوم");
 
             } else {
 
@@ -109,12 +119,10 @@ public class MapRepository extends BaseRepository {
 
             String result;
 
-            if (confirmResult!=null && !confirmResult.isEmpty() && !confirmResult.get(0).get("ID").equals("0")){
+            if (confirmResult != null && !confirmResult.isEmpty() && !confirmResult.get(0).get("ID").equals("0")) {
 
                 result = confirmResult.get(0).get("ID");
-            }
-
-            else {
+            } else {
 
                 result = "error";
             }

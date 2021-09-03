@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.alsalameg.BaseClasses.BaseFragment;
 import com.alsalameg.Constants;
@@ -53,6 +54,17 @@ public class LoginFragment extends BaseFragment {
             fragmentLoginBinding.fragmentLoginUsernameEdt.setText(MyApplication.getTinyDB().getString(Constants.KEY_USERNAME));
             fragmentLoginBinding.fragmentLoginPasswordEdt.setText(MyApplication.getTinyDB().getString(Constants.KEY_USER_PASSWORD));
         }
+//        Button crashButton = new Button(getContext());
+//        crashButton.setText("Test Crash");
+//        crashButton.setOnClickListener(new View.OnClickListener() {
+//            public void onClick(View view) {
+//                throw new RuntimeException("Test Crash"); // Force a crash
+//            }
+//        });
+//
+//        getActivity().addContentView(crashButton, new ViewGroup.LayoutParams(
+//                ViewGroup.LayoutParams.MATCH_PARENT,
+//                ViewGroup.LayoutParams.WRAP_CONTENT));
         setListeners();
         initObservers();
     }

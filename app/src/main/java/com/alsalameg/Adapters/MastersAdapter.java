@@ -14,7 +14,7 @@ import com.alsalameg.R;
 import com.alsalameg.Models.Record;
 import com.alsalameg.Utils;
 import com.alsalameg.ViewModels.ListenRecordsViewModel;
-import com.alsalameg.databinding.ItemRecordBinding;
+import com.alsalameg.databinding.ItemMasterBinding;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -46,16 +46,17 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
     public class MastersViewHolder extends RecyclerView.ViewHolder {
 
-        private ItemRecordBinding itemRecordBinding;
+        private ItemMasterBinding itemRecordBinding;
         private SupportMapFragment mapFragment;
         private List<View> viewList;
         private List<String> values;
         private List<Record> recordList;
         private RecordsAdapter recordsAdapter;
+        private OnDeleteMaster onDeleteMaster;
 
 
 
-        public MastersViewHolder(ItemRecordBinding itemRecordBinding) {
+        public MastersViewHolder(ItemMasterBinding itemRecordBinding) {
             super(itemRecordBinding.getRoot());
             mapFragment = (SupportMapFragment) fragment.getChildFragmentManager().findFragmentById(R.id.item_record_map);
 
@@ -112,10 +113,59 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
         }
 
+
         private void loadRecords(String id){
 
             MastersViewHolder.this.itemRecordBinding.progress.setVisibility(View.VISIBLE);
             new GetMasterRecordsAsyncClass(id).execute();
+        }
+
+
+        private void deleteMaster(String masterId, String idUser, int pos){
+
+            fragment.showInfoDialogWithTwoButtons(context.getResources().getString(R.string.delete), context.getResources().
+                    getString(R.string.sure_delete_master), context.getResources().getString(R.string.yes), context.getResources().
+                    getString(R.string.no), new Closure() {
+                @Override
+                public void exec() {
+
+                    fragment.showProgressDialog("", context.getResources().getString(R.string.loading_msg), false);
+                    listenRecordsViewModel.getDeleteMasterWithRecordsMutableLiveData(masterId, idUser).observe(MastersAdapter.this.fragment
+                            .getViewLifecycleOwner(), deleteMasterObserver(pos));
+                }
+            }, new Closure() {
+                @Override
+                public void exec() {
+
+                    fragment.hideInfoDialogWithTwoButton();
+                }
+            }, true);
+
+
+        }
+
+        private Observer<String> deleteMasterObserver(int pos){
+
+            return new Observer<String>() {
+                @Override
+                public void onChanged(String id) {
+
+                    if (id!=null){
+
+                        if (fragment.getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+
+                            fragment.hideProgress();
+
+                            if (!TextUtils.isEmpty(id)){
+
+                                MastersAdapter.this.masterList.remove(pos);
+                                MastersAdapter.this.notifyItemRemoved(pos);
+                                MastersAdapter.this.notifyDataSetChanged();
+                            }
+                        }
+                    }
+                }
+            };
         }
     }
 
@@ -128,8 +178,8 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
     @Override
     public MastersViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        ItemRecordBinding itemRecordBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()),
-                R.layout.item_record, parent, false);
+        ItemMasterBinding itemRecordBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()),
+                R.layout.item_master, parent, false);
         return new MastersViewHolder(itemRecordBinding);
 
     }
@@ -152,18 +202,18 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
         Utils.hideIfEmpty(holder.viewList, holder.values);
 
         holder.itemRecordBinding.createDateTxt.setText(Utils.getStringKeyValue(context, R.string.date_create,
-                Utils.formatDate("ss-mm-HH  dd-MM-yyyy", master.getDateCreate())));
+                Utils.formatDate("dd MMM yyyy hh:mm a", master.getDateCreate())));
         holder.itemRecordBinding.editDateTxt.setText(Utils.getStringKeyValue(context, R.string.date_edit,
-                Utils.formatDate("ss-mm-HH  dd-MM-yyyy", master.getDateEdit())));
+                Utils.formatDate("dd MMM yyyy hh:mm a", master.getDateEdit())));
         holder.itemRecordBinding.districtTxt.setText(Utils.getStringKeyValue(context, R.string.district,master.getDistrict()));
         holder.itemRecordBinding.locationTxt.setText(Utils.getStringKeyValue(context, R.string.location,master.getLocation()));
         holder.itemRecordBinding.notesTxt.setText(Utils.getStringKeyValue(context, R.string.notes,master.getNotes()));
         holder.itemRecordBinding.regionTxt.setText(Utils.getStringKeyValue(context, R.string.region,master.getRegions()));
+        holder.itemRecordBinding.latitudeTxt.setText(Utils.getStringKeyValue(context, R.string.latitude,master.getLatitude()));
+        holder.itemRecordBinding.longitudeTxt.setText(Utils.getStringKeyValue(context, R.string.longitude,master.getLongitude()));
         holder.itemRecordBinding.sortingTxt.setText(Utils.getStringKeyValue(context, R.string.status,master.getSorting()));
-        holder.itemRecordBinding.vehcileTypeTxt.setText(Utils.getStringKeyValue(context, R.string.vichel_type,
-                master.getVehicleType()));
-        holder.itemRecordBinding.vehicleNumTxt.setText(Utils.getStringKeyValue(context, R.string.vichel_num,
-                master.getVehicleNumber()));
+        holder.itemRecordBinding.vehcileTypeTxt.setText(Utils.getStringKeyValue(context, R.string.vichel_type, master.getVehicleType()));
+        holder.itemRecordBinding.vehicleNumTxt.setText(Utils.getStringKeyValue(context, R.string.vichel_num, master.getVehicleNumber()));
 
 
         // init google map
@@ -217,12 +267,21 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
         // init records
         if (Boolean.parseBoolean(master.getType())){
 
+            holder.onDeleteMaster = new OnDeleteMaster() {
+                @Override
+                public void deleteMaster() {
+
+                    holder.deleteMaster(master.getId(), master.getIdUSER(), position);
+                }
+            };
+
             holder.recordList = new ArrayList<>();
-            holder.recordsAdapter = new RecordsAdapter(holder.recordList , context, fragment);
+            holder.recordsAdapter = new RecordsAdapter(holder.recordList , holder.onDeleteMaster, context, fragment);
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(context);
             holder.itemRecordBinding.itemRecordRecordsRecycler.recyclerview.setLayoutManager(mLayoutManager);
             holder.itemRecordBinding.itemRecordRecordsRecycler.recyclerview.addItemDecoration(new DividerItemDecoration(context,
                     LinearLayoutManager.VERTICAL));
+            holder.recordsAdapter.setHasStableIds(true);
             holder.itemRecordBinding.itemRecordRecordsRecycler.recyclerview.setAdapter(holder.recordsAdapter);
 
             holder.loadRecords(master.getId());
@@ -234,7 +293,7 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
             @Override
             public void onClick(View v) {
 
-                deleteMaster(master.getId(), master.getIdUSER(), position, holder);
+                holder.deleteMaster(master.getId(), master.getIdUSER(), position);
             }
         });
     }
@@ -243,6 +302,19 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
     @Override
     public int getItemCount() {
         return masterList.size();
+    }
+
+    @Override
+    public long getItemId(int position)
+    {
+
+        return Long.parseLong(masterList.get(position).getId());
+    }
+
+    @Override
+    public int getItemViewType(int position)
+    {
+        return Integer.parseInt(masterList.get(position).getId());
     }
 
     /*
@@ -277,50 +349,5 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
      */
 
-    private void deleteMaster(String masterId, String idUser, int pos,  MastersViewHolder mastersViewHolder){
 
-        fragment.showInfoDialogWithTwoButtons(context.getResources().getString(R.string.delete), context.getResources().
-                getString(R.string.sure_delete_master), context.getResources().getString(R.string.yes), context.getResources().
-                getString(R.string.no), new Closure() {
-            @Override
-            public void exec() {
-
-                fragment.showProgressDialog("", context.getResources().getString(R.string.loading_msg), false);
-                listenRecordsViewModel.getDeleteMasterWithRecordsMutableLiveData(masterId, idUser).observe(MastersAdapter.this.fragment
-                        .getViewLifecycleOwner(), deleteMasterObserver(mastersViewHolder, pos));
-            }
-        }, new Closure() {
-            @Override
-            public void exec() {
-
-                fragment.hideInfoDialogWithTwoButton();
-            }
-        }, true);
-
-
-    }
-
-    private Observer<String> deleteMasterObserver(MastersViewHolder mastersViewHolder, int pos){
-
-        return new Observer<String>() {
-            @Override
-            public void onChanged(String id) {
-
-                if (id!=null){
-
-                    if (fragment.getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
-
-                        fragment.hideProgress();
-
-                        if (!TextUtils.isEmpty(id)){
-
-                            MastersAdapter.this.masterList.remove(pos);
-                            MastersAdapter.this.notifyItemRemoved(pos);
-                            MastersAdapter.this.notifyDataSetChanged();
-                        }
-                    }
-                }
-            }
-        };
-    }
 }
