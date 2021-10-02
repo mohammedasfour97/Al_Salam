@@ -19,6 +19,6 @@
         android:id="@+id/navigation_listen_records"
         android:name="com.alsalameg.UI.ListenRecordsFragment"
         android:label="@string/my_records"
-        tools:layout="@layout/fragment_listen_records" />
+        tools:layout="@layout/fragment_listen_masters" />
 
 </navigation>

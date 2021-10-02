@@ -1,14 +1,20 @@
 package com.alsalameg.UI;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
 
+import com.alsalameg.BaseClasses.BaseActivity;
 import com.alsalameg.BaseClasses.BaseDialog;
 import com.alsalameg.Constants;
 import com.alsalameg.MyApplication;
@@ -16,14 +22,16 @@ import com.alsalameg.R;
 import com.alsalameg.TinyDB;
 import com.alsalameg.Models.User;
 import com.alsalameg.ViewModels.LoginViewModel;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends BaseActivity {
 
     /** Duration of wait **/
     private final int SPLASH_DISPLAY_LENGTH = 3000;
@@ -89,27 +97,73 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
 
-                if (MyApplication.getTinyDB().getString(Constants.KEY_USERID)!=null && !TextUtils.isEmpty(MyApplication.getTinyDB()
-                        .getString(Constants.KEY_USERID))){
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+//
+//                    if (!checkPermission()) return;
+//                }
 
-                    baseDialog.awesomeProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg),
-                            false).show();
-
-                    loginViewModel.userMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERNAME), MyApplication.getTinyDB()
-                            .getString(Constants.KEY_USER_PASSWORD))
-                            .observe(SplashActivity.this, userObserver);
-                }
-
-                else
-                    startMainActivity();
+                tryToLogin();
 
             }
         }, SPLASH_DISPLAY_LENGTH);
     }
 
+
+    private void tryToLogin(){
+
+        if (MyApplication.getTinyDB().getString(Constants.KEY_USERID)!=null && !TextUtils.isEmpty(MyApplication.getTinyDB()
+                .getString(Constants.KEY_USERID))){
+
+            baseDialog.awesomeProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg),
+                    false).show();
+
+            loginViewModel.userMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERNAME),
+                    MyApplication.getTinyDB().getString(Constants.KEY_USER_PASSWORD),
+                    MyApplication.getTinyDB().getString(Constants.KEY_UID)).observe(SplashActivity.this, userObserver);
+        }
+
+        else
+            startMainActivity();
+    }
+
+
+
+    private boolean checkPermission() {
+
+        if (!Constants.checkIdentifierPermission(this)) {
+
+            showInfoDialogWithOneButton(getResources().getString(R.string.req_uid_perm),
+                    getResources().getString(R.string.req_uid_perm_message), getResources().getString(R.string.req_loc_perm_pos_btn),
+                    new Closure() {
+                        @Override
+                        public void exec() {
+
+                            requestPermissions(new String[]{Manifest.permission.READ_PHONE_STATE}, 1);
+                        }
+                    }, false);
+            return false;
+        } else return true;
+    }
+
+
     private void startMainActivity(){
 
         startActivity(intent);
         finish();
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 1:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    tryToLogin();
+                }
+                else finish();
+                break;
+        }
     }
 }

@@ -3,10 +3,8 @@ package com.alsalameg.Repositories;
 import android.os.AsyncTask;
 
 import com.alsalameg.BaseClasses.BaseRepository;
-import com.alsalameg.Models.Car;
 import com.alsalameg.Models.User;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -22,11 +20,11 @@ public class LoginRepository extends BaseRepository {
 
     }
 
-    public MutableLiveData<User> getUserMutableLiveData(String username, String password) {
+    public MutableLiveData<User> getUserMutableLiveData(String username, String password, String uid) {
 
         userMutableLiveData = new MutableLiveData<>();
 
-        new GetUserInfoAsyncClass(username, password).execute();
+        new GetUserInfoAsyncClass(username, password, uid).execute();
 
         return userMutableLiveData;
     }
@@ -35,16 +33,17 @@ public class LoginRepository extends BaseRepository {
 
     private class GetUserInfoAsyncClass extends AsyncTask<Void, Void, List<HashMap<String, String>>> {
 
-        private String username, password;
+        private String username, password, uid;
 
-        public GetUserInfoAsyncClass(String username, String password) {
+        public GetUserInfoAsyncClass(String username, String password, String uid) {
             this.username = username;
             this.password = password;
+            this.uid = uid;
         }
 
         @Override
         protected List<HashMap<String, String>> doInBackground(Void... voids) {
-            return webService.getUserInfoService(username, password);
+            return webServices.getUserInfoService(username, password, uid);
         }
 
         @Override

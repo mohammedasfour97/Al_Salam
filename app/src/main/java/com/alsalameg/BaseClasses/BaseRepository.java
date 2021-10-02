@@ -1,6 +1,6 @@
 package com.alsalameg.BaseClasses;
 
-import com.alsalameg.Api.WebService;
+import com.alsalameg.Api.WebServices;
 import com.alsalameg.MyApplication;
 
 import javax.inject.Inject;
@@ -8,7 +8,7 @@ import javax.inject.Inject;
 public class BaseRepository {
 
     @Inject
-    public WebService webService;
+    public WebServices webServices;
 
     public BaseRepository(){
 

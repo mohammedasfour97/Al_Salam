@@ -2,16 +2,20 @@ package com.alsalameg.Adapters;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.alsalameg.Api.WebService;
+import com.alsalameg.Api.WebServices;
 import com.alsalameg.BaseClasses.BaseFragment;
+import com.alsalameg.Constants;
 import com.alsalameg.Models.Master;
+import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.Models.Record;
+import com.alsalameg.UI.MainActivity;
 import com.alsalameg.Utils;
 import com.alsalameg.ViewModels.ListenRecordsViewModel;
 import com.alsalameg.databinding.ItemMasterBinding;
@@ -43,6 +47,7 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
     private Context context;
     private BaseFragment fragment;
     private ListenRecordsViewModel listenRecordsViewModel;
+    private boolean listenerRecordedCars;
 
     public class MastersViewHolder extends RecyclerView.ViewHolder {
 
@@ -82,7 +87,7 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
             protected List<HashMap<String,String>> doInBackground(String... args) {
 
-                return new WebService().getMasterRecords(id);
+                return new WebServices().getMasterRecords(id);
             }
             /**
              * After completing background task Dismiss the progress dialog
@@ -121,7 +126,7 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
         }
 
 
-        private void deleteMaster(String masterId, String idUser, int pos){
+        private void deleteMaster(String masterId, String idUser, int pos, boolean isRecorder){
 
             fragment.showInfoDialogWithTwoButtons(context.getResources().getString(R.string.delete), context.getResources().
                     getString(R.string.sure_delete_master), context.getResources().getString(R.string.yes), context.getResources().
@@ -130,8 +135,13 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
                 public void exec() {
 
                     fragment.showProgressDialog("", context.getResources().getString(R.string.loading_msg), false);
-                    listenRecordsViewModel.getDeleteMasterWithRecordsMutableLiveData(masterId, idUser).observe(MastersAdapter.this.fragment
+
+                    if (isRecorder)
+                        listenRecordsViewModel.getDeleteMasterWithRecordsMutableLiveData(masterId, idUser).observe(MastersAdapter.this.fragment
                             .getViewLifecycleOwner(), deleteMasterObserver(pos));
+                    else
+                        listenRecordsViewModel.getDeleteListenerRecordedCarMutableLiveData(masterId, idUser).observe(MastersAdapter.this.fragment
+                                .getViewLifecycleOwner(), deleteMasterObserver(pos));
                 }
             }, new Closure() {
                 @Override
@@ -176,6 +186,14 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
         listenRecordsViewModel = ViewModelProviders.of(fragment).get(ListenRecordsViewModel.class);
     }
 
+    public MastersAdapter(List<Master> masterList, Context context, BaseFragment fragment, boolean listenerRecordedCars) {
+        this.masterList = masterList;
+        this.context = context;
+        this.fragment = fragment;
+        this.listenerRecordedCars = listenerRecordedCars;
+        listenRecordsViewModel = ViewModelProviders.of(fragment).get(ListenRecordsViewModel.class);
+    }
+
     @Override
     public MastersViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         ItemMasterBinding itemRecordBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()),
@@ -214,6 +232,15 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
         holder.itemRecordBinding.sortingTxt.setText(Utils.getStringKeyValue(context, R.string.status,master.getSorting()));
         holder.itemRecordBinding.vehcileTypeTxt.setText(Utils.getStringKeyValue(context, R.string.vichel_type, master.getVehicleType()));
         holder.itemRecordBinding.vehicleNumTxt.setText(Utils.getStringKeyValue(context, R.string.vichel_num, master.getVehicleNumber()));
+
+        /// hide delete if the listener who is listening
+
+        if (!MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded")){
+
+            if (!listenerRecordedCars)
+                holder.itemRecordBinding.deleteBtn.setVisibility(View.GONE);
+        }
+
 
 
         // init google map
@@ -265,35 +292,54 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
 
         // init records
-        if (Boolean.parseBoolean(master.getType())){
+        if (MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded") && Boolean.parseBoolean(master.getType())){
 
-            holder.onDeleteMaster = new OnDeleteMaster() {
-                @Override
-                public void deleteMaster() {
+                holder.onDeleteMaster = new OnDeleteMaster() {
+                    @Override
+                    public void deleteMaster() {
 
-                    holder.deleteMaster(master.getId(), master.getIdUSER(), position);
-                }
-            };
+                        holder.deleteMaster(master.getId(), master.getIdUSER(), position, true);
+                    }
+                };
 
-            holder.recordList = new ArrayList<>();
-            holder.recordsAdapter = new RecordsAdapter(holder.recordList , holder.onDeleteMaster, context, fragment);
-            LinearLayoutManager mLayoutManager = new LinearLayoutManager(context);
-            holder.itemRecordBinding.itemRecordRecordsRecycler.recyclerview.setLayoutManager(mLayoutManager);
-            holder.itemRecordBinding.itemRecordRecordsRecycler.recyclerview.addItemDecoration(new DividerItemDecoration(context,
-                    LinearLayoutManager.VERTICAL));
-            holder.recordsAdapter.setHasStableIds(true);
-            holder.itemRecordBinding.itemRecordRecordsRecycler.recyclerview.setAdapter(holder.recordsAdapter);
+                holder.recordList = new ArrayList<>();
+                holder.recordsAdapter = new RecordsAdapter(holder.recordList , holder.onDeleteMaster, context, fragment);
+                LinearLayoutManager mLayoutManager = new LinearLayoutManager(context);
+                holder.itemRecordBinding.itemRecordRecordsRecycler.recyclerview.setLayoutManager(mLayoutManager);
+                holder.itemRecordBinding.itemRecordRecordsRecycler.recyclerview.addItemDecoration(new DividerItemDecoration(context,
+                        LinearLayoutManager.VERTICAL));
+                holder.recordsAdapter.setHasStableIds(true);
+                holder.itemRecordBinding.itemRecordRecordsRecycler.recyclerview.setAdapter(holder.recordsAdapter);
 
-            holder.loadRecords(master.getId());
-        }
-
+                holder.loadRecords(master.getId());
+            }
 
 
         holder.itemRecordBinding.deleteBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                holder.deleteMaster(master.getId(), master.getIdUSER(), position);
+                if (MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded"))
+                    holder.deleteMaster(master.getId(), master.getIdUSER(), position, true);
+                else
+                    holder.deleteMaster(master.getId(), master.getIdUSER(), position, false);
+            }
+        });
+
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                if (!MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded")){
+
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("master", master);
+                    ((MainActivity) fragment.getActivity()).navController.navigate(
+                            R.id.action_fragment_listen_to_fragment_listener_add_recorded_car, bundle);
+                }
+
             }
         });
     }

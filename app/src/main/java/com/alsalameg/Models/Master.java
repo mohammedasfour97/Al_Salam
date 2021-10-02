@@ -1,6 +1,8 @@
 package com.alsalameg.Models;
 
-public class Master {
+import java.io.Serializable;
+
+public class Master implements Serializable {
 
     private String id, vehicleNumber, vehicleType, location, district, longitude, latitude, status, sorting, notes, idRegions, regions, idUSER,
             dateEdit, dateCreate, type;

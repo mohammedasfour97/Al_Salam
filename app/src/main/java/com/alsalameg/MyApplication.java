@@ -1,13 +1,15 @@
 package com.alsalameg;
 
 import android.app.Application;
+import android.provider.Settings;
+import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 
 
-import com.alsalameg.Api.WebService;
+import com.alsalameg.Api.WebServices;
 import com.alsalameg.Components.ContextComponent;
 
 import com.alsalameg.Components.DaggerContextComponent;
-import com.alsalameg.Components.DaggerUtilsComponents;
 import com.alsalameg.Components.DaggerWebServiceComponent;
 import com.alsalameg.Components.WebServiceComponent;
 import com.alsalameg.Modules.ContextModule;
@@ -39,11 +41,14 @@ public class MyApplication extends Application {
 
         contextComponent.inject(this);
 
-        webServiceComponent = DaggerWebServiceComponent.builder().webService(new WebService()).build();
+        webServiceComponent = DaggerWebServiceComponent.builder().webServices(new WebServices()).build();
 
         new Utils(this).setLocale("ar");
 
         tinyDBInstance = new TinyDB(getApplicationContext());
+
+        if (TextUtils.isEmpty(MyApplication.getTinyDB().getString(Constants.KEY_UID)))
+            MyApplication.getTinyDB().putString("uid", Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
     }
 
     public static ContextComponent getContextComponent() {

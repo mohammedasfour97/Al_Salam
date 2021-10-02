@@ -15,10 +15,11 @@ import androidx.lifecycle.MutableLiveData;
 
 public class ListenRecordsRepository extends BaseRepository {
 
-    private MutableLiveData<List<Master>> masterListMutableLiveData;
+    private MutableLiveData<List<Master>> masterListMutableLiveData, masterListenerListMutableLiveData,
+            masterListenerRecordedCarsMutableLiveData;
     private MutableLiveData<List<Record>> masterRecordsMutableLiveData;
-    private MutableLiveData<String> deleteMasterWithRecordsMutableLiveData;
-    private MutableLiveData<String> deleteRecordMutableLiveData;
+    private MutableLiveData<String> deleteMasterWithRecordsMutableLiveData, deleteRecordMutableLiveData, addRecordedCarMutableLiveData,
+    deleteListenerRecordedCarMutableLivedata;
 
     public ListenRecordsRepository() {
 
@@ -32,6 +33,15 @@ public class ListenRecordsRepository extends BaseRepository {
         new GetMasterListAsyncClass(id).execute();
 
         return masterListMutableLiveData;
+    }
+
+    public MutableLiveData<List<Master>> getMasterListenerListMutableLiveData(String id) {
+
+        masterListenerListMutableLiveData = new MutableLiveData<>();
+
+        new GetMasterListenerListAsyncClass(id).execute();
+
+        return masterListenerListMutableLiveData;
     }
 
     public MutableLiveData<List<Record>> getMasterRecordsMutableLiveData(String id) {
@@ -61,6 +71,76 @@ public class ListenRecordsRepository extends BaseRepository {
         return deleteRecordMutableLiveData;
     }
 
+    public MutableLiveData<List<Master>> getMasterListenerRecordedCarsMutableLiveData(String id) {
+
+        masterListenerRecordedCarsMutableLiveData = new MutableLiveData<>();
+
+        new GetMasterListenerRecordedCarsAsyncClass(id).execute();
+
+        return masterListenerRecordedCarsMutableLiveData;
+    }
+
+    public MutableLiveData<String> getAddRecordedCarMutableLiveData(String vehicleNumber, String vehicleType, String location, String district,
+                                                                    String longitude, String latitude, String idUSER, String idRegions,
+                                                                    String notes, String masterId) {
+
+        addRecordedCarMutableLiveData = new MutableLiveData<>();
+
+        new InsertRecordedCarAsyncClass(vehicleNumber ,vehicleType, location,  district, longitude,  latitude,  idUSER,  idRegions,
+                notes, masterId).execute();
+
+        return addRecordedCarMutableLiveData;
+    }
+
+    public MutableLiveData<String> getDeleteListenerRecordedCarMutableLivedata(String masterId, String idUser) {
+
+        deleteListenerRecordedCarMutableLivedata = new MutableLiveData<>();
+
+        new DeleteListenerRecordedCarAsyncClass(masterId, idUser).execute();
+
+        return deleteListenerRecordedCarMutableLivedata;
+    }
+
+    private class InsertRecordedCarAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
+
+        private String vehicleNumber ,vehicleType, location,  district, longitude,  latitude,  idUSER,  idRegions, notes, masterId;
+        private boolean type;
+
+        public InsertRecordedCarAsyncClass(String vehicleNumber, String vehicleType, String location, String district, String longitude,
+                                            String latitude, String idUSER, String idRegions, String notes, String masterId) {
+            this.vehicleNumber = vehicleNumber;
+            this.vehicleType = vehicleType;
+            this.location = location;
+            this.district = district;
+            this.longitude = longitude;
+            this.latitude = latitude;
+            this.idUSER = idUSER;
+            this.idRegions = idRegions;
+            this.notes = notes;
+            this.masterId = masterId;
+        }
+
+        @Override
+        protected List<HashMap<String,String>> doInBackground(Void... voids) {
+            return webServices.insertRecodedCar(vehicleNumber ,vehicleType, location,  district, longitude,  latitude,  idUSER,
+                    idRegions, notes, masterId);
+        }
+
+        @Override
+        protected void onPostExecute(List<HashMap<String,String>> insertRecordedCar) {
+
+            if (insertRecordedCar != null) {
+
+                addRecordedCarMutableLiveData.postValue(insertRecordedCar.get(0).get("ID"));
+
+            }
+
+            else addRecordedCarMutableLiveData.postValue("error");
+        }
+
+    }
+
+
     private class GetMasterListAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
 
         private String id;
@@ -71,7 +151,7 @@ public class ListenRecordsRepository extends BaseRepository {
 
         @Override
         protected List<HashMap<String,String>> doInBackground(Void... voids) {
-            return webService.getMasters(id);
+            return webServices.getMasters(id);
         }
 
         @Override
@@ -110,6 +190,56 @@ public class ListenRecordsRepository extends BaseRepository {
 
     }
 
+
+    private class GetMasterListenerListAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
+
+        private String id;
+
+        public GetMasterListenerListAsyncClass(String id) {
+            this.id = id;
+        }
+
+        @Override
+        protected List<HashMap<String,String>> doInBackground(Void... voids) {
+            return webServices.getListenerMasters(id);
+        }
+
+        @Override
+        protected void onPostExecute(List<HashMap<String,String>> getMasterList) {
+
+            List<Master> list = new ArrayList<>();
+
+            Master master;
+
+            if (getMasterList != null) {
+
+                for (HashMap<String, String> hashMap : getMasterList) {
+
+                    master = new Master(hashMap.get("ID"), hashMap.get("Vehicle_Number"), hashMap.get("Vehicle_Type"), hashMap.get("Location"),
+                            hashMap.get("District"), hashMap.get("Longitude"), hashMap.get("Latitude"), hashMap.get("Status"),
+                            hashMap.get("Sorting"), hashMap.get("Notes"), hashMap.get("ID_Regions"), hashMap.get("Regions"),
+                            hashMap.get("ID_USER"), hashMap.get("DateEdite"), hashMap.get("DateCreate"), hashMap.get("Type"));
+
+                    list.add(master);
+
+                }
+
+                Collections.reverse(list);
+            }
+
+            else {
+
+                master = new Master();
+                master.setId("-1");
+                list.add(master);
+            }
+
+            masterListenerListMutableLiveData.postValue(list);
+        }
+
+    }
+
+
     private class GetMasterRecordsListAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
 
         private String id;
@@ -120,7 +250,7 @@ public class ListenRecordsRepository extends BaseRepository {
 
         @Override
         protected List<HashMap<String,String>> doInBackground(Void... voids) {
-            return webService.getMasterRecords(id);
+            return webServices.getMasterRecords(id);
         }
 
         @Override
@@ -140,9 +270,6 @@ public class ListenRecordsRepository extends BaseRepository {
                     list.add(record);
 
                 }
-
-                masterRecordsMutableLiveData.postValue(list);
-
             }
 
             else {
@@ -150,11 +277,62 @@ public class ListenRecordsRepository extends BaseRepository {
                 record = new Record();
                 record.setId("-1");
                 list.add(record);
-                masterRecordsMutableLiveData.postValue(list);
             }
+            masterRecordsMutableLiveData.postValue(list);
         }
 
     }
+
+
+    private class GetMasterListenerRecordedCarsAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
+
+        private String id;
+
+        public GetMasterListenerRecordedCarsAsyncClass(String id) {
+            this.id = id;
+        }
+
+        @Override
+        protected List<HashMap<String,String>> doInBackground(Void... voids) {
+            return webServices.getListenerRecordedCars(id);
+        }
+
+        @Override
+        protected void onPostExecute(List<HashMap<String,String>> getMasterList) {
+
+            List<Master> list = new ArrayList<>();
+
+            Master master;
+
+            if (getMasterList != null) {
+
+                for (HashMap<String, String> hashMap : getMasterList) {
+
+                    master = new Master(hashMap.get("ID"), hashMap.get("Vehicle_Number"), hashMap.get("Vehicle_Type"),
+                            hashMap.get("Location"), hashMap.get("District"), hashMap.get("Longitude"), hashMap.get("Latitude"),
+                            hashMap.get("Status"), hashMap.get("Sorting"), hashMap.get("Notes"), hashMap.get("ID_Regions"),
+                            hashMap.get("Regions"), hashMap.get("ID_USER"), hashMap.get("DateEdite"), hashMap.get("DateCreate"),
+                            hashMap.get("Type"));
+
+                    list.add(master);
+
+                }
+
+                Collections.reverse(list);
+            }
+
+            else {
+
+                master = new Master();
+                master.setId("-1");
+                list.add(master);
+            }
+
+            masterListenerRecordedCarsMutableLiveData.postValue(list);
+        }
+
+    }
+
 
     private class DeleteMasterWithRecordsAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
 
@@ -167,7 +345,7 @@ public class ListenRecordsRepository extends BaseRepository {
 
         @Override
         protected List<HashMap<String,String>> doInBackground(Void... voids) {
-            return webService.deleteMasterOrRecord(masterId, idUser, "master");
+            return webServices.deleteMasterOrRecord(masterId, idUser, "master");
         }
 
         @Override
@@ -184,6 +362,7 @@ public class ListenRecordsRepository extends BaseRepository {
         }
     }
 
+
     private class DeleteRecordAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
 
         private String masterId, idUser;
@@ -195,7 +374,7 @@ public class ListenRecordsRepository extends BaseRepository {
 
         @Override
         protected List<HashMap<String,String>> doInBackground(Void... voids) {
-            return webService.deleteMasterOrRecord(masterId, idUser, "record");
+            return webServices.deleteMasterOrRecord(masterId, idUser, "record");
         }
 
         @Override
@@ -209,6 +388,35 @@ public class ListenRecordsRepository extends BaseRepository {
             }
 
             deleteRecordMutableLiveData.postValue(result);
+        }
+    }
+
+
+    private class DeleteListenerRecordedCarAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
+
+        private String masterId, idUser;
+
+        public DeleteListenerRecordedCarAsyncClass(String masterId, String idUser) {
+            this.masterId = masterId;
+            this.idUser = idUser;
+        }
+
+        @Override
+        protected List<HashMap<String,String>> doInBackground(Void... voids) {
+            return webServices.deleteListenerRecordedCarMaster(masterId, idUser);
+        }
+
+        @Override
+        protected void onPostExecute(List<HashMap<String,String>> getDeleteMasterWithRecords) {
+
+            String result = "";
+
+            if (getDeleteMasterWithRecords != null && !getDeleteMasterWithRecords.get(0).get("ID").equals("0")) {
+
+                result = getDeleteMasterWithRecords.get(0).get("ID");
+            }
+
+            deleteListenerRecordedCarMutableLivedata.postValue(result);
         }
     }
 }

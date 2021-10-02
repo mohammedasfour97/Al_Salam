@@ -6,6 +6,8 @@
     <string name="google_maps_key">AIzaSyDbD_ikRqyF7gZcuDtGHFuGNtNd7yXuM_c</string>
     <string name="req_loc_perm">السماح بالوصول للموقع</string>
     <string name="req_loc_perm_message">يرجى السماح بالوصول للموقع للتمكن من فتح الخريطة</string>
+    <string name="req_uid_perm">السماح بالوصول للمعرف</string>
+    <string name="req_uid_perm_message">يرجى السماح بالوصول للمعرف الخاص بالجهاز للتمكن من تسجيل الدخول</string>
     <string name="req_record_and_read_write_perm">السماح بالتسجيل</string>
     <string name="req_record_and_read_write_perm_message">يرجى السماح بالتسجيل و الوصول للذاكرة للتمكن من تسجيل الصوت</string>
     <string name="req_loc_perm_pos_btn">الموافقة</string>
@@ -100,4 +102,15 @@
     <string name="sure_no_car">هل تريد بالفعل الإبلاغ عن عدم وجود هذه السيارة ؟</string>
     <string name="longitude">خط الطول</string>
     <string name="latitude">دائرة العرض</string>
+    <string name="address">العنوان</string>
+    <string name="enter_vic_num">يرجى إدخال رقم السيارة</string>
+    <string name="enter_vic_type">يرجى إدخال نوع السيارة</string>
+    <string name="enter_vic_district">يرجى إدخال حى السيارة</string>
+    <string name="enter_vic_addr">يرجى إدخال عنوان السيارة</string>
+    <string name="load_records_msg">برجاء الإنتظار حتى يتم تحميل التسجيلات …</string>
+    <string name="load_regions_msg">برجاء الإنتظار حتى يتم تحميل المناطق …</string>
+    <string name="added_car_before_msg">تمت اضافة هذه السيارة من قبل</string>
+    <string name="show_records">عرض التسجيلات</string>
+    <string name="add_car_prog_msg">جارى إضافة العربة …</string>
+
 </resources>

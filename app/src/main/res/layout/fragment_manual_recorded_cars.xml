@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/purple_500">
+
+            <ImageView
+                android:id="@+id/back_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_10sdp"
+                android:src="@drawable/ic_baseline_arrow_back_white_24"
+                android:layout_centerVertical="true"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true" />
+
+            <ImageView
+                android:id="@+id/standard_toolbar_refresh_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_autorenew_24"
+                android:layout_margin="@dimen/_10sdp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true" />
+
+            <TextView
+                android:id="@+id/standard_toolbar_title_txt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Bold_White_Color_TextView_style"
+                android:layout_centerInParent="true"
+                android:textSize="20sp"/>
+
+        </RelativeLayout>
+
+        <include
+            android:id="@+id/recordedCars_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/_10sdp"
+            layout="@layout/recycler"/>
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</layout>

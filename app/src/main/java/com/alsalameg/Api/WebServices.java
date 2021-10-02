@@ -11,23 +11,25 @@ import dagger.Module;
 import dagger.Provides;
 
 @Module
-public class WebService {
+public class WebServices {
 
     @Singleton
     @Provides
-    WebService webService(){return this;}
+    WebServices webService(){return this;}
 
 
-    public ArrayList<HashMap<String, String>> getUserInfoService(String username , String Password) {
+    public ArrayList<HashMap<String, String>> getUserInfoService(String username , String Password, String uid) {
         MasterSlayer MS = new MasterSlayer("GetLogin");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
         send_params.add("USERNAME");
         send_params.add("USERPASS");
+        send_params.add("UID");
 
         ArrayList<String> send_params_value = new ArrayList<String>();
         send_params_value.add(username);
         send_params_value.add(Password);
+        send_params_value.add(uid);
 
         MS.addsendparam(send_params, send_params_value);
 
@@ -364,6 +366,163 @@ public class WebService {
         send_params_value.add(confirmation);
         send_params_value.add(longitude);
         send_params_value.add(latitude);
+
+        MS.addsendparam(send_params, send_params_value);
+
+        /**2 - request */
+        ArrayList<String> request_params = new ArrayList<String>();
+        request_params.add("ID");
+        MS.setRequest_paramName(request_params);
+        /** 3 - any image */
+        // MS.setIsImage1("ProductPicture");
+        // MS.setIsImage2("Voice");
+
+        return MS.Call();
+    }
+
+
+    public ArrayList<HashMap<String, String>> getListenerMasters(String id) {
+
+        MasterSlayer MS = new MasterSlayer("Getlistener");
+        /**1 - any parameter send */
+        ArrayList<String> send_params = new ArrayList<String>();
+
+        send_params.add("ID_Listen");
+
+        ArrayList<String> send_params_value = new ArrayList<String>();
+
+        send_params_value.add(id);
+
+        MS.addsendparam(send_params, send_params_value);
+
+        /**2 - request */
+        ArrayList<String> request_params = new ArrayList<String>();
+        request_params.add("ID");
+        request_params.add("Vehicle_Number");
+        request_params.add("Vehicle_Type");
+        request_params.add("Location");
+        request_params.add("District");
+        request_params.add("Longitude");
+        request_params.add("Latitude");
+        request_params.add("Status");
+        request_params.add("Sorting");
+        request_params.add("Notes");
+        request_params.add("Regions");
+        request_params.add("ID_USER");
+        request_params.add("DateEdite");
+        request_params.add("DateCreate");
+        request_params.add("Type");
+        request_params.add("Transfer");
+
+        MS.setRequest_paramName(request_params);
+        /** 3 - any image */
+        // MS.setIsImage1("ProductPicture");
+        // MS.setIsImage2("Voice");
+
+        return MS.Call();
+    }
+
+
+    public ArrayList<HashMap<String, String>> insertRecodedCar(String vehicleNumber, String vehicleType, String location, String district,
+                                                                 String longitude, String latitude, String idUSER, String idRegions,
+                                                                 String notes, String masterId) {
+        MasterSlayer MS = new MasterSlayer("ADD_listener");
+        /**1 - any parameter send */
+        ArrayList<String> send_params = new ArrayList<String>();
+
+        send_params.add("Vehicle_Number");
+        send_params.add("Vehicle_Type");
+        send_params.add("Location");
+        send_params.add("District");
+        send_params.add("Longitude");
+        send_params.add("Latitude");
+        send_params.add("ID_USER");
+        send_params.add("ID_Regions");
+        send_params.add("Notes");
+        send_params.add("ID_Recorded");
+
+        ArrayList<String> send_params_value = new ArrayList<String>();
+
+        send_params_value.add(vehicleNumber);
+        send_params_value.add(vehicleType);
+        send_params_value.add(location);
+        send_params_value.add(district);
+        send_params_value.add(longitude);
+        send_params_value.add(latitude);
+        send_params_value.add(idUSER);
+        send_params_value.add(idRegions);
+        send_params_value.add(notes);
+        send_params_value.add(masterId);
+
+        MS.addsendparam(send_params, send_params_value);
+
+        /**2 - request */
+        ArrayList<String> request_params = new ArrayList<String>();
+        request_params.add("ID");
+        MS.setRequest_paramName(request_params);
+        /** 3 - any image */
+        // MS.setIsImage1("ProductPicture");
+        // MS.setIsImage2("Voice");
+
+        return MS.Call();
+    }
+
+
+    public ArrayList<HashMap<String, String>> getListenerRecordedCars(String id) {
+
+        MasterSlayer MS = new MasterSlayer("Getlistenerrecordings");
+        /**1 - any parameter send */
+        ArrayList<String> send_params = new ArrayList<String>();
+
+        send_params.add("ID_Recorded");
+
+        ArrayList<String> send_params_value = new ArrayList<String>();
+
+        send_params_value.add(id);
+
+        MS.addsendparam(send_params, send_params_value);
+
+        /**2 - request */
+        ArrayList<String> request_params = new ArrayList<String>();
+        request_params.add("ID");
+        request_params.add("Vehicle_Number");
+        request_params.add("Vehicle_Type");
+        request_params.add("Location");
+        request_params.add("District");
+        request_params.add("Longitude");
+        request_params.add("Latitude");
+        request_params.add("Status");
+        request_params.add("Type");
+        request_params.add("Sorting");
+        request_params.add("Notes");
+        request_params.add("ID_Regions");
+        request_params.add("ID_USER");
+        request_params.add("DateEdite");
+        request_params.add("DateCreate");
+        request_params.add("ID_Recorded");
+
+        MS.setRequest_paramName(request_params);
+        /** 3 - any image */
+        // MS.setIsImage1("ProductPicture");
+        // MS.setIsImage2("Voice");
+
+        return MS.Call();
+    }
+
+
+    public ArrayList<HashMap<String, String>> deleteListenerRecordedCarMaster(String masterId, String idUser) {
+
+        MasterSlayer MS = new MasterSlayer("Delete_listener");
+        /**1 - any parameter send */
+        ArrayList<String> send_params = new ArrayList<String>();
+
+        send_params.add("ID");
+        send_params.add("ID_USER");
+
+        ArrayList<String> send_params_value = new ArrayList<String>();
+
+        send_params_value.add(masterId);
+        send_params_value.add(idUser);
 
         MS.addsendparam(send_params, send_params_value);
 

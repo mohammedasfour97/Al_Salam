@@ -18,9 +18,9 @@ public class LoginViewModel extends ViewModel {
         loginRepository = new LoginRepository();
     }
 
-    public MutableLiveData<User> userMutableLiveData(String username, String password){
+    public MutableLiveData<User> userMutableLiveData(String username, String password, String uid){
 
-        return loginRepository.getUserMutableLiveData(username, password);
+        return loginRepository.getUserMutableLiveData(username, password, uid);
     }
 
 

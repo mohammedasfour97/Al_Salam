@@ -16,6 +16,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import androidx.core.content.res.ResourcesCompat;
 import dagger.Module;
 import dagger.Provides;
 
+import com.alsalameg.Models.IDName;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
@@ -145,6 +147,8 @@ public class Utils {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }
+
+
     public static void goToNotificationSettings(String channel, Context context) {
         Intent intent = new Intent();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -238,6 +242,31 @@ public class Utils {
                 viewList.get(a).setVisibility(View.GONE);
         }
     }
+
+    public static IDName getSelectedIDNameItemInSpinner(List<IDName> list, String name){
+
+        IDName returnedIDName = null;
+
+        for (IDName idName : list){
+
+            if (idName.getName().equals(name)){
+
+                returnedIDName = idName;
+                break;
+            }
+
+        }
+
+        return returnedIDName;
+    }
+
+    public static void setAllEmpty(List<EditText> editTextList){
+
+        for (EditText editText : editTextList)
+            editText.setText("");
+    }
+
+
 
     public static void animateViewVisibility(final View view, final int visibility)
     {

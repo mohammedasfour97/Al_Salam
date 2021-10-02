@@ -54,13 +54,15 @@ public class MainActivity extends AppCompatActivity {
                     break;
 
                 case "Recorded":
-                    navController.navigate
-                            (R.id.action_fragment_login_to_fragment_main_records);
+                    navController.navigate(R.id.action_fragment_login_to_fragment_main_records);
                     break;
 
                 case "Listener":
-                    navController.navigate
-                            (R.id.action_fragment_login_to_fragment_listen_records);
+
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean("lis_rec_car", false);
+
+                    navController.navigate(R.id.action_fragment_login_to_fragment_listen_records, bundle);
                     break;
                 default:
                     break;

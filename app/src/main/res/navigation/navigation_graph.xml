@@ -77,13 +77,45 @@
     <fragment
         android:id="@+id/fragment_listen_to_records"
         android:name="com.alsalameg.UI.ListenRecordsFragment"
-        tools:layout="@layout/fragment_listen_records">
+        tools:layout="@layout/fragment_listen_masters">
 
         <action
             android:id="@+id/action_fragment_listen_to_fragment_login"
             app:destination="@id/fragment_login"
             app:popUpTo="@id/fragment_listen_to_records"
             app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_left"
+            app:exitAnim="@anim/wait_anim"
+            app:popEnterAnim="@anim/wait_anim"
+            app:popExitAnim="@anim/slide_right"/>
+
+        <action
+            android:id="@+id/action_fragment_listen_to_fragment_listener_add_recorded_car"
+            app:destination="@id/fragment_listener_add_recorded_car"
+            app:enterAnim="@anim/slide_left"
+            app:exitAnim="@anim/wait_anim"
+            app:popEnterAnim="@anim/wait_anim"
+            app:popExitAnim="@anim/slide_right"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragment_listener_add_recorded_car"
+        android:name="com.alsalameg.UI.ListenerAddRecordedCarFragment"
+        tools:layout="@layout/fragment_listener_add_recorded_car">
+
+        <action
+            android:id="@+id/fragment_listener_add_recorded_car_to_fragment_login"
+            app:destination="@id/fragment_login"
+            app:popUpTo="@id/fragment_listener_add_recorded_car"
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_left"
+            app:exitAnim="@anim/wait_anim"
+            app:popEnterAnim="@anim/wait_anim"
+            app:popExitAnim="@anim/slide_right"/>
+
+        <action
+            android:id="@+id/fragment_listener_add_recorded_car_to_fragment_listen_to_records"
+            app:destination="@id/fragment_listen_to_records"
             app:enterAnim="@anim/slide_left"
             app:exitAnim="@anim/wait_anim"
             app:popEnterAnim="@anim/wait_anim"

@@ -2,10 +2,8 @@ package com.alsalameg.Components;
 
 import android.app.Application;
 
-import com.alsalameg.Api.WebService;
 import com.alsalameg.Modules.ContextModule;
 import com.alsalameg.TinyDB;
-import com.alsalameg.UI.SplashActivity;
 
 import javax.inject.Singleton;
 

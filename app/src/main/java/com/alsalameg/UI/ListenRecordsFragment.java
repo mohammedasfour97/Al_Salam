@@ -12,7 +12,7 @@ import com.alsalameg.Models.Master;
 import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.ViewModels.ListenRecordsViewModel;
-import com.alsalameg.databinding.FragmentListenRecordsBinding;
+import com.alsalameg.databinding.FragmentListenMastersBinding;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -28,18 +29,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 public class ListenRecordsFragment extends BaseFragment {
 
-    private FragmentListenRecordsBinding fragmentListenRecordsBinding;
-    private Observer<List<Master>> getMasterListObserver;
+    private FragmentListenMastersBinding fragmentListenRecordsBinding;
+    private Observer<List<Master>> getMasterListObserver, getListenerMasterListObserver;
     private MastersAdapter mastersAdapter;
     private List<Master> masterList;
     private ListenRecordsViewModel listenRecordsViewModel;
-    private boolean isRecorderListener;
+    private boolean isRecorder;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
-        fragmentListenRecordsBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_listen_records, container, false);
+        fragmentListenRecordsBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_listen_masters, container, false);
         return fragmentListenRecordsBinding.getRoot();
     }
 
@@ -47,30 +48,31 @@ public class ListenRecordsFragment extends BaseFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        isRecorderListener = MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded");
+        isRecorder = MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded");
 
         initUI();
         setListeners();
         initRecyclerView();
         initObservers();
         requestMasters();
-//        Bundle bundle = getArguments();
-//        fragmentListenRecordsBinding.recordItem.itemRecordEmployeeNameTxt.setText(getResources().getString(R.string.employee_name) +
-//                " محمد عصفور ");
-//
-//        fragmentListenRecordsBinding.recordItem.itemRecordLocationTxt.setText(getResources().getString(R.string.location) +
-//                " " + bundle.getString("address"));
-//
-//        fragmentListenRecordsBinding.recordItem.itemRecordPlayer.voicePlayerView.setAudio(bundle.getString("path"));
-
     }
 
 
 
     private void initUI(){
 
-        if (!isRecorderListener)
-            fragmentListenRecordsBinding.standardToolbarTitleTxt.setText(getResources().getString(R.string.listen_records));
+        if (!isRecorder){
+
+            if (getArguments().getBoolean("lis_rec_car")){
+
+                fragmentListenRecordsBinding.standardToolbarTitleTxt.setText(getResources().getString(R.string.user_records));
+                fragmentListenRecordsBinding.standardToolbarLogoutBtn.setImageResource(R.drawable.ic_baseline_arrow_back_white_24);
+            }
+
+            else
+                fragmentListenRecordsBinding.standardToolbarTitleTxt.setText(getResources().getString(R.string.listen_records));
+        }
+
         else
             fragmentListenRecordsBinding.standardToolbarTitleTxt.setText(getResources().getString(R.string.user_records));
     }
@@ -82,30 +84,34 @@ public class ListenRecordsFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
 
-                showInfoDialogWithTwoButtons(getResources().getString(R.string.logout), getResources().getString(R.string.sure_logout),
-                        getResources().getString(R.string.yes), getResources().getString(R.string.no), new Closure() {
-                            @Override
-                            public void exec() {
+                if (!isRecorder && getArguments().getBoolean("lis_rec_car"))
+                    ((MainActivity)getActivity()).navController.popBackStack();
 
-                                if (isRecorderListener)
-                                    ((MainActivity)getActivity()).navController.navigate(R.id.action_fragment_main_records_to_fragment_login);
-                                else
-                                    ((MainActivity)getActivity()).navController.navigate(R.id.action_fragment_listen_to_fragment_login);
+                    else
+                        showInfoDialogWithTwoButtons(getResources().getString(R.string.logout), getResources().getString(R.string.sure_logout),
+                                getResources().getString(R.string.yes), getResources().getString(R.string.no), new Closure() {
+                                    @Override
+                                    public void exec() {
 
-                                MyApplication.getTinyDB().putString(Constants.KEY_USERID, "");
-                                MyApplication.getTinyDB().putString(Constants.KEY_USERNAME, "");
-                                MyApplication.getTinyDB().putString(Constants.KEY_USER_PASSWORD, "");
-                                MyApplication.getTinyDB().putString(Constants.KEY_USER_TYPE, "");
+                                        if (isRecorder)
+                                            ((MainActivity)getActivity()).navController.navigate(R.id.action_fragment_main_records_to_fragment_login);
+                                        else
+                                            ((MainActivity)getActivity()).navController.navigate(R.id.action_fragment_listen_to_fragment_login);
 
-                            }
-                        }, new Closure() {
-                            @Override
-                            public void exec() {
+                                        MyApplication.getTinyDB().putString(Constants.KEY_USERID, "");
+                                        MyApplication.getTinyDB().putString(Constants.KEY_USERNAME, "");
+                                        MyApplication.getTinyDB().putString(Constants.KEY_USER_PASSWORD, "");
+                                        MyApplication.getTinyDB().putString(Constants.KEY_USER_TYPE, "");
 
-                                hideInfoDialogWithTwoButton();
-                            }
-                        }, false);
-            }
+                                    }
+                                }, new Closure() {
+                                    @Override
+                                    public void exec() {
+
+                                        hideInfoDialogWithTwoButton();
+                                    }
+                                }, false);
+                    }
         });
 
         fragmentListenRecordsBinding.standardToolbarRefreshBtn.setOnClickListener(new View.OnClickListener() {
@@ -115,11 +121,17 @@ public class ListenRecordsFragment extends BaseFragment {
                 requestMasters();
             }
         });
+
     }
+
+
     private void initRecyclerView(){
 
         masterList = new ArrayList<>();
-        mastersAdapter = new MastersAdapter(masterList , getContext(), this);
+        if (!isRecorder && getArguments().getBoolean("lis_rec_car"))
+            mastersAdapter = new MastersAdapter(masterList , getContext(), this, true);
+        else
+            mastersAdapter = new MastersAdapter(masterList , getContext(), this, false);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         fragmentListenRecordsBinding.fragmentListenRecordsrecycler.recyclerview.setLayoutManager(mLayoutManager);
         fragmentListenRecordsBinding.fragmentListenRecordsrecycler.recyclerview.addItemDecoration(new DividerItemDecoration(getContext(),
@@ -127,6 +139,7 @@ public class ListenRecordsFragment extends BaseFragment {
         mastersAdapter.setHasStableIds(true);
         fragmentListenRecordsBinding.fragmentListenRecordsrecycler.recyclerview.setAdapter(mastersAdapter);
     }
+
 
     private void initObservers(){
 
@@ -140,18 +153,47 @@ public class ListenRecordsFragment extends BaseFragment {
 
                     hideProgress();
 
-                    if (masters.get(0).getId().equals("-1"))
-                        showFailedDialog(getResources().getString(R.string.cannot_load_records), true);
+                    if (masters.isEmpty())
+                        showSnackBar(R.string.no_records);
 
                     else {
 
-                        if (masters.isEmpty())
-                            showSnackBar(R.string.no_records);
+                        if (masters.get(0).getId().equals("-1"))
+                            showFailedDialog(getResources().getString(R.string.no_records), true);
                         else {
                             masterList.clear();
                             masterList.addAll(masters);
                             mastersAdapter.notifyDataSetChanged();
                         }
+                    }
+                }
+            }
+        };
+
+        getListenerMasterListObserver = new Observer<List<Master>>() {
+            @Override
+            public void onChanged(List<Master> masters) {
+
+                if (masters != null) {
+
+                    if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
+
+                        hideProgress();
+
+                        if (masters.isEmpty())
+                            showSnackBar(R.string.no_records);
+
+                        else {
+
+                            if (masters.get(0).getId().equals("-1"))
+                                showFailedDialog(getResources().getString(R.string.no_records), true);
+                            else {
+                                masterList.clear();
+                                masterList.addAll(masters);
+                                mastersAdapter.notifyDataSetChanged();
+                            }
+                        }
+
                     }
                 }
             }
@@ -163,7 +205,20 @@ public class ListenRecordsFragment extends BaseFragment {
 
         showDefaultProgressDialog();
 
-        listenRecordsViewModel.getMasterListMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(
+        if (isRecorder)
+            listenRecordsViewModel.getMasterListMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(
                 getViewLifecycleOwner(), getMasterListObserver);
+
+        else{
+
+            if (getArguments().getBoolean("lis_rec_car"))
+                listenRecordsViewModel.getMasterListenerRecordedCarsMutableLiveData(getArguments().getString("master_id"))
+                        .observe(getViewLifecycleOwner(), getListenerMasterListObserver);
+            else
+                listenRecordsViewModel.getMasterListenerListMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(
+                        getViewLifecycleOwner(), getMasterListObserver);
+        }
+
     }
+
 }

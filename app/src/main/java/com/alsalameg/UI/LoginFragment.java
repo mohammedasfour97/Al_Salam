@@ -85,7 +85,8 @@ public class LoginFragment extends BaseFragment {
 
                         //loginViewModel.userMutableLiveData(usernameText, passwordText).removeObservers(getViewLifecycleOwner());
 
-                        loginViewModel.userMutableLiveData(usernameText, passwordText).observe(getViewLifecycleOwner(), loginObserver);
+                        loginViewModel.userMutableLiveData(usernameText, passwordText, MyApplication.getTinyDB()
+                                .getString(Constants.KEY_UID)).observe(getViewLifecycleOwner(), loginObserver);
                         //((MainActivity)getActivity()).navController.navigate(R.id.action_fragment_login_to_fragment_main_records);
                     }
                 }
@@ -125,8 +126,12 @@ public class LoginFragment extends BaseFragment {
                                     break;
 
                                 case "Listener":
+
+                                    Bundle bundle = new Bundle();
+                                    bundle.putBoolean("lis_rec_car", false);
+
                                     ((MainActivity) getActivity()).navController.navigate
-                                            (R.id.action_fragment_login_to_fragment_listen_records);
+                                            (R.id.action_fragment_login_to_fragment_listen_records, bundle);
                                     break;
                             }
 
@@ -137,6 +142,7 @@ public class LoginFragment extends BaseFragment {
                                     fragmentLoginPasswordEdt.getText().toString());
                             MyApplication.getTinyDB().putString(Constants.KEY_USER_TYPE, user.getType());
 
+                            hideKeyboard();
                         }
 
                         else {

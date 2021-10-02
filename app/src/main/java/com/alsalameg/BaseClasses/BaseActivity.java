@@ -4,32 +4,26 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
-import com.alsalameg.Components.DaggerUtilsComponents;
-import com.alsalameg.MyApplication;
 import com.alsalameg.R;
-import com.alsalameg.Utils;
-import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.google.android.material.snackbar.Snackbar;
 
-import javax.inject.Inject;
-
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.appcompat.app.AppCompatActivity;
 
-public class BaseFragment extends Fragment {
+public class BaseActivity extends AppCompatActivity {
 
     private BaseDialog baseDialog;
-
+    
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-        baseDialog = new BaseDialog(getContext());
-
+        baseDialog = new BaseDialog(this);
     }
 
     public void showInfoDialogWithTwoButtons(String title, String message, String positive_button_message,
@@ -95,7 +89,7 @@ public class BaseFragment extends Fragment {
 
     public void showSnackBar(int message) {
 
-        Snackbar snackbar = Snackbar.make(getActivity().findViewById(android.R.id.content), getResources().getString(message),
+        Snackbar snackbar = Snackbar.make(BaseActivity.this.findViewById(android.R.id.content), getResources().getString(message),
                 Snackbar.LENGTH_LONG);
         snackbar.show();
     }
@@ -120,12 +114,12 @@ public class BaseFragment extends Fragment {
 
 
     public void hideKeyboard() {
-        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(getActivity().INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) BaseActivity.this.getSystemService(BaseActivity.this.INPUT_METHOD_SERVICE);
         //Find the currently focused view, so we can grab the correct window token from it.
-        View view = getActivity().getCurrentFocus();
+        View view = BaseActivity.this.getCurrentFocus();
         //If no view currently has focus, create a new one, just so we can grab a window token from it
         if (view == null) {
-            view = new View(getActivity());
+            view = new View(BaseActivity.this);
         }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 

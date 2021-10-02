@@ -73,7 +73,7 @@ public class MakeRecordsRepository extends BaseRepository {
 
         @Override
         protected List<HashMap<String,String>> doInBackground(Void... voids) {
-            return webService.uploadRecordFile(recordBytes, fileName);
+            return webServices.uploadRecordFile(recordBytes, fileName);
         }
 
         @Override
@@ -100,7 +100,7 @@ public class MakeRecordsRepository extends BaseRepository {
 
         @Override
         protected List<HashMap<String,String>> doInBackground(Void... voids) {
-            return webService.getRegions();
+            return webServices.getRegions();
         }
 
         @Override
@@ -148,7 +148,7 @@ public class MakeRecordsRepository extends BaseRepository {
 
         @Override
         protected List<HashMap<String,String>> doInBackground(Void... voids) {
-            return webService.insertRecordMaster(vehicleNumber ,vehicleType, location,  district, longitude,  latitude,  idUSER,
+            return webServices.insertRecordMaster(vehicleNumber ,vehicleType, location,  district, longitude,  latitude,  idUSER,
                     idRegions, notes, type);
         }
 
@@ -181,7 +181,7 @@ public class MakeRecordsRepository extends BaseRepository {
 
         @Override
         protected List<HashMap<String,String>> doInBackground(Void... voids) {
-            return webService.insertRecordFileToMaster(idRecorded, fileName, fileExtension, fileSize, idUser);
+            return webServices.insertRecordFileToMaster(idRecorded, fileName, fileExtension, fileSize, idUser);
         }
 
         @Override

@@ -46,6 +46,14 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
 
     }
 
+    public RecordsAdapter(List<Record> recordList, Context context, BaseFragment fragment) {
+        this.recordList = recordList;
+        this.context = context;
+        this.fragment = fragment;
+
+        listenRecordsViewModel = ViewModelProviders.of(fragment).get(ListenRecordsViewModel.class);
+    }
+
     public RecordsAdapter(List<Record> recordList,OnDeleteMaster onDeleteMaster, Context context, BaseFragment fragment) {
         this.recordList = recordList;
         this.context = context;
@@ -69,6 +77,13 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
         Record record = recordList.get(position);
 
         holder.itemRecordPlayerBinding.voicePlayerView.setAudio(Constants.ImageURl + record.getFileName());
+
+        /// hide delete if the listener who is listening
+
+        if (!MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded"))
+            holder.itemRecordPlayerBinding.deleteRecord.setVisibility(View.GONE);
+
+
         holder.itemRecordPlayerBinding.shareRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
