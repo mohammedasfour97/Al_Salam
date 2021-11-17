@@ -232,13 +232,7 @@ public class MakeRecordsFragment extends BaseFragment {
         fragmentMakeRecordsBinding.uploadingRecordsProcessList.recyclerview.addItemDecoration(new DividerItemDecoration(getContext(),
                 LinearLayoutManager.VERTICAL));
 
-        uploadingRecordsProgressAdapter = new UploadingRecordsProgressAdapter(uploadingRecordList, new OnFinish() {
-            @Override
-            public void finish(UploadingRecord uploadingRecord) {
-
-                addUploadedRecordToMaster(uploadingRecord);
-            }
-        }, getContext(), MakeRecordsFragment.this);
+        uploadingRecordsProgressAdapter = new UploadingRecordsProgressAdapter(uploadingRecordList, getContext(), MakeRecordsFragment.this);
 
         uploadingRecordsProgressAdapter.setHasStableIds(true);
         fragmentMakeRecordsBinding.uploadingRecordsProcessList.recyclerview.setAdapter(uploadingRecordsProgressAdapter);
@@ -579,22 +573,9 @@ public class MakeRecordsFragment extends BaseFragment {
          */
 
         Toast.makeText(getContext(), getResources().getString(R.string.cut_upload_record_warn_msg), Toast.LENGTH_LONG).show();
-        uploadingRecordList.add(new UploadingRecord(recordFilePath, recordFileName));
+        uploadingRecordList.add(new UploadingRecord(recordFilePath, recordFileName, masterId));
         uploadingRecordsProgressAdapter.notifyDataSetChanged();
 
-    }
-
-
-    private void addUploadedRecordToMaster(UploadingRecord uploadingRecord){
-
-        hideProgress();
-        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.add_rec_to_master_loading_msg)
-                , false);
-
-        makeRecordsViewModel.insertRecordToMasterLiveDatag(masterId, uploadingRecord.getRecordName(), "3gp",
-                String.valueOf(Utils.getImageSizeFromUriInMegaByte(Uri.fromFile(new File(uploadingRecord.getRecordFilePath()))
-                        , getContext())), MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(),
-                uploadRecordToMasterObserver);
     }
 
 
@@ -701,7 +682,7 @@ public class MakeRecordsFragment extends BaseFragment {
             }
         };
 
-        uploadRecordToMasterObserver = new Observer<String>() {
+        /*uploadRecordToMasterObserver = new Observer<String>() {
             @Override
             public void onChanged(String s) {
 
@@ -743,6 +724,8 @@ public class MakeRecordsFragment extends BaseFragment {
                 }
             }
         };
+
+         */
     }
 
 

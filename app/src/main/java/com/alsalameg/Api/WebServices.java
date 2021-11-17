@@ -60,7 +60,7 @@ public class WebServices {
 
 
     public ArrayList<HashMap<String, String>> uploadRecordFile(byte[] fileBytes , String fileNmae, String id_user) {
-        MasterSlayer MS = new MasterSlayer("UploadFile");
+        MasterSlayer MS = new MasterSlayer("UploadFile", 0);
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
         send_params.add("fle");

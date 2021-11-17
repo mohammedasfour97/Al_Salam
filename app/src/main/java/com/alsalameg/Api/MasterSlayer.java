@@ -28,7 +28,9 @@ public class MasterSlayer {
     private String NoImg = "no-image.jpg";
 
 
-    public String FunctionName = "";
+    private String FunctionName;
+
+    private int runTimeOut;
 
     //send param
     private ArrayList<String> ParamSendName = new ArrayList<String>();
@@ -40,9 +42,13 @@ public class MasterSlayer {
 
     public MasterSlayer(String functionName) {
         FunctionName = functionName;
+        runTimeOut = 10000;
     }
 
-
+    public MasterSlayer(String functionName, int runTimeOut) {
+        FunctionName = functionName;
+        this.runTimeOut = runTimeOut;
+    }
 
     public void addsendparam(ArrayList<String> param, ArrayList<String> value) {
         if (param.size() != value.size()) {
@@ -71,13 +77,17 @@ public class MasterSlayer {
         }
 //		request.addProperty(getPI("UserName",UserName, String.class));
         /** end send*/
-        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(
-                SoapEnvelope.VER11);
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         envelope.dotNet = true;
         // Set output SOAP object
         envelope.setOutputSoapObject(request);
         // Create HTTP call object
-        HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
+        HttpTransportSE androidHttpTransport;
+
+        if (runTimeOut == 0)
+            androidHttpTransport = new HttpTransportSE(URL);
+        else
+            androidHttpTransport = new HttpTransportSE(URL, runTimeOut);
 
         ArrayList<HashMap<String, String>> ArrayListHash = null;
         try {

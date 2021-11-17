@@ -2,15 +2,16 @@ package com.alsalameg.Models;
 
 public class UploadingRecord {
 
-    private String recordName, recordFilePath;
+    private String recordName, recordFilePath, masterId;
     private Boolean isUploaded, isUploading;
 
     public UploadingRecord() {
     }
 
-    public UploadingRecord(String recordFilePath, String recordName) {
+    public UploadingRecord(String recordFilePath, String recordName, String masterId) {
         this.recordName = recordName;
         this.recordFilePath = recordFilePath;
+        this.masterId = masterId;
         isUploaded = false;
         isUploading = false;
     }
@@ -45,5 +46,13 @@ public class UploadingRecord {
 
     public void setUploading(Boolean uploading) {
         isUploading = uploading;
+    }
+
+    public String getMasterId() {
+        return masterId;
+    }
+
+    public void setMasterId(String masterId) {
+        this.masterId = masterId;
     }
 }

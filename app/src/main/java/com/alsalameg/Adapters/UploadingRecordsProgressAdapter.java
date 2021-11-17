@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.alsalameg.Api.WebServices;
 import com.alsalameg.BaseClasses.BaseFragment;
@@ -15,6 +16,7 @@ import com.alsalameg.Models.Record;
 import com.alsalameg.Models.UploadingRecord;
 import com.alsalameg.MyApplication;
 import com.alsalameg.R;
+import com.alsalameg.Utils;
 import com.alsalameg.ViewModels.MakeRecordsViewModel;
 import com.alsalameg.databinding.ItemRecordPlayerBinding;
 import com.alsalameg.databinding.ItemUploadingRecordProcessBinding;
@@ -29,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
@@ -39,7 +42,6 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
     private Context context;
     private BaseFragment fragment;
     private MakeRecordsViewModel makeRecordsViewModel;
-    private OnFinish onFinish;
 
     public class UploadingRecordsProgressViewHolder extends RecyclerView.ViewHolder {
 
@@ -59,7 +61,7 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
                 try {
                     InputStream iStream = fragment.getActivity().getContentResolver()
                             .openInputStream(Uri.fromFile(new File(recordFilePath)));
-                    byte[] voiceBytes = getBytes(iStream);
+                    byte[] voiceBytes = Utils.getBytes(iStream);
 
 
                     if (fragment.hasInternetConnection(context)) {
@@ -90,17 +92,6 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
 
         }
 
-        private byte[] getBytes(InputStream inputStream) throws IOException {
-            ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-            int bufferSize = 1024;
-            byte[] buffer = new byte[bufferSize];
-
-            int len = 0;
-            while ((len = inputStream.read(buffer)) != -1) {
-                byteBuffer.write(buffer, 0, len);
-            }
-            return byteBuffer.toByteArray();
-        }
 
 
         private class UploadAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
@@ -133,16 +124,8 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
                     if (uploadedResultMap.get("result").equals("DONE")){
 
 
-                        onFinish.finish(uploadingRecord);
+                        addUploadedRecordToMaster(uploadingRecord);
 
-                        UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.progressCircular.setVisibility(
-                                View.GONE);
-                        UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText.setText(
-                                fragment.getResources().getString(R.string.succ_upload_record));
-                        UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.reloadRecordIcon.setImageDrawable(
-                                fragment.getResources().getDrawable
-                                        (R.drawable.ic_baseline_close_prim_24));
-                        uploadingRecord.setUploaded(true);
 
                     }
 
@@ -175,14 +158,99 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
 
         }
 
+
+        private void addUploadedRecordToMaster(UploadingRecord uploadingRecord){
+
+            makeRecordsViewModel.insertRecordToMasterLiveDatag(uploadingRecord.getMasterId(), uploadingRecord.getRecordName(),
+                    "3gp", String.valueOf(Utils.getImageSizeFromUriInMegaByte(Uri.fromFile(new File
+                            (uploadingRecord.getRecordFilePath())), context)), MyApplication.getTinyDB().getString
+                            (Constants.KEY_USERID)).observe(fragment.getViewLifecycleOwner(), uploadRecordToMasterObserver(
+                                    uploadingRecord));
+        }
+
+
+        private Observer<String> uploadRecordToMasterObserver(UploadingRecord uploadingRecord){
+
+            return new Observer<String>() {
+                @Override
+                public void onChanged(String s) {
+
+                    if (s!=null){
+
+                        if (fragment.getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+
+                            boolean succUploaded;
+                            String failedMsg = "";
+
+                            switch (s){
+
+                                case "error" :
+
+                                    succUploaded = false;
+
+                                    failedMsg = context.getResources().getString(R.string.add_rec_to_master_fail_msg);
+
+                                    break;
+
+                                case "-1" :
+
+                                    succUploaded = false;
+
+                                    failedMsg = context.getResources().getString(R.string.added_record_before);
+
+                                    break;
+
+                                case "0":
+
+                                    succUploaded = false;
+
+                                    failedMsg = context.getResources().getString(R.string.add_rec_to_master_fail_msg);
+
+                                    break;
+
+                                default:
+
+                                    succUploaded = true;
+
+                            }
+
+                            if (succUploaded){
+
+                                Toast.makeText(context, context.getResources().getString(R.string.add_rec_to_master_succ_msg)
+                                        , Toast.LENGTH_SHORT).show();
+
+                                UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.progressCircular
+                                        .setVisibility(View.GONE);
+                                UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText.setText(
+                                        fragment.getResources().getString(R.string.succ_upload_record));
+                                UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.reloadRecordIcon
+                                        .setImageDrawable(fragment.getResources().getDrawable(R.drawable.ic_baseline_close_prim_24));
+                                uploadingRecord.setUploaded(true);
+                            }
+
+                            else {
+
+                                Toast.makeText(context, failedMsg, Toast.LENGTH_SHORT).show();
+
+                                UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.progressCircular
+                                        .setVisibility(View.GONE);
+                                UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText.setText(
+                                        uploadingRecord.getRecordName());
+                            }
+                        }
+
+                    }
+                }
+            };
+        }
+
     }
 
-    public UploadingRecordsProgressAdapter(List<UploadingRecord> uploadingRecordList, OnFinish onFinish ,Context context,
+    public UploadingRecordsProgressAdapter(List<UploadingRecord> uploadingRecordList ,Context context,
                                            BaseFragment fragment) {
         this.uploadingRecordList = uploadingRecordList;
         this.context = context;
         this.fragment = fragment;
-        this.onFinish = onFinish;
 
         makeRecordsViewModel = ViewModelProviders.of(fragment).get(MakeRecordsViewModel.class);
     }
