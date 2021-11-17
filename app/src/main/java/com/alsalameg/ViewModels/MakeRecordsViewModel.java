@@ -1,6 +1,7 @@
 package com.alsalameg.ViewModels;
 
 import com.alsalameg.Models.IDName;
+import com.alsalameg.Models.Master;
 import com.alsalameg.Repositories.MakeRecordsRepository;
 
 import java.util.List;
@@ -17,13 +18,13 @@ public class MakeRecordsViewModel extends ViewModel {
         makeRecordsRepository = new MakeRecordsRepository();
     }
 
-    public MutableLiveData<String> getUploadRecordMutableLiveData(byte[] recordBytes, String fileName){
+    public MutableLiveData<String> getUploadRecordMutableLiveData(byte[] recordBytes, String fileName, String userId){
 
-        return makeRecordsRepository.getMutableLiveData(recordBytes, fileName);
+        return makeRecordsRepository.getMutableLiveData(recordBytes, fileName, userId);
     }
 
-    public MutableLiveData<List<IDName>> getGetRegionsLiveData() {
-        return makeRecordsRepository.getGetRegionsLiveData();
+    public MutableLiveData<List<IDName>> getGetRegionsLiveData(String userId) {
+        return makeRecordsRepository.getGetRegionsLiveData(userId);
     }
 
     public MutableLiveData<String> insertMasterRecordString (String vehicleNumber, String vehicleType, String location, String district, String longitude,
@@ -37,5 +38,10 @@ public class MakeRecordsViewModel extends ViewModel {
                                                                   String fileSize, String idUser){
 
         return makeRecordsRepository.getUploadRecordToMasterLiveData(idRecorded, fileName, fileExtension, fileSize, idUser);
+    }
+
+    public MutableLiveData<List<Master>> getRecorderDailyCarsLiveData(String id){
+
+        return makeRecordsRepository.getGetRecorderDailyCarsMutableLiveData(id);
     }
 }

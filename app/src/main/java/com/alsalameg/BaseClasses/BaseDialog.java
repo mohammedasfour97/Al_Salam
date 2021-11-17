@@ -7,11 +7,13 @@ import android.text.SpannableString;
 import android.text.style.TextAppearanceSpan;
 import android.view.View;
 
+import com.alsalameg.Dialogs.AwesomeProgressDialogWithButton;
 import com.alsalameg.R;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeErrorDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeInfoDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeProgressDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeSuccessDialog;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.AwesomeWarningDialog;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.alsalameg.Dialogs.FlatDialog;
 
@@ -28,6 +30,8 @@ public class BaseDialog {
     private AwesomeProgressDialog awesomeProgressDialog;
     private AwesomeSuccessDialog awesomeSuccessDialog;
     private AwesomeErrorDialog awesomeErrorDialog;
+    private AwesomeWarningDialog awesomeWarningDialog;
+    private AwesomeProgressDialogWithButton awesomeProgressDialogWithButton;
 
     private FlatDialog flatDialog;
 
@@ -77,16 +81,46 @@ public class BaseDialog {
     }
 
 
+    public AwesomeWarningDialog awesomeWarningDialog(String title, String message, String positive_button_message,
+                                                             Closure positive_button_click, boolean cancelable){
+
+        awesomeWarningDialog =  new AwesomeWarningDialog(context)
+                .setTitle(getSpanningString(title, R.style.Bold_Default_TextView_style))
+                .setMessage(getSpanningString(message, R.style.Regular_Default_TextView_style))
+                .setColoredCircle(R.color.dialogWarningBackgroundColor)
+                .setDialogIconAndColor(R.drawable.ic_dialog_warning, R.color.white)
+                .setCancelable(cancelable)
+                .setButtonText(positive_button_message)
+                .setButtonTextColor(R.color.white)
+                .setWarningButtonClick(positive_button_click);
+
+        return awesomeWarningDialog;
+    }
+
+
     public AwesomeProgressDialog awesomeProgressDialog(String title, String message, boolean cancelable){
 
         awesomeProgressDialog =  new AwesomeProgressDialog(context)
                 .setTitle(getSpanningString(title, R.style.Bold_Default_TextView_style))
                 .setMessage(getSpanningString(message, R.style.Regular_Default_TextView_style))
-                .setColoredCircle(R.color.purple_500)
+                .setColoredCircle(R.color.dialogProgressBackgroundColor)
                 .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
                 .setCancelable(cancelable);
 
         return awesomeProgressDialog;
+    }
+
+
+    public AwesomeProgressDialogWithButton awesomeProgressDialogWithButton(String title, String message, String buttonText,
+                                                                           Closure buttonClick){
+
+        awesomeProgressDialogWithButton =  new AwesomeProgressDialogWithButton(context)
+                .setTitle(getSpanningString(title, R.style.Bold_Default_TextView_style))
+                .setMessage(getSpanningString(message, R.style.Regular_Default_TextView_style))
+                .setPositiveButtonClick(buttonClick)
+                .setCancelable(false);
+
+        return awesomeProgressDialogWithButton;
     }
 
 
@@ -96,7 +130,7 @@ public class BaseDialog {
                 awesomeSuccessDialog.setTitle(context.getResources().getString(R.string.succ))
                 .setMessage(getSpanningString(message, R.style.Regular_Default_TextView_style))
                 .setColoredCircle(R.color.dialogSuccessBackgroundColor)
-                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setDialogIconAndColor(R.drawable.ic_success, R.color.white)
                 .setPositiveButtonText(context.getResources().getString(R.string.dialog_ok_button))
                 .setPositiveButtonbackgroundColor(R.color.dialogSuccessBackgroundColor)
                 .setPositiveButtonTextColor(R.color.white)
@@ -161,9 +195,15 @@ public class BaseDialog {
         if (awesomeInfoDialog!=null) awesomeInfoDialog.hide();
     }
 
+    public void hideWarningDialog(){
+
+        if (awesomeWarningDialog!=null) awesomeWarningDialog.hide();
+    }
+
     public void hideProgress(){
 
         if (awesomeProgressDialog!=null) awesomeProgressDialog.hide();
+        else if (awesomeProgressDialogWithButton != null) awesomeProgressDialogWithButton.hide();
     }
 
     public void hideFlatDialogWithEditTextTwoButtons(){

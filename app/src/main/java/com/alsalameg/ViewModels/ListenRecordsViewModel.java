@@ -28,9 +28,9 @@ public class ListenRecordsViewModel extends ViewModel {
         return listenRecordsRepository.getMasterListenerListMutableLiveData(id);
     }
 
-    public MutableLiveData<List<Master>> getMasterListenerRecordedCarsMutableLiveData(String id) {
+    public MutableLiveData<List<Master>> getMasterListenerRecordedCarsMutableLiveData(String id, String id_user) {
 
-        return listenRecordsRepository.getMasterListenerRecordedCarsMutableLiveData(id);
+        return listenRecordsRepository.getMasterListenerRecordedCarsMutableLiveData(id, id_user);
     }
 
     public MutableLiveData<String> getDeleteMasterWithRecordsMutableLiveData(String masterId, String idUser) {
@@ -48,9 +48,9 @@ public class ListenRecordsViewModel extends ViewModel {
         return listenRecordsRepository.getDeleteRecordMutableLiveData(recordId, idUser);
     }
 
-    public MutableLiveData<List<Record>> getMasterRecordListMutableLiveData(String id) {
+    public MutableLiveData<List<Record>> getMasterRecordListMutableLiveData(String id, String id_user) {
 
-        return listenRecordsRepository.getMasterRecordsMutableLiveData(id);
+        return listenRecordsRepository.getMasterRecordsMutableLiveData(id, id_user);
     }
 
     public MutableLiveData<String> getAddRecordedCarMutableLiveData(String vehicleNumber, String vehicleType, String location, String district,

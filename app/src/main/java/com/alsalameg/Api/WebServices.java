@@ -59,18 +59,20 @@ public class WebServices {
     }
 
 
-    public ArrayList<HashMap<String, String>> uploadRecordFile(byte[] fileBytes , String fileNmae) {
+    public ArrayList<HashMap<String, String>> uploadRecordFile(byte[] fileBytes , String fileNmae, String id_user) {
         MasterSlayer MS = new MasterSlayer("UploadFile");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
         send_params.add("fle");
         send_params.add("FileName");
+        send_params.add("ID_USER");
 
         ArrayList<String> send_params_value = new ArrayList<String>();
         String bytes = "";
         for (byte b : fileBytes) bytes+=b;
         send_params_value.add(Base64.encodeToString(fileBytes, Base64.DEFAULT));
         send_params_value.add(fileNmae);
+        send_params_value.add(id_user);
 
         MS.addsendparam(send_params, send_params_value);
 
@@ -86,13 +88,14 @@ public class WebServices {
     }
 
 
-    public ArrayList<HashMap<String, String>> getRegions() {
+    public ArrayList<HashMap<String, String>> getRegions(String id) {
         MasterSlayer MS = new MasterSlayer("GetRegions");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
-
+        send_params.add("ID");
 
         ArrayList<String> send_params_value = new ArrayList<String>();
+        send_params_value.add(id);
 
 
         MS.addsendparam(send_params, send_params_value);
@@ -229,17 +232,19 @@ public class WebServices {
     }
 
 
-    public ArrayList<HashMap<String, String>> getMasterRecords(String id) {
+    public ArrayList<HashMap<String, String>> getMasterRecords(String id, String user_id) {
 
         MasterSlayer MS = new MasterSlayer("GETRecorded_Files");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
         send_params.add("ID");
+        send_params.add("ID_USER");
 
         ArrayList<String> send_params_value = new ArrayList<String>();
 
         send_params_value.add(id);
+        send_params_value.add(user_id);
 
         MS.addsendparam(send_params, send_params_value);
 
@@ -468,17 +473,19 @@ public class WebServices {
     }
 
 
-    public ArrayList<HashMap<String, String>> getListenerRecordedCars(String id) {
+    public ArrayList<HashMap<String, String>> getListenerRecordedCars(String id, String id_user) {
 
         MasterSlayer MS = new MasterSlayer("Getlistenerrecordings");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
         send_params.add("ID_Recorded");
+        send_params.add("ID_Listen");
 
         ArrayList<String> send_params_value = new ArrayList<String>();
 
         send_params_value.add(id);
+        send_params_value.add(id_user);
 
         MS.addsendparam(send_params, send_params_value);
 
@@ -529,6 +536,48 @@ public class WebServices {
         /**2 - request */
         ArrayList<String> request_params = new ArrayList<String>();
         request_params.add("ID");
+        MS.setRequest_paramName(request_params);
+        /** 3 - any image */
+        // MS.setIsImage1("ProductPicture");
+        // MS.setIsImage2("Voice");
+
+        return MS.Call();
+    }
+
+
+    public ArrayList<HashMap<String, String>> getRecoderDailyCars(String id) {
+
+        MasterSlayer MS = new MasterSlayer("GetRecordedDay");
+        /**1 - any parameter send */
+        ArrayList<String> send_params = new ArrayList<String>();
+
+        send_params.add("ID");
+
+        ArrayList<String> send_params_value = new ArrayList<String>();
+
+        send_params_value.add(id);
+
+        MS.addsendparam(send_params, send_params_value);
+
+        /**2 - request */
+        ArrayList<String> request_params = new ArrayList<String>();
+        request_params.add("ID");
+        request_params.add("Vehicle_Number");
+        request_params.add("Vehicle_Type");
+        request_params.add("Location");
+        request_params.add("District");
+        request_params.add("Longitude");
+        request_params.add("Latitude");
+        request_params.add("Status");
+        request_params.add("Sorting");
+        request_params.add("Notes");
+        request_params.add("Regions");
+        request_params.add("ID_USER");
+        request_params.add("DateEdite");
+        request_params.add("DateCreate");
+        request_params.add("Type");
+        request_params.add("Transfer");
+
         MS.setRequest_paramName(request_params);
         /** 3 - any image */
         // MS.setIsImage1("ProductPicture");

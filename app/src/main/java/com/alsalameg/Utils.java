@@ -267,6 +267,11 @@ public class Utils {
     }
 
 
+    public static void setEnableOrNot(List<View> viewList, Boolean enable){
+
+        for (View view : viewList)
+            view.setEnabled(enable);
+    }
 
     public static void animateViewVisibility(final View view, final int visibility)
     {

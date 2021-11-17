@@ -1,6 +1,8 @@
 package com.alsalameg.BaseClasses;
 
 import android.content.Context;
+import android.content.Intent;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -48,9 +50,19 @@ public class BaseFragment extends Fragment {
                 positive_button_click, cancelable).show();
     }
 
+    public void showWarningDialog(String title, String message, String buttonText, Closure buttonClick, Boolean cancable){
+
+        baseDialog.awesomeWarningDialog(title, message, buttonText, buttonClick,cancable).show();
+    }
+
     public void showProgressDialog(String title, String message, boolean cancelable) {
 
         baseDialog.awesomeProgressDialog(getResources().getString(R.string.loading), message, cancelable).show();
+    }
+
+    public void showProgressDialogWithButton(String title, String message, String button_text, Closure button_click) {
+
+        baseDialog.awesomeProgressDialogWithButton(getResources().getString(R.string.loading), message, button_text, button_click).show();
     }
 
     public void showDefaultProgressDialog() {
@@ -81,6 +93,11 @@ public class BaseFragment extends Fragment {
     public void hideInfoDialogWithTwoButton() {
 
         baseDialog.hideInfoDialogWithTwoButton();
+    }
+
+    public void hideWarningDialog(){
+
+        baseDialog.hideWarningDialog();
     }
 
     public void hideProgress() {
@@ -116,6 +133,13 @@ public class BaseFragment extends Fragment {
             showSnackBar(R.string.check_int_con);
             return false;
         }
+    }
+
+
+    public boolean isGPSEnabled(Context context){
+
+        return ((LocationManager) context.getSystemService(Context.LOCATION_SERVICE)).isProviderEnabled
+                (LocationManager.GPS_PROVIDER);
     }
 
 

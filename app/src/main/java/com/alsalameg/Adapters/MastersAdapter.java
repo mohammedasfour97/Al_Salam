@@ -87,7 +87,7 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
             protected List<HashMap<String,String>> doInBackground(String... args) {
 
-                return new WebServices().getMasterRecords(id);
+                return new WebServices().getMasterRecords(id, MyApplication.getTinyDB().getString(Constants.KEY_USERID));
             }
             /**
              * After completing background task Dismiss the progress dialog

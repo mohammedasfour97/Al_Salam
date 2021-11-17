@@ -1,6 +1,7 @@
 package com.alsalameg.UI;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -10,15 +11,25 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import com.alsalameg.Adapters.MastersAdapter;
+import com.alsalameg.Adapters.OnFinish;
+import com.alsalameg.Adapters.UploadingRecordsProgressAdapter;
 import com.alsalameg.AudioRecorder;
 import com.alsalameg.BaseClasses.BaseFragment;
 import com.alsalameg.Constants;
+import com.alsalameg.Models.Car;
+import com.alsalameg.Models.IDName;
+import com.alsalameg.Models.Master;
+import com.alsalameg.Models.UploadingRecord;
 import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.UI.FragmentDialogs.AddCarDetailsFragment;
@@ -49,6 +60,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -60,8 +72,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -83,10 +98,24 @@ public class MakeRecordsFragment extends BaseFragment {
     private LatLng MylatLng, selectedLatLan;
     private String selectedAdress, selectedSubAdminArea, selectedSubLocality;
     private Marker selectedMark;
+    private List<Marker> markerList;
+    private Boolean isEnablingGps;
+
+    //vars for spinner
+    private ArrayAdapter<IDName> spinnerArrayAdapter;
+    private List<IDName> regionList;
+    private String selectedRegionID;
+
+
+    // vars for recyclerview///
+    private UploadingRecordsProgressAdapter uploadingRecordsProgressAdapter;
+    private List<UploadingRecord> uploadingRecordList;
 
     //VariablesForServices
     private MakeRecordsViewModel makeRecordsViewModel;
-    private Observer<String> uploadRecordObserver, uploadRecordToMasterObserver;
+    private Observer<String> uploadRecordObserver, uploadRecordToMasterObserver, addMasterObserver;
+    private Observer<List<IDName>> regionsObserver;
+    private String masterId;
 
     @Nullable
     @Override
@@ -103,6 +132,8 @@ public class MakeRecordsFragment extends BaseFragment {
         makeRecordsViewModel = ViewModelProviders.of(this).get(MakeRecordsViewModel.class);
 
         setListeners();
+        configureRegionSpinner();
+        initRecyclerView();
         configureTheRecorder();
         fetchCurrentLocation();
         initObservers();
@@ -151,13 +182,66 @@ public class MakeRecordsFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
 
-                if (MyApplication.getTinyDB().getString("master_id") != null &&
-                !MyApplication.getTinyDB().getString("master_id").equals(""))
+//                if (MyApplication.getTinyDB().getString("master_id") != null &&
+//                !MyApplication.getTinyDB().getString("master_id").equals(""))
+//                    fragmentMakeRecordsBinding.fragmentMakeRecordsRecorderLayout.setVisibility(View.VISIBLE);
+//                else
+//                    showFailedDialog(getResources().getString(R.string.add_master_fir), true);
+
+                if (selectedMark!=null)
                     fragmentMakeRecordsBinding.fragmentMakeRecordsRecorderLayout.setVisibility(View.VISIBLE);
                 else
-                    showFailedDialog(getResources().getString(R.string.add_master_fir), true);
+                    Toast.makeText(getContext(), getResources().getString(R.string.choose_point_firstly),
+                            Toast.LENGTH_SHORT).show();
+
             }
         });
+
+        fragmentMakeRecordsBinding.regionsSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                selectedRegionID = ((IDName)parent.getSelectedItem()).getId();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+
+    private void configureRegionSpinner(){
+
+        regionList = new ArrayList<>();
+        regionList.add(new IDName("0", getResources().getString(R.string.choose_region)));
+
+        spinnerArrayAdapter = new ArrayAdapter<IDName>(getContext(), android.R.layout.simple_spinner_item, regionList);
+        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down vieww
+        fragmentMakeRecordsBinding.regionsSpinner.setAdapter(spinnerArrayAdapter);
+    }
+
+
+    private void initRecyclerView(){
+
+        uploadingRecordList = new ArrayList<>();
+
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext());
+        fragmentMakeRecordsBinding.uploadingRecordsProcessList.recyclerview.setLayoutManager(mLayoutManager);
+        fragmentMakeRecordsBinding.uploadingRecordsProcessList.recyclerview.addItemDecoration(new DividerItemDecoration(getContext(),
+                LinearLayoutManager.VERTICAL));
+
+        uploadingRecordsProgressAdapter = new UploadingRecordsProgressAdapter(uploadingRecordList, new OnFinish() {
+            @Override
+            public void finish(UploadingRecord uploadingRecord) {
+
+                addUploadedRecordToMaster(uploadingRecord);
+            }
+        }, getContext(), MakeRecordsFragment.this);
+
+        uploadingRecordsProgressAdapter.setHasStableIds(true);
+        fragmentMakeRecordsBinding.uploadingRecordsProcessList.recyclerview.setAdapter(uploadingRecordsProgressAdapter);
     }
 
 
@@ -200,6 +284,11 @@ public class MakeRecordsFragment extends BaseFragment {
                 @Override
                 public void onStart() {
 
+                    if (selectedRegionID.equals("0")){
+
+                        Toast.makeText(getContext(), getResources().getString(R.string.choose_region_message), Toast.LENGTH_SHORT).show();
+                    }
+
                     setRecordPath();
 
                     if (checkSelectedPoint()){
@@ -234,6 +323,13 @@ public class MakeRecordsFragment extends BaseFragment {
 
                         showFailedDialog(getResources().getString(R.string.not_recorder_no_selected_point), true);
                     }
+
+                    else if (selectedRegionID.equals("0")){
+
+                        recordFile.delete();
+                        Toast.makeText(getContext(), getResources().getString(R.string.choose_region_message), Toast.LENGTH_SHORT).show();
+                    }
+
                     else{
 
                         showInfoDialogWithTwoButtons(getResources().getString(R.string.sure_make_record_title),
@@ -244,7 +340,7 @@ public class MakeRecordsFragment extends BaseFragment {
                                     @Override
                                     public void exec() {
 
-                                        uploadRecord();
+                                        insertMasterRecord();
 
 //                                        Bundle bundle = new Bundle();
 //                                        bundle.putString("address", selectedAdress);
@@ -299,6 +395,10 @@ public class MakeRecordsFragment extends BaseFragment {
                 googleMap.moveCamera(CameraUpdateFactory.newLatLng(MylatLng));
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MylatLng, 20));
 
+                ///// Get daily recorded cars ///////
+
+                getRecorderDailyCars(googleMap);
+
 
                 googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                     @Override
@@ -313,41 +413,34 @@ public class MakeRecordsFragment extends BaseFragment {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
 
-                        showInfoDialogWithTwoButtons(getResources().getString(R.string.record_for_sel_pos),
-                                getResources().getString(R.string.record_for_sel_pos_msg), getResources().getString(R.string.yes),
-                                getResources().getString(R.string.no), new Closure() {
-                                    @Override
-                                    public void exec() {
+                        ///// Check if this is a point have been just made to record or is a daily previous car
 
-                                        marker.setTitle(getResources().getString(R.string.sel_mark));
-                                        marker.showInfoWindow();
-                                        if (selectedMark!= null) selectedMark.setIcon(BitmapDescriptorFactory.defaultMarker());
-                                        selectedMark = marker;
-                                        marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+                        if (marker.getTag() ==null){
 
-                                        selectedLatLan = selectedMark.getPosition();
-                                        selectedAdress = getAdressDetailsFromLatLong(selectedLatLan).getAddressLine(0);
-                                        selectedSubAdminArea = getAdressDetailsFromLatLong(selectedLatLan).getSubAdminArea();
-                                        selectedSubLocality = getAdressDetailsFromLatLong(selectedLatLan).getSubLocality();
+                            marker.setTitle(getResources().getString(R.string.sel_mark));
+                            marker.showInfoWindow();
+                            if (selectedMark!= null) selectedMark.setIcon(BitmapDescriptorFactory.defaultMarker());
+                            selectedMark = marker;
+                            marker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 
-                                        fragmentMakeRecordsBinding.fragmentMakeRecordsRecorderLayout.setVisibility(View.GONE);
+                            selectedLatLan = selectedMark.getPosition();
+                            selectedAdress = getAdressDetailsFromLatLong(selectedLatLan).getAddressLine(0);
+                            selectedSubAdminArea = getAdressDetailsFromLatLong(selectedLatLan).getSubAdminArea();
+                            selectedSubLocality = getAdressDetailsFromLatLong(selectedLatLan).getSubLocality();
 
-                                        //Show dialog to choose write or send record for the selected point
-                                        FragmentManager fm = getActivity().getSupportFragmentManager();
-                                        AddCarDetailsFragment addCarDetailsFragment = new AddCarDetailsFragment(selectedAdress,
-                                                selectedSubAdminArea, selectedSubLocality, String.valueOf(currentLocation.getLongitude()),
-                                                String.valueOf(currentLocation.getLatitude()));
-                                        addCarDetailsFragment.show(fm, "fragment_new_activity");
+                            masterId = null;
 
 
-                                    }
-                                }, new Closure() {
-                                    @Override
-                                    public void exec() {
+                            fragmentMakeRecordsBinding.fragmentMakeRecordsRecorderLayout.setVisibility(View.GONE);
 
-                                        hideInfoDialogWithTwoButton();
-                                    }
-                                }, false);
+                            //Show dialog to choose write or send record for the selected point
+//                            FragmentManager fm = getActivity().getSupportFragmentManager();
+//                            AddCarDetailsFragment addCarDetailsFragment = new AddCarDetailsFragment(selectedAdress,
+//                                    selectedSubAdminArea, selectedSubLocality, String.valueOf(currentLocation.getLongitude()),
+//                                    String.valueOf(currentLocation.getLatitude()));
+//                            addCarDetailsFragment.show(fm, "fragment_new_activity");
+                        }
+
                         return false;
                     }
                 });
@@ -366,54 +459,243 @@ public class MakeRecordsFragment extends BaseFragment {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
+        isEnablingGps = false;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkLocationPermission()) {return;}
-        fusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
-                new CancellationToken() {
-                    @Override
-                    public boolean isCancellationRequested() {
-                        return false;
-                    }
 
-                    @Override
-                    public CancellationToken onCanceledRequested(OnTokenCanceledListener onTokenCanceledListener) {
-                        return null;
-                    }
-                }).addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location != null) {
-                    currentLocation = location;
+        if (!isGPSEnabled(getContext())){
 
-                    setGoogleMap();
+            showWarningDialog(getResources().getString(R.string.enable_gps), getResources().getString(R.string.enable_gps_msg),
+                    getResources().getString(R.string.enable), new Closure() {
+                        @Override
+                        public void exec() {
+
+                            getActivity().startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+
+                            isEnablingGps = true;
+                        }
+                    }, true);
+        }
+
+        else {
+
+            showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.detecting_your_loc_msg),
+                    false);
+
+            fusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
+                    new CancellationToken() {
+                        @Override
+                        public boolean isCancellationRequested() {
+                            return false;
+                        }
+
+                        @Override
+                        public CancellationToken onCanceledRequested(OnTokenCanceledListener onTokenCanceledListener) {
+                            return null;
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null) {
+
+                        hideProgress();
+
+                        currentLocation = location;
+
+                        setGoogleMap();
+                    }
                 }
+            });
+        }
+
+    }
+
+
+    private void getRecorderDailyCars(GoogleMap googleMap) {
+
+        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg), false);
+
+        makeRecordsViewModel.getRecorderDailyCarsLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID))
+                .observe(getViewLifecycleOwner(), dailyCarsObserver(googleMap));
+    }
+
+
+    private void fillRegionsSpinner(){
+
+        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg), false);
+
+        makeRecordsViewModel.getGetRegionsLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID))
+                .observe(getViewLifecycleOwner(), regionsObserver);
+    }
+
+
+    private void insertMasterRecord(){
+
+//        if (selectedRegionID.equals("0")){
+//
+//            Toast.makeText(getContext(), getResources().getString(R.string.choose_region_message), Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+        if (masterId!=null){
+
+            uploadRecord();
+            return;
+        }
+
+        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.add_master_loading_msg),
+                false);
+
+        makeRecordsViewModel.insertMasterRecordString(Utils.generateUniqueNumber(), "", selectedAdress,
+                Utils.chooseNonNull(selectedSubLocality, selectedSubAdminArea), String.valueOf(selectedLatLan.longitude)
+                , String.valueOf(selectedLatLan.latitude),MyApplication.getTinyDB().getString(Constants.KEY_USERID), selectedRegionID,
+                "", true).observe(getViewLifecycleOwner(), addMasterObserver);
+    }
+
+
+    private void uploadRecord(){
+
+        /*if (hasInternetConnection(getContext())) {
+
+            try {
+                InputStream iStream = getActivity().getContentResolver().openInputStream(Uri.fromFile(new File(recordFilePath)));
+                byte[] voiceBytes = getBytes(iStream);
+
+                showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.uploading_record),
+                        false);
+
+                makeRecordsViewModel.getUploadRecordMutableLiveData(voiceBytes, recordFileName, MyApplication.getTinyDB().getString
+                        (Constants.KEY_USERID)).observe(getViewLifecycleOwner(), uploadRecordObserver);
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                showFailedDialog(getResources().getString(R.string.error_upload_record), true);
+            } catch (IOException e) {
+                e.printStackTrace();
+                showFailedDialog(getResources().getString(R.string.error_upload_record), true);
             }
-        });
+
+        }
+
+         */
+
+        Toast.makeText(getContext(), getResources().getString(R.string.cut_upload_record_warn_msg), Toast.LENGTH_LONG).show();
+        uploadingRecordList.add(new UploadingRecord(recordFilePath, recordFileName));
+        uploadingRecordsProgressAdapter.notifyDataSetChanged();
+
+    }
+
+
+    private void addUploadedRecordToMaster(UploadingRecord uploadingRecord){
+
+        hideProgress();
+        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.add_rec_to_master_loading_msg)
+                , false);
+
+        makeRecordsViewModel.insertRecordToMasterLiveDatag(masterId, uploadingRecord.getRecordName(), "3gp",
+                String.valueOf(Utils.getImageSizeFromUriInMegaByte(Uri.fromFile(new File(uploadingRecord.getRecordFilePath()))
+                        , getContext())), MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(),
+                uploadRecordToMasterObserver);
     }
 
 
     private void initObservers(){
 
-        uploadRecordObserver = new Observer<String>() {
+        regionsObserver = new Observer<List<IDName>>() {
+            @Override
+            public void onChanged(List<IDName> idNames) {
+
+                if (idNames!=null){
+
+                    hideProgress();
+
+                    if (idNames.isEmpty()){
+
+                        Toast.makeText(getContext(), getResources().getString(R.string.err_loading), Toast.LENGTH_SHORT).show();
+                    }
+
+                    else {
+
+                        regionList.addAll(idNames);
+                        spinnerArrayAdapter.notifyDataSetChanged();
+                    }
+
+                }
+            }
+        };
+
+
+        /*uploadRecordObserver = new Observer<String>() {
             @Override
             public void onChanged(String s) {
 
                 if (s!=null) {
 
+                    hideProgress();
+
                     if (s.equals("DONE")){
 
-                        makeRecordsViewModel.insertRecordToMasterLiveDatag(MyApplication.getTinyDB().getString("master_id"),
-                                recordFileName, "3gp", String.valueOf(Utils.getImageSizeFromUriInMegaByte
-                                                (Uri.fromFile(recordFile), getContext())), MyApplication.getTinyDB().
-                                        getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(), uploadRecordToMasterObserver);
+                        //// Add the uploaded record to the master
+
+                        addUploadedRecordToMaster();
 
                     }
 
                     else{
 
-                        hideProgress();
                         showFailedDialog(getResources().getString(R.string.error_upload_record), true);
                     }
 
+
+                }
+            }
+        };
+
+         */
+
+
+        addMasterObserver = new Observer<String>() {
+
+            @Override
+            public void onChanged(String s) {
+
+                if (s != null){
+
+                    hideProgress();
+
+                    switch (s){
+
+                        case "error" :
+                            Toast.makeText(getContext(), getResources().getString(R.string.add_master_fail_msg),
+                                    Toast.LENGTH_SHORT).show();
+                            break;
+
+                        case "-1" :
+                            showInfoDialogWithOneButton(getResources().getString(R.string.add_master_fail_msg),
+                                    getResources().getString(R.string.added_before_msg),getResources().getString
+                                            (R.string.dialog_ok_button), new Closure() {
+                                        @Override
+                                        public void exec() {
+
+                                            hideInfoDialogWithTwoButton();
+                                        }
+                                    }, true);
+
+                            break;
+
+                        case "0":
+                            Toast.makeText(getContext(), getResources().getString(R.string.add_master_fail_msg),
+                                    Toast.LENGTH_SHORT).show();
+
+                            break;
+
+                        default:
+
+                            masterId = s;
+
+                            //// Upload Record /////
+                            uploadRecord();
+
+                    }
 
                 }
             }
@@ -427,32 +709,89 @@ public class MakeRecordsFragment extends BaseFragment {
 
                     hideProgress();
 
-                    switch (s){
+                    if (getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
 
-                        case "error" :
-                            showFailedDialog(getResources().getString(R.string.error_upload_record), true);
-                            break;
+                        switch (s){
 
-                        case "-1" :
-                            showInfoDialogWithOneButton(getResources().getString(R.string.err_insert),
-                                    getResources().getString(R.string.added_record_before),getResources().getString
-                                            (R.string.dialog_ok_button), new Closure() {
-                                        @Override
-                                        public void exec() {
+                            case "error" :
+                                showFailedDialog(getResources().getString(R.string.add_rec_to_master_fail_msg), true);
+                                break;
 
-                                            hideInfoDialogWithTwoButton();
-                                        }
-                                    }, true);
-                            break;
+                            case "-1" :
+                                showInfoDialogWithOneButton(getResources().getString(R.string.add_rec_to_master_fail_msg),
+                                        getResources().getString(R.string.added_record_before),getResources().getString
+                                                (R.string.dialog_ok_button), new Closure() {
+                                            @Override
+                                            public void exec() {
 
-                        case "0":
-                            showFailedDialog(getResources().getString(R.string.error_upload_record), true);
-                            break;
+                                                hideInfoDialogWithTwoButton();
+                                            }
+                                        }, true);
+                                break;
 
-                        default:
-                            showSuccessDialog(getResources().getString(R.string.succ_upload_record), true);
-                            fragmentMakeRecordsBinding.fragmentMakeRecordsRecorderLayout.setVisibility(View.GONE);
+                            case "0":
+                                showFailedDialog(getResources().getString(R.string.add_rec_to_master_fail_msg), true);
+                                break;
 
+                            default:
+                                showSuccessDialog(getResources().getString(R.string.add_rec_to_master_succ_msg), true);
+                                //fragmentMakeRecordsBinding.fragmentMakeRecordsRecorderLayout.setVisibility(View.GONE);
+
+                        }
+                    }
+
+                }
+            }
+        };
+    }
+
+
+    private Observer<List<Master>> dailyCarsObserver(GoogleMap googleMap) {
+
+        return new Observer<List<Master>>() {
+            @Override
+            public void onChanged(List<Master> masters) {
+
+                if (masters != null) {
+
+                    hideProgress();
+
+                    markerList = new ArrayList<>();
+
+                    if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
+
+                        if (masters.isEmpty())
+                            showSnackBar(R.string.no_daily_cars);
+
+                        else {
+
+                            if (!masters.get(0).getId().equals("-1")) {
+
+                                Marker marker;
+
+                                for (Master master : masters) {
+
+                                    marker = googleMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(
+                                            master.getLatitude()), Double.parseDouble(master.getLongitude())))
+                                                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                                            //.title(master.getPlateNumber() + " , " + car.getKind() + " , " + car.getBank())
+                                    );
+
+                                    marker.setTag(master);
+                                    markerList.add(marker);
+                                    //marker.showInfoWindow();
+                                }
+
+                            } else {
+
+                                showFailedDialog(getResources().getString(R.string.fail_load_daily_cars), true);
+                            }
+                        }
+
+
+                        //// Get regions to fill the spinner //////
+
+                        fillRegionsSpinner();
                     }
                 }
             }
@@ -559,7 +898,7 @@ public class MakeRecordsFragment extends BaseFragment {
     }
 
 
-    private byte[] getBytes(InputStream inputStream) throws IOException {
+    /*private byte[] getBytes(InputStream inputStream) throws IOException {
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
         int bufferSize = 1024;
         byte[] buffer = new byte[bufferSize];
@@ -571,31 +910,8 @@ public class MakeRecordsFragment extends BaseFragment {
         return byteBuffer.toByteArray();
     }
 
+     */
 
-    private void uploadRecord(){
-
-        if (hasInternetConnection(getContext())) {
-
-            try {
-                InputStream iStream = getActivity().getContentResolver().openInputStream(Uri.fromFile(new File(recordFilePath)));
-                byte[] voiceBytes = getBytes(iStream);
-
-                showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.uploading_record), false);
-
-                makeRecordsViewModel.getUploadRecordMutableLiveData(voiceBytes, recordFileName).observe(getViewLifecycleOwner(),
-                        uploadRecordObserver);
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                showFailedDialog(getResources().getString(R.string.error_upload_record), true);
-            } catch (IOException e) {
-                e.printStackTrace();
-                showFailedDialog(getResources().getString(R.string.error_upload_record), true);
-            }
-
-        }
-
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -621,9 +937,16 @@ public class MakeRecordsFragment extends BaseFragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        //// When back from opening GPS page ////
+        if (isEnablingGps) fetchCurrentLocation();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
 
-        MyApplication.getTinyDB().putString("master_id", "");
     }
 }

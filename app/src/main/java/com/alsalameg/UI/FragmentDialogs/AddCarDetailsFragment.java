@@ -260,7 +260,8 @@ public class AddCarDetailsFragment extends DialogFragment {
         baseDialog.awesomeProgressDialog(getResources().getString(R.string.loading), getResources().getString
                 (R.string.loading_msg),false).show();
 
-        makeRecordsViewModel.getGetRegionsLiveData().observe(getViewLifecycleOwner(), regionsObserver);
+        makeRecordsViewModel.getGetRegionsLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID))
+                .observe(getViewLifecycleOwner(), regionsObserver);
     }
 
 

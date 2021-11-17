@@ -64,139 +64,38 @@
                 android:padding="20dp"
                 android:layout_margin="@dimen/_10sdp">
 
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/icon"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:src="@drawable/ic_car_red"
-                    android:layout_marginBottom="8dp"
-                    android:layout_gravity="center" />
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/title_txt"
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/add_car"
-                    android:textColor="@color/purple_500"
-                    android:textSize="24sp"
-                    android:fontFamily="@font/cairo_regular"
-                    android:textStyle="bold"
-                    android:gravity="center"
-                    android:layout_marginBottom="8dp"/>
+                    android:gravity="center_vertical">
 
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/latLng_txt"
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/regions_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="28dp"
+                        android:layout_marginRight="28dp"
+                        android:background="@drawable/edit_text_background"
+                        android:padding="10dp"
+                        android:layout_marginBottom="20dp"
+                        android:layout_alignParentEnd="true"
+                        style="@style/Regular_Primary_Color_TextView_style"/>
+
+                    <ImageView
+                        android:id="@+id/delete"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/_10sdp"
+                        android:src="@drawable/ic_baseline_delete_prim_24"/>
+
+                </RelativeLayout>
+
+                <include
+                    android:id="@+id/add_recorded_car_recycler"
+                    android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:textSize="15sp"
-
-                    style="@style/Regular_Primary_Color_TextView_style" />
-
-                <androidx.appcompat.widget.AppCompatEditText
-                    android:id="@+id/vichelNumber_edt"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="28dp"
-                    android:layout_marginRight="28dp"
-                    android:background="@drawable/edit_text_background"
-                    android:hint="@string/vichel_num"
-                    android:padding="10dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textColorHint="@color/gray"
-                    android:layout_marginBottom="20dp"
-                    style="@style/Regular_Primary_Color_TextView_style"
-                    android:layout_marginTop="10dp"
-                    android:textSize="16.5sp"/>
-
-                <androidx.appcompat.widget.AppCompatEditText
-                    android:id="@+id/vichelType_edt"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="28dp"
-                    android:layout_marginRight="28dp"
-                    android:background="@drawable/edit_text_background"
-                    android:hint="@string/vichel_type"
-                    android:padding="10dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textColorHint="@color/gray"
-                    android:layout_marginBottom="20dp"
-                    android:fontFamily="@font/cairo_regular"
-                    android:textSize="16.5sp"/>
-
-                <androidx.appcompat.widget.AppCompatEditText
-                    android:id="@+id/vichel_address_edt"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="28dp"
-                    android:layout_marginRight="28dp"
-                    android:background="@drawable/edit_text_background"
-                    android:hint="@string/address"
-                    android:padding="10dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textColorHint="@color/gray"
-                    android:layout_marginBottom="20dp"
-                    android:fontFamily="@font/cairo_regular"
-                    android:textSize="16.5sp"/>
-
-                <androidx.appcompat.widget.AppCompatEditText
-                    android:id="@+id/vichel_district_edt"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="28dp"
-                    android:layout_marginRight="28dp"
-                    android:background="@drawable/edit_text_background"
-                    android:hint="@string/district"
-                    android:padding="10dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textColorHint="@color/gray"
-                    android:layout_marginBottom="20dp"
-                    android:fontFamily="@font/cairo_regular"
-                    android:textSize="16.5sp"/>
-
-                <androidx.appcompat.widget.AppCompatSpinner
-                    android:id="@+id/regions_spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="28dp"
-                    android:layout_marginRight="28dp"
-                    android:background="@drawable/edit_text_background"
-                    android:padding="10dp"
-                    android:layout_marginBottom="20dp"
-                    style="@style/Regular_Primary_Color_TextView_style"/>
-
-                <androidx.appcompat.widget.AppCompatEditText
-                    android:id="@+id/vichel_notes_txt"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="28dp"
-                    android:layout_marginRight="28dp"
-                    android:background="@drawable/edit_text_background"
-                    android:hint="@string/notes"
-                    android:minLines="5"
-                    android:gravity="start"
-                    android:inputType="textMultiLine"
-                    android:padding="10dp"
-                    android:textColor="@color/colorPrimary"
-                    android:textColorHint="@color/gray"
-                    android:layout_marginBottom="20dp"
-                    android:fontFamily="@font/cairo_regular"
-                    android:textSize="16.sp"/>
-
-                <androidx.appcompat.widget.AppCompatTextView
-                    android:id="@+id/send_data"
-                    android:layout_width="280dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/send_car_data"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:padding="10dp"
-                    android:textSize="18sp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="10dp"
-                    android:textColor="@color/white"
-                    style="@style/Bold_White_Color_TextView_style"
-                    android:background="@drawable/first_button_background"/>
+                    android:layout_margin="@dimen/_10sdp"
+                    layout="@layout/recycler"/>
 
             </LinearLayout>
 

@@ -88,46 +88,51 @@ public class MasterSlayer {
             SoapObject resultsString = (SoapObject) envelope.getResponse();
             //String response = resultsString.getProperty(0).toString();
             SoapObject diffgram = (SoapObject) resultsString.getProperty(1);
-            SoapObject DocumentElement = (SoapObject) diffgram.getProperty(0);
 
             ArrayListHash = new ArrayList<>();
+
+            if (diffgram.getPropertyCount() != 0){
+
+                SoapObject DocumentElement = (SoapObject) diffgram.getProperty(0);
 /**
  ==============================
  * */
-            for (int i = 0; i < DocumentElement.getPropertyCount(); i++) {
-                SoapObject Objecttable = (SoapObject) DocumentElement.getProperty(i);
-                HashMap<String, String> map = new HashMap<String, String>();
-                for (int name_num = 0; name_num < request_paramName.size(); name_num++) {
+                for (int i = 0; i < DocumentElement.getPropertyCount(); i++) {
+                    SoapObject Objecttable = (SoapObject) DocumentElement.getProperty(i);
+                    HashMap<String, String> map = new HashMap<String, String>();
+                    for (int name_num = 0; name_num < request_paramName.size(); name_num++) {
 
-                    if (Objecttable.hasProperty(request_paramName.get(name_num))) {
+                        if (Objecttable.hasProperty(request_paramName.get(name_num))) {
 
-                        /**map.put("ID", Objecttable.getProperty("ID").toString());*/
-                        if (IsImage(request_paramName.get(name_num))) { /** Is Image );*/
+                            /**map.put("ID", Objecttable.getProperty("ID").toString());*/
+                            if (IsImage(request_paramName.get(name_num))) { /** Is Image );*/
 
-                            if (Objecttable.getProperty(request_paramName.get(name_num)).toString().equals("anyType{}")) {
-                                map.put(request_paramName.get(name_num), ImageURl + NoImg);
+                                if (Objecttable.getProperty(request_paramName.get(name_num)).toString().equals("anyType{}")) {
+                                    map.put(request_paramName.get(name_num), ImageURl + NoImg);
+                                } else {
+                                    map.put(request_paramName.get(name_num), ImageURl + substringAfter(Objecttable.getProperty(request_paramName.get(name_num)).toString(), "/prdPic/"));
+                                }
                             } else {
-                                map.put(request_paramName.get(name_num), ImageURl + substringAfter(Objecttable.getProperty(request_paramName.get(name_num)).toString(), "/prdPic/"));
+                                if (Objecttable.getProperty(request_paramName.get(name_num)).toString().equals("anyType{}")) {
+                                    map.put(request_paramName.get(name_num), "");
+                                } else {
+                                    map.put(request_paramName.get(name_num), Objecttable.getProperty(request_paramName.get(name_num)).toString());
+                                }
                             }
+
                         } else {
-                            if (Objecttable.getProperty(request_paramName.get(name_num)).toString().equals("anyType{}")) {
-                                map.put(request_paramName.get(name_num), "");
-                            } else {
-                                map.put(request_paramName.get(name_num), Objecttable.getProperty(request_paramName.get(name_num)).toString());
-                            }
+                            map.put(request_paramName.get(name_num), "");
                         }
-
-                    } else {
-                        map.put(request_paramName.get(name_num), "");
                     }
-                }
 //				if(Objecttable.hasProperty("Code")) {
 //					map.put("Code", Objecttable.getProperty("Code").toString());
 //				}else{
 //					map.put("Code", "");
 //				}
-                ArrayListHash.add(map);
+                    ArrayListHash.add(map);
+                }
             }
+
 
         } catch (Exception e) {
             e.printStackTrace();

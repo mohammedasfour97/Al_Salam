@@ -44,11 +44,11 @@ public class ListenRecordsRepository extends BaseRepository {
         return masterListenerListMutableLiveData;
     }
 
-    public MutableLiveData<List<Record>> getMasterRecordsMutableLiveData(String id) {
+    public MutableLiveData<List<Record>> getMasterRecordsMutableLiveData(String id, String id_user) {
 
         masterRecordsMutableLiveData = new MutableLiveData<>();
 
-        new GetMasterRecordsListAsyncClass(id).execute();
+        new GetMasterRecordsListAsyncClass(id, id_user).execute();
 
         return masterRecordsMutableLiveData;
     }
@@ -71,11 +71,11 @@ public class ListenRecordsRepository extends BaseRepository {
         return deleteRecordMutableLiveData;
     }
 
-    public MutableLiveData<List<Master>> getMasterListenerRecordedCarsMutableLiveData(String id) {
+    public MutableLiveData<List<Master>> getMasterListenerRecordedCarsMutableLiveData(String id, String id_user) {
 
         masterListenerRecordedCarsMutableLiveData = new MutableLiveData<>();
 
-        new GetMasterListenerRecordedCarsAsyncClass(id).execute();
+        new GetMasterListenerRecordedCarsAsyncClass(id, id_user).execute();
 
         return masterListenerRecordedCarsMutableLiveData;
     }
@@ -100,6 +100,7 @@ public class ListenRecordsRepository extends BaseRepository {
 
         return deleteListenerRecordedCarMutableLivedata;
     }
+
 
     private class InsertRecordedCarAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
 
@@ -242,15 +243,16 @@ public class ListenRecordsRepository extends BaseRepository {
 
     private class GetMasterRecordsListAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
 
-        private String id;
+        private String id, id_user;
 
-        public GetMasterRecordsListAsyncClass(String id) {
+        public GetMasterRecordsListAsyncClass(String id, String id_user) {
             this.id = id;
+            this.id_user = id_user;
         }
 
         @Override
         protected List<HashMap<String,String>> doInBackground(Void... voids) {
-            return webServices.getMasterRecords(id);
+            return webServices.getMasterRecords(id, id_user);
         }
 
         @Override
@@ -286,15 +288,16 @@ public class ListenRecordsRepository extends BaseRepository {
 
     private class GetMasterListenerRecordedCarsAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
 
-        private String id;
+        private String id, id_user;
 
-        public GetMasterListenerRecordedCarsAsyncClass(String id) {
+        public GetMasterListenerRecordedCarsAsyncClass(String id, String id_user) {
             this.id = id;
+            this.id_user = id_user;
         }
 
         @Override
         protected List<HashMap<String,String>> doInBackground(Void... voids) {
-            return webServices.getListenerRecordedCars(id);
+            return webServices.getListenerRecordedCars(id, id_user);
         }
 
         @Override

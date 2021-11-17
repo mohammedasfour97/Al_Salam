@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -65,6 +66,7 @@ public class MapFragment extends BaseFragment {
     private LatLng latLng;
     private List<Marker> markerList, markers;
     private Marker selectedMarker;
+    private boolean isEnablingGps;
 
     // vars for api
     private MapViewModel mapViewModel;
@@ -239,30 +241,51 @@ public class MapFragment extends BaseFragment {
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
 
+        isEnablingGps = false;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkPermission()) {
             return;
         }
-        fusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
-                new CancellationToken() {
-                    @Override
-                    public boolean isCancellationRequested() {
-                        return false;
-                    }
 
-                    @Override
-                    public CancellationToken onCanceledRequested(OnTokenCanceledListener onTokenCanceledListener) {
-                        return null;
-                    }
-                }).addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location != null) {
-                    currentLocation = location;
+        if (!isGPSEnabled(getContext())){
 
-                    setGoogleMap();
+            showWarningDialog(getResources().getString(R.string.enable_gps), getResources().getString(R.string.enable_gps_msg),
+                    getResources().getString(R.string.enable), new Closure() {
+                        @Override
+                        public void exec() {
+
+                            getActivity().startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+
+                            isEnablingGps = true;
+                        }
+                    }, true);
+        }
+
+        else {
+
+            fusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
+                    new CancellationToken() {
+                        @Override
+                        public boolean isCancellationRequested() {
+                            return false;
+                        }
+
+                        @Override
+                        public CancellationToken onCanceledRequested(OnTokenCanceledListener onTokenCanceledListener) {
+                            return null;
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null) {
+                        currentLocation = location;
+
+                        setGoogleMap();
+                    }
                 }
-            }
-        });
+            });
+        }
+
     }
 
 

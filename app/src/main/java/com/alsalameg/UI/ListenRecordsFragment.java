@@ -159,7 +159,7 @@ public class ListenRecordsFragment extends BaseFragment {
                     else {
 
                         if (masters.get(0).getId().equals("-1"))
-                            showFailedDialog(getResources().getString(R.string.no_records), true);
+                            showFailedDialog(getResources().getString(R.string.err_loading), true);
                         else {
                             masterList.clear();
                             masterList.addAll(masters);
@@ -186,7 +186,7 @@ public class ListenRecordsFragment extends BaseFragment {
                         else {
 
                             if (masters.get(0).getId().equals("-1"))
-                                showFailedDialog(getResources().getString(R.string.no_records), true);
+                                showFailedDialog(getResources().getString(R.string.err_loading), true);
                             else {
                                 masterList.clear();
                                 masterList.addAll(masters);
@@ -212,11 +212,12 @@ public class ListenRecordsFragment extends BaseFragment {
         else{
 
             if (getArguments().getBoolean("lis_rec_car"))
-                listenRecordsViewModel.getMasterListenerRecordedCarsMutableLiveData(getArguments().getString("master_id"))
-                        .observe(getViewLifecycleOwner(), getListenerMasterListObserver);
+                listenRecordsViewModel.getMasterListenerRecordedCarsMutableLiveData(getArguments().getString("master_id"),
+                        MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(),
+                        getListenerMasterListObserver);
             else
-                listenRecordsViewModel.getMasterListenerListMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(
-                        getViewLifecycleOwner(), getMasterListObserver);
+                listenRecordsViewModel.getMasterListenerListMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID))
+                        .observe(getViewLifecycleOwner(), getMasterListObserver);
         }
 
     }

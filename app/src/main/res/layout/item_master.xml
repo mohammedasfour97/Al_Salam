@@ -34,7 +34,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/_10sdp"
                     android:layout_marginTop="@dimen/_10sdp"
-                    android:src="@drawable/ic_baseline_delete_forever_24"
+                    android:src="@drawable/ic_baseline_delete_white_24"
                     android:layout_gravity="start"/>
 
                 <TextView
