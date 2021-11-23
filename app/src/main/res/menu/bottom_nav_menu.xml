@@ -11,4 +11,9 @@
         android:icon="@drawable/ic_baseline_record_voice_over_24"
         android:title="@string/my_records" />
 
+    <item
+        android:id="@+id/navigation_records_history"
+        android:icon="@drawable/ic_baseline_archive_24"
+        android:title="@string/history" />
+
 </menu>

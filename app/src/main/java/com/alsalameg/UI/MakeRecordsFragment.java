@@ -6,13 +6,8 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,19 +15,15 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
-import com.alsalameg.Adapters.MastersAdapter;
-import com.alsalameg.Adapters.OnFinish;
 import com.alsalameg.Adapters.UploadingRecordsProgressAdapter;
 import com.alsalameg.AudioRecorder;
 import com.alsalameg.BaseClasses.BaseFragment;
 import com.alsalameg.Constants;
-import com.alsalameg.Models.Car;
 import com.alsalameg.Models.IDName;
 import com.alsalameg.Models.Master;
 import com.alsalameg.Models.UploadingRecord;
 import com.alsalameg.MyApplication;
 import com.alsalameg.R;
-import com.alsalameg.UI.FragmentDialogs.AddCarDetailsFragment;
 import com.alsalameg.Utils;
 import com.alsalameg.ViewModels.MakeRecordsViewModel;
 import com.alsalameg.databinding.FragmentMakeRecordsBinding;
@@ -54,15 +45,11 @@ import com.google.android.gms.tasks.CancellationToken;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.OnTokenCanceledListener;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -71,7 +58,6 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -132,7 +118,7 @@ public class MakeRecordsFragment extends BaseFragment {
         makeRecordsViewModel = ViewModelProviders.of(this).get(MakeRecordsViewModel.class);
 
         setListeners();
-        configureRegionSpinner();
+        initRegionSpinner();
         initRecyclerView();
         configureTheRecorder();
         fetchCurrentLocation();
@@ -212,17 +198,6 @@ public class MakeRecordsFragment extends BaseFragment {
     }
 
 
-    private void configureRegionSpinner(){
-
-        regionList = new ArrayList<>();
-        regionList.add(new IDName("0", getResources().getString(R.string.choose_region)));
-
-        spinnerArrayAdapter = new ArrayAdapter<IDName>(getContext(), android.R.layout.simple_spinner_item, regionList);
-        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down vieww
-        fragmentMakeRecordsBinding.regionsSpinner.setAdapter(spinnerArrayAdapter);
-    }
-
-
     private void initRecyclerView(){
 
         uploadingRecordList = new ArrayList<>();
@@ -236,6 +211,17 @@ public class MakeRecordsFragment extends BaseFragment {
 
         uploadingRecordsProgressAdapter.setHasStableIds(true);
         fragmentMakeRecordsBinding.uploadingRecordsProcessList.recyclerview.setAdapter(uploadingRecordsProgressAdapter);
+    }
+
+
+    private void initRegionSpinner(){
+
+        regionList = new ArrayList<>();
+        regionList.add(new IDName("0", getResources().getString(R.string.choose_region)));
+
+        spinnerArrayAdapter = new ArrayAdapter<IDName>(getContext(), android.R.layout.simple_spinner_item, regionList);
+        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down vieww
+        fragmentMakeRecordsBinding.regionsSpinner.setAdapter(spinnerArrayAdapter);
     }
 
 
@@ -366,6 +352,64 @@ public class MakeRecordsFragment extends BaseFragment {
     }
 
 
+    private void fetchCurrentLocation() {
+
+        //showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg), false);
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
+        isEnablingGps = false;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkLocationPermission()) {return;}
+
+        if (!isGPSEnabled(getContext())){
+
+            showWarningDialog(getResources().getString(R.string.enable_gps), getResources().getString(R.string.enable_gps_msg),
+                    getResources().getString(R.string.enable), new Closure() {
+                        @Override
+                        public void exec() {
+
+                            getActivity().startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+
+                            isEnablingGps = true;
+                        }
+                    }, true);
+        }
+
+        else {
+
+            showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.detecting_your_loc_msg),
+                    false);
+
+            fusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
+                    new CancellationToken() {
+                        @Override
+                        public boolean isCancellationRequested() {
+                            return false;
+                        }
+
+                        @Override
+                        public CancellationToken onCanceledRequested(OnTokenCanceledListener onTokenCanceledListener) {
+                            return null;
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null) {
+
+                        hideProgress();
+
+                        currentLocation = location;
+
+                        setGoogleMap();
+                    }
+                }
+            });
+        }
+
+    }
+
+
     private void setGoogleMap() {
 
                  /*if (currentLocation != null) {
@@ -444,64 +488,6 @@ public class MakeRecordsFragment extends BaseFragment {
         if (mapFragment == null)
             mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(callback);
-    }
-
-
-    private void fetchCurrentLocation() {
-
-        //showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg), false);
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
-
-        isEnablingGps = false;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkLocationPermission()) {return;}
-
-        if (!isGPSEnabled(getContext())){
-
-            showWarningDialog(getResources().getString(R.string.enable_gps), getResources().getString(R.string.enable_gps_msg),
-                    getResources().getString(R.string.enable), new Closure() {
-                        @Override
-                        public void exec() {
-
-                            getActivity().startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-
-                            isEnablingGps = true;
-                        }
-                    }, true);
-        }
-
-        else {
-
-            showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.detecting_your_loc_msg),
-                    false);
-
-            fusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
-                    new CancellationToken() {
-                        @Override
-                        public boolean isCancellationRequested() {
-                            return false;
-                        }
-
-                        @Override
-                        public CancellationToken onCanceledRequested(OnTokenCanceledListener onTokenCanceledListener) {
-                            return null;
-                        }
-                    }).addOnSuccessListener(new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    if (location != null) {
-
-                        hideProgress();
-
-                        currentLocation = location;
-
-                        setGoogleMap();
-                    }
-                }
-            });
-        }
-
     }
 
 
@@ -782,6 +768,53 @@ public class MakeRecordsFragment extends BaseFragment {
     }
 
 
+    private Address getAdressDetailsFromLatLong(LatLng latLng) {
+
+        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        List<Address> addresses = null;
+        try {
+            addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Address address = null;
+        if (addresses != null && addresses.size() > 0) {
+
+
+            /*address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+            city = addresses.get(0).getLocality();
+            state = addresses.get(0).getAdminArea();
+            country = addresses.get(0).getCountryName();
+            */
+            address = addresses.get(0);
+
+        }
+
+        return address;
+    }
+
+
+    private void setRecordPath(){
+
+        audioRecorder = new AudioRecorder();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US);
+
+        parentFile = new File(getActivity().getExternalFilesDir("com.alsalameg"), "records");
+
+        if (!parentFile.exists())
+            parentFile.mkdirs();
+
+        recordFileName = getActivity().getApplicationContext().getPackageName() + "_" + dateFormat.format(new Date()) + ".mp3";
+
+        recordFilePath = parentFile.getAbsolutePath() + "/" + recordFileName;
+
+        recordFile = new File(recordFilePath);
+
+    }
+
+
     private boolean checkRecordPermission() {
 
             if (!Constants.checkRecorderPermission(getActivity())) {
@@ -833,52 +866,6 @@ public class MakeRecordsFragment extends BaseFragment {
         else return true;
     }
 
-
-    private Address getAdressDetailsFromLatLong(LatLng latLng) {
-
-        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
-        List<Address> addresses = null;
-        try {
-            addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Address address = null;
-        if (addresses != null && addresses.size() > 0) {
-
-
-            /*address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-            city = addresses.get(0).getLocality();
-            state = addresses.get(0).getAdminArea();
-            country = addresses.get(0).getCountryName();
-            */
-             address = addresses.get(0);
-
-        }
-
-        return address;
-    }
-
-
-    private void setRecordPath(){
-
-        audioRecorder = new AudioRecorder();
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US);
-
-            parentFile = new File(getActivity().getExternalFilesDir("com.alsalameg"), "records");
-
-            if (!parentFile.exists())
-                parentFile.mkdirs();
-
-        recordFileName = getActivity().getApplicationContext().getPackageName() + "_" + dateFormat.format(new Date()) + ".mp3";
-
-        recordFilePath = parentFile.getAbsolutePath() + "/" + recordFileName;
-
-        recordFile = new File(recordFilePath);
-
-    }
 
 
     /*private byte[] getBytes(InputStream inputStream) throws IOException {

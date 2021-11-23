@@ -23,7 +23,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class SameMultipleMarksAdapter extends RecyclerView.Adapter<SameMultipleMarksAdapter.SameMultipleMarksViewHolder> {
-    private List<Marker> markerList;
+    private List<Car> carList;
     private Fragment fragment;
     private LatLng latLng;
 
@@ -38,8 +38,8 @@ public class SameMultipleMarksAdapter extends RecyclerView.Adapter<SameMultipleM
         }
     }
 
-    public SameMultipleMarksAdapter(List<Marker> markerList, Fragment fragment, LatLng latLng) {
-        this.markerList = markerList;
+    public SameMultipleMarksAdapter(List<Car> carList, Fragment fragment, LatLng latLng) {
+        this.carList = carList;
         this.fragment = fragment;
         this.latLng = latLng;
     }
@@ -55,25 +55,25 @@ public class SameMultipleMarksAdapter extends RecyclerView.Adapter<SameMultipleM
     @Override
     public void onBindViewHolder(SameMultipleMarksAdapter.SameMultipleMarksViewHolder holder, int position) {
 
-        Marker marker = markerList.get(position);
-        holder.itemSameMultipleLatlongMarksBinding.bankTxt.setText(((Car)marker.getTag()).getBank());
-        holder.itemSameMultipleLatlongMarksBinding.kindTxt.setText(((Car)marker.getTag()).getKind());
-        holder.itemSameMultipleLatlongMarksBinding.plateNumberTxt.setText(((Car)marker.getTag()).getPlateNumber());
-        holder.itemSameMultipleLatlongMarksBinding.statusTxt.setText(((Car)marker.getTag()).getStatus());
+        Car car = carList.get(position);
+        holder.itemSameMultipleLatlongMarksBinding.bankTxt.setText(car.getBank());
+        holder.itemSameMultipleLatlongMarksBinding.kindTxt.setText(car.getKind());
+        holder.itemSameMultipleLatlongMarksBinding.plateNumberTxt.setText(car.getPlateNumber());
+        holder.itemSameMultipleLatlongMarksBinding.statusTxt.setText(car.getStatus());
 
         /////  change icon color ///////
 
-        holder.porterDuffColorFilter = new PorterDuffColorFilter(getMarkColor(((Car)marker.getTag()).getStatus()),
+        holder.porterDuffColorFilter = new PorterDuffColorFilter(getMarkColor(car.getStatus()),
                 PorterDuff.Mode.SRC_ATOP);
         holder.itemSameMultipleLatlongMarksBinding.markIcon.getDrawable().setColorFilter(holder.porterDuffColorFilter);
-        holder.itemSameMultipleLatlongMarksBinding.statusTxt.setTextColor(getMarkColor(((Car)marker.getTag()).getStatus()));
+        holder.itemSameMultipleLatlongMarksBinding.statusTxt.setTextColor(getMarkColor(car.getStatus()));
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 FragmentManager fm = fragment.getActivity().getSupportFragmentManager();
-                CarMarkerDetailsFragment carMarkerDetailsFragment = new CarMarkerDetailsFragment((Car)marker.getTag(), latLng);
+                CarMarkerDetailsFragment carMarkerDetailsFragment = new CarMarkerDetailsFragment(car, latLng);
                 carMarkerDetailsFragment.show(fm, "fragment_new_activity");
             }
         });
@@ -110,10 +110,9 @@ public class SameMultipleMarksAdapter extends RecyclerView.Adapter<SameMultipleM
         }
     }
 
-
     @Override
     public int getItemCount() {
-        return markerList.size();
+        return carList.size();
     }
 
     @Override

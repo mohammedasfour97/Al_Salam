@@ -68,7 +68,6 @@
         android:background="@drawable/circle_background">
 
         <RelativeLayout
-            android:id="@+id/colored_circle"
             style="@style/AlertDialog.AppCompat.CircleBackground"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -76,7 +75,6 @@
             android:layout_centerVertical="true">
 
             <ImageView
-                android:id="@+id/dialog_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"

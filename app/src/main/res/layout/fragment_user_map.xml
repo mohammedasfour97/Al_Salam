@@ -14,10 +14,9 @@
             layout="@layout/fragment_map"/>
 
 
-        <androidx.appcompat.widget.LinearLayoutCompat
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content">
 
             <ImageView
                 android:id="@+id/fragment_map_logout_btn"
@@ -26,6 +25,7 @@
                 android:layout_margin="@dimen/_10sdp"
                 android:padding="@dimen/_5sdp"
                 android:background="@drawable/prim_solid_circle"
+                android:layout_centerVertical="true"
                 android:src="@drawable/ic_baseline_power_settings_new_24"/>
 
             <ImageView
@@ -35,8 +35,21 @@
                 android:layout_marginTop="@dimen/_10sdp"
                 android:padding="@dimen/_5sdp"
                 android:background="@drawable/prim_solid_circle"
+                android:layout_toEndOf="@id/fragment_map_logout_btn"
+                android:layout_centerVertical="true"
                 android:src="@drawable/ic_baseline_autorenew_24"/>
-        </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/search_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/_10sdp"
+                android:background="@drawable/white_solid_prim_stroke"
+                android:layout_toEndOf="@id/fragment_map_reload_btn"
+                style="@style/Regular_Primary_Color_TextView_style"
+                android:visibility="gone"/>
+
+        </RelativeLayout>
 
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

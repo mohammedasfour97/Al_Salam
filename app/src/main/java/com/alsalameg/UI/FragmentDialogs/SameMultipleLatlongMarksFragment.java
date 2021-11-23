@@ -37,12 +37,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 public class SameMultipleLatlongMarksFragment extends DialogFragment {
 
     private FragmentDialogSameMultipleMarksBinding fragmentDialogSameMultipleMarksBinding;
-    private List<Marker> markerList;
+    private List<Car> carList;
     private SameMultipleMarksAdapter sameMultipleMarksAdapter;
     private LatLng latLng;
 
-    public SameMultipleLatlongMarksFragment(List<Marker> markerList, LatLng latLng) {
-        this.markerList = markerList;
+    public SameMultipleLatlongMarksFragment(List<Car> carList, LatLng latLng) {
+        this.carList = carList;
         this.latLng = latLng;
     }
 
@@ -72,7 +72,7 @@ public class SameMultipleLatlongMarksFragment extends DialogFragment {
 
     private void initRecyclerView(){
 
-        sameMultipleMarksAdapter = new SameMultipleMarksAdapter(markerList, this, latLng);
+        sameMultipleMarksAdapter = new SameMultipleMarksAdapter(carList, this, latLng);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         fragmentDialogSameMultipleMarksBinding.marksRecycler.recyclerview.setLayoutManager(mLayoutManager);
         fragmentDialogSameMultipleMarksBinding.marksRecycler.recyclerview.setAdapter(sameMultipleMarksAdapter);

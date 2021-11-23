@@ -19,7 +19,7 @@ public class ListenRecordsRepository extends BaseRepository {
             masterListenerRecordedCarsMutableLiveData;
     private MutableLiveData<List<Record>> masterRecordsMutableLiveData;
     private MutableLiveData<String> deleteMasterWithRecordsMutableLiveData, deleteRecordMutableLiveData, addRecordedCarMutableLiveData,
-    deleteListenerRecordedCarMutableLivedata;
+    deleteListenerRecordedCarMutableLivedata, updateHeardMutableLiveData;
 
     public ListenRecordsRepository() {
 
@@ -101,6 +101,14 @@ public class ListenRecordsRepository extends BaseRepository {
         return deleteListenerRecordedCarMutableLivedata;
     }
 
+    public MutableLiveData<String> getUpdateHeardMutableLiveData(String recId, String userId) {
+
+        updateHeardMutableLiveData = new MutableLiveData<>();
+
+        new GetUpdateHeardAsyncClass(recId, userId).execute();
+
+        return updateHeardMutableLiveData;
+    }
 
     private class InsertRecordedCarAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
 
@@ -267,7 +275,7 @@ public class ListenRecordsRepository extends BaseRepository {
                 for (HashMap<String, String> hashMap : getMasterRecordsList) {
 
                     record = new Record(hashMap.get("ID"), hashMap.get("ID_Recorded"), hashMap.get("File_Name"), hashMap.get("File_Extension"),
-                            hashMap.get("File_Size"));
+                            hashMap.get("File_Size"), hashMap.get("heard"));
 
                     list.add(record);
 
@@ -420,6 +428,33 @@ public class ListenRecordsRepository extends BaseRepository {
             }
 
             deleteListenerRecordedCarMutableLivedata.postValue(result);
+        }
+    }
+
+
+    private class GetUpdateHeardAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
+
+        private String recId, idUser;
+
+        public GetUpdateHeardAsyncClass(String recId, String idUser) {
+            this.recId = recId;
+            this.idUser = idUser;
+        }
+
+        @Override
+        protected List<HashMap<String,String>> doInBackground(Void... voids) {
+            return webServices.getUpdateHeard(recId, idUser);
+        }
+
+        @Override
+        protected void onPostExecute(List<HashMap<String,String>> getUpdateHeard) {
+
+            String result = "";
+
+            if (getUpdateHeard != null)
+                result = "done";
+
+            updateHeardMutableLiveData.postValue(result);
         }
     }
 }

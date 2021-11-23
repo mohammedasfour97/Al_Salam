@@ -6,15 +6,13 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
+import com.alsalameg.Adapters.Interfaces.OnDeleteMaster;
 import com.alsalameg.BaseClasses.BaseFragment;
 import com.alsalameg.Constants;
 import com.alsalameg.MyApplication;
 import com.alsalameg.R;
 import com.alsalameg.Models.Record;
-import com.alsalameg.UI.MainActivity;
-import com.alsalameg.UI.MakeRecordsFragment;
 import com.alsalameg.ViewModels.ListenRecordsViewModel;
 import com.alsalameg.databinding.ItemRecordPlayerBinding;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
@@ -42,6 +40,80 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
             super(itemRecordPlayerBinding.getRoot());
 
             this.itemRecordPlayerBinding = itemRecordPlayerBinding;
+        }
+
+
+        private void deleteRecord(String recordId, String idUser, int pos){
+
+            fragment.showInfoDialogWithTwoButtons(context.getResources().getString(R.string.delete), context.getResources().
+                    getString(R.string.sure_delete_record), context.getResources().getString(R.string.yes), context.getResources().
+                    getString(R.string.no), new Closure() {
+                @Override
+                public void exec() {
+
+                    fragment.showProgressDialog("", context.getResources().getString(R.string.loading_msg), false);
+
+                    listenRecordsViewModel.getDeleteRecordMutableLiveData(recordId, idUser).observe(fragment.getViewLifecycleOwner(),
+                            deleteRecordObserver(pos));
+                }
+            }, new Closure() {
+                @Override
+                public void exec() {
+
+                    fragment.hideInfoDialogWithTwoButton();
+                }
+            }, true);
+
+
+        }
+
+
+        private void updateHeard(String recId){
+
+            listenRecordsViewModel.getUpdateHeardMutableLiveData(recId, MyApplication.getTinyDB().getString(Constants.KEY_USERID))
+                    .observe(fragment.getViewLifecycleOwner(), updateHeardObserver());
+        }
+
+        private Observer<String> deleteRecordObserver(int pos){
+
+            return new Observer<String>() {
+                @Override
+                public void onChanged(String id) {
+
+                    if (id!=null){
+
+                        if (fragment.getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+
+                            fragment.hideProgress();
+
+                            if (!TextUtils.isEmpty(id)){
+
+                                RecordsAdapter.this.recordList.remove(pos);
+                                RecordsAdapter.this.notifyItemRemoved(pos);
+                                RecordsAdapter.this.notifyDataSetChanged();
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+
+        private Observer<String> updateHeardObserver(){
+
+            return new Observer<String>() {
+                @Override
+                public void onChanged(String msg) {
+
+                    if (msg!=null){
+
+                        if (fragment.getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+
+                            //////
+                        }
+                    }
+                }
+            };
         }
 
     }
@@ -84,6 +156,17 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
             holder.itemRecordPlayerBinding.deleteRecord.setVisibility(View.GONE);
 
 
+        holder.itemRecordPlayerBinding.voicePlayerView.setImgPlayClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Listener"))
+                    holder.updateHeard(record.getId());
+            }
+        });
+
+        //if (MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Listener") && r)
+
         holder.itemRecordPlayerBinding.shareRecord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,7 +186,7 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
                 if (recordList.size() == 1)
                     onDeleteMaster.deleteMaster();
                 else
-                    deleteRecord(record.getId(), MyApplication.getTinyDB().getString(Constants.KEY_USERID), position);
+                    holder.deleteRecord(record.getId(), MyApplication.getTinyDB().getString(Constants.KEY_USERID), position);
             }
         });
 
@@ -124,52 +207,4 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
         return Integer.parseInt(recordList.get(position).getId());
     }
 
-
-    private void deleteRecord(String recordId, String idUser, int pos){
-
-        fragment.showInfoDialogWithTwoButtons(context.getResources().getString(R.string.delete), context.getResources().
-                getString(R.string.sure_delete_record), context.getResources().getString(R.string.yes), context.getResources().
-                getString(R.string.no), new Closure() {
-            @Override
-            public void exec() {
-
-                fragment.showProgressDialog("", context.getResources().getString(R.string.loading_msg), false);
-
-                listenRecordsViewModel.getDeleteRecordMutableLiveData(recordId, idUser).observe(fragment.getViewLifecycleOwner(),
-                        deleteRecordObserver(pos));
-            }
-        }, new Closure() {
-            @Override
-            public void exec() {
-
-                fragment.hideInfoDialogWithTwoButton();
-            }
-        }, true);
-
-
-    }
-
-    private Observer<String> deleteRecordObserver(int pos){
-
-        return new Observer<String>() {
-            @Override
-            public void onChanged(String id) {
-
-                if (id!=null){
-
-                    if (fragment.getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
-
-                        fragment.hideProgress();
-
-                        if (!TextUtils.isEmpty(id)){
-
-                            RecordsAdapter.this.recordList.remove(pos);
-                            RecordsAdapter.this.notifyItemRemoved(pos);
-                            RecordsAdapter.this.notifyDataSetChanged();
-                        }
-                    }
-                }
-            }
-        };
-    }
 }

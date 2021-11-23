@@ -60,4 +60,10 @@ public class ListenRecordsViewModel extends ViewModel {
         return listenRecordsRepository.getAddRecordedCarMutableLiveData(vehicleNumber ,vehicleType, location,  district, longitude,
                 latitude,  idUSER,  idRegions, notes, masterId);
     }
+
+    public MutableLiveData<String> getUpdateHeardMutableLiveData(String recId, String id_user) {
+
+        return listenRecordsRepository.getUpdateHeardMutableLiveData(recId, id_user);
+    }
+
 }

@@ -61,8 +61,16 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/white_solid_prim_stroke"
                 android:orientation="vertical"
-                android:padding="20dp"
                 android:layout_margin="@dimen/_10sdp">
+
+                <TextView
+                    android:id="@+id/latLngTxt"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/_5sdp"
+                    android:textSize="13sp"
+                    style="@style/Regular_Default_TextView_style"
+                    android:gravity="center"/>
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -78,7 +86,7 @@
                         android:background="@drawable/edit_text_background"
                         android:padding="10dp"
                         android:layout_marginBottom="20dp"
-                        android:layout_alignParentEnd="true"
+                        android:layout_centerInParent="true"
                         style="@style/Regular_Primary_Color_TextView_style"/>
 
                     <ImageView
@@ -86,7 +94,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_margin="@dimen/_10sdp"
-                        android:src="@drawable/ic_baseline_delete_prim_24"/>
+                        android:src="@drawable/ic_baseline_delete_prim_24"
+                        android:background="@drawable/white_solid_prim_stroke"
+                        android:padding="@dimen/_5sdp"
+                        android:layout_centerVertical="true"
+                        android:layout_alignParentEnd="true"/>
 
                 </RelativeLayout>
 

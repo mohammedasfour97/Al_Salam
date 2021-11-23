@@ -1,4 +1,4 @@
-package com.alsalameg.Adapters;
+package com.alsalameg.Adapters.Interfaces;
 
 public interface OnDeleteMaster {
 

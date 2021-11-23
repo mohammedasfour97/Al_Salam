@@ -517,6 +517,34 @@ public class WebServices {
     }
 
 
+    public ArrayList<HashMap<String, String>> getUpdateHeard(String id, String id_user) {
+
+        MasterSlayer MS = new MasterSlayer("Update_heard");
+        /**1 - any parameter send */
+        ArrayList<String> send_params = new ArrayList<String>();
+
+        send_params.add("ID");
+        send_params.add("ID_USER");
+
+        ArrayList<String> send_params_value = new ArrayList<String>();
+
+        send_params_value.add(id);
+        send_params_value.add(id_user);
+
+        MS.addsendparam(send_params, send_params_value);
+
+        /**2 - request */
+        ArrayList<String> request_params = new ArrayList<String>();
+
+        MS.setRequest_paramName(request_params);
+        /** 3 - any image */
+        // MS.setIsImage1("ProductPicture");
+        // MS.setIsImage2("Voice");
+
+        return MS.Call();
+    }
+
+
     public ArrayList<HashMap<String, String>> deleteListenerRecordedCarMaster(String masterId, String idUser) {
 
         MasterSlayer MS = new MasterSlayer("Delete_listener");

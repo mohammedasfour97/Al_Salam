@@ -19,7 +19,7 @@
                 android:layout_width="@dimen/_20sdp"
                 android:layout_height="@dimen/_20sdp"
                 android:background="@drawable/prim_solid_circle"
-                android:src="@drawable/ic_baseline_close_24"/>
+                android:src="@drawable/ic_baseline_close_red_24"/>
 
 
             <androidx.appcompat.widget.AppCompatImageView

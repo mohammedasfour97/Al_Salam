@@ -2,6 +2,7 @@ package com.alsalameg.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,7 @@ import com.alsalameg.ViewModels.ListenRecordsViewModel;
 import com.alsalameg.databinding.ItemListenerAddRecordedCarBinding;
 import com.alsalameg.databinding.ItemRecordPlayerBinding;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
+import com.flod.drawabletextview.DrawableTextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,18 +43,42 @@ public class ListenerAddRecordedCarsAdapter extends RecyclerView.Adapter<Listene
     public class ListenerAddRecordedCarsViewHolder extends RecyclerView.ViewHolder {
 
         private ItemListenerAddRecordedCarBinding itemListenerAddRecordedCarBinding;
-        private List<View> editTexts;
+        private List<View> allViews;
 
         public ListenerAddRecordedCarsViewHolder(ItemListenerAddRecordedCarBinding itemListenerAddRecordedCarBinding) {
             super(itemListenerAddRecordedCarBinding.getRoot());
 
             this.itemListenerAddRecordedCarBinding = itemListenerAddRecordedCarBinding;
 
-            editTexts = new ArrayList<>();
-            editTexts.add(itemListenerAddRecordedCarBinding.vichelNumberEdt);
-            editTexts.add(itemListenerAddRecordedCarBinding.vichelTypeEdt);
+            allViews = new ArrayList<>();
+            allViews.add(itemListenerAddRecordedCarBinding.vichelNumberEdt);
+            allViews.add(itemListenerAddRecordedCarBinding.vichelTypeEdt);
+            allViews.add(itemListenerAddRecordedCarBinding.loadingBtn);
         }
 
+        private boolean getTextFromEDTs(){
+
+            if (TextUtils.isEmpty(this.itemListenerAddRecordedCarBinding.vichelNumberEdt.getText().toString())){
+
+                this.itemListenerAddRecordedCarBinding.vichelNumberEdt.setError(context.getResources().getString(R.string.enter) +
+                        " " + context.getResources().getString(R.string.vichel_num));
+
+                return false;
+            }
+
+            else if (TextUtils.isEmpty(this.itemListenerAddRecordedCarBinding.vichelTypeEdt.getText().toString())) {
+                this.itemListenerAddRecordedCarBinding.vichelTypeEdt.setError(context.getResources().getString(R.string.enter) + " " +
+                        context.getResources().getString(R.string.vichel_type));
+                return false;
+            }
+            else if (((ListenerAddRecordedCarFragment)fragment).getSelectedRegionID().equals("0")){
+
+                Toast.makeText(context, R.string.choose_region_message, Toast.LENGTH_SHORT).show();
+                return false;
+            }
+
+            else return true;
+        }
 
         private void insertAddRecordedCar(){
 
@@ -75,7 +101,8 @@ public class ListenerAddRecordedCarsAdapter extends RecyclerView.Adapter<Listene
 
                         if (fragment.getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
 
-                            Boolean completed;
+                            Boolean completed = false;
+                            float alpha = 1;
 
                             switch (s) {
 
@@ -84,16 +111,12 @@ public class ListenerAddRecordedCarsAdapter extends RecyclerView.Adapter<Listene
                                     Toast.makeText(context, context.getResources().getString(R.string.err_insert),
                                             Toast.LENGTH_SHORT).show();
 
-                                    completed = false;
-
                                     break;
 
                                 case "-1":
 
                                     Toast.makeText(context, context.getResources().getString(R.string.added_car_before_msg),
                                             Toast.LENGTH_SHORT).show();
-
-                                    completed = false;
 
                                     break;
 
@@ -102,17 +125,17 @@ public class ListenerAddRecordedCarsAdapter extends RecyclerView.Adapter<Listene
                                     Toast.makeText(context, context.getResources().getString(R.string.err_insert),
                                             Toast.LENGTH_SHORT).show();
 
-                                    completed = false;
-
                                 default:
 
                                     completed = true;
+                                    alpha = .5f;
                             }
 
-                            Utils.setEnableOrNot(editTexts, !completed);
-                            itemListenerAddRecordedCarBinding.loadingBtn.setEnabled(!completed);
+                            Utils.setEnableOrNot(allViews, !completed);
+                            itemListenerAddRecordedCarBinding.mainLayout.setAlpha(alpha);
 
-                            ListenerAddRecordedCarsViewHolder.this.itemListenerAddRecordedCarBinding.loadingBtn.complete(completed);
+
+                            itemListenerAddRecordedCarBinding.loadingBtn.complete(completed);
                         }
                     }
                 }
@@ -143,15 +166,41 @@ public class ListenerAddRecordedCarsAdapter extends RecyclerView.Adapter<Listene
     @Override
     public void onBindViewHolder(ListenerAddRecordedCarsAdapter.ListenerAddRecordedCarsViewHolder holder, int position) {
 
+        holder.itemListenerAddRecordedCarBinding.mainLayout.setAlpha(1);
+        holder.itemListenerAddRecordedCarBinding.vichelNumberEdt.setText("");
+        holder.itemListenerAddRecordedCarBinding.vichelTypeEdt.setText("");
+
+        Utils.setEnableOrNot(holder.allViews, true);
+
+        //// init loading btn /////
+
+        holder.itemListenerAddRecordedCarBinding.loadingBtn.setEnableShrink(true)
+                .setEnableRestore(false)
+                .setDisableClickOnLoading(true)
+                .setShrinkDuration(450)
+                .setLoadingPosition(DrawableTextView.POSITION.START)
+                .setSuccessDrawable(R.drawable.ic_successful)
+                .setFailDrawable(R.drawable.ic_fail)
+                .setEndDrawableKeepDuration(900)
+                .setLoadingEndDrawableSize((int) (holder.itemListenerAddRecordedCarBinding.loadingBtn.getTextSize() * 2));
+        holder.itemListenerAddRecordedCarBinding.loadingBtn.getLoadingDrawable()
+                .setStrokeWidth(holder.itemListenerAddRecordedCarBinding.loadingBtn.getTextSize() * 0.14f);
+        holder.itemListenerAddRecordedCarBinding.loadingBtn.getLoadingDrawable()
+                .setColorSchemeColors(holder.itemListenerAddRecordedCarBinding.loadingBtn.getTextColors().getDefaultColor());
+
         holder.itemListenerAddRecordedCarBinding.loadingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                Utils.setEnableOrNot(holder.editTexts, false);
+                if (holder.getTextFromEDTs()){
 
-                holder.itemListenerAddRecordedCarBinding.loadingBtn.start();
+                    Utils.setEnableOrNot(holder.allViews, false);
 
-                holder.insertAddRecordedCar();
+                    holder.itemListenerAddRecordedCarBinding.loadingBtn.start();
+
+                    holder.insertAddRecordedCar();
+                }
+
             }
         });
     }

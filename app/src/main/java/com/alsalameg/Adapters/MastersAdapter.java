@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.alsalameg.Adapters.Interfaces.OnDeleteMaster;
 import com.alsalameg.Api.WebServices;
 import com.alsalameg.BaseClasses.BaseFragment;
 import com.alsalameg.Constants;
@@ -43,18 +44,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersViewHolder>{
-    private List<Master> masterList;
-    private Context context;
-    private BaseFragment fragment;
-    private ListenRecordsViewModel listenRecordsViewModel;
+    private final List<Master> masterList;
+    private final Context context;
+    private final BaseFragment fragment;
+    private final ListenRecordsViewModel listenRecordsViewModel;
     private boolean listenerRecordedCars;
 
     public class MastersViewHolder extends RecyclerView.ViewHolder {
 
-        private ItemMasterBinding itemRecordBinding;
-        private SupportMapFragment mapFragment;
-        private List<View> viewList;
-        private List<String> values;
+        private final ItemMasterBinding itemRecordBinding;
+        private final SupportMapFragment mapFragment;
+        private final List<View> viewList;
+        private final List<String> values;
         private List<Record> recordList;
         private RecordsAdapter recordsAdapter;
         private OnDeleteMaster onDeleteMaster;
@@ -73,7 +74,7 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
         class GetMasterRecordsAsyncClass extends AsyncTask<String, String, List<HashMap<String,String>>> {
 
-            private String id;
+            private final String id;
 
             public GetMasterRecordsAsyncClass(String id) {
                 this.id = id;
@@ -102,8 +103,8 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
                     List<Record> recordList = new ArrayList<>();
                     for (HashMap<String,String> hashMap : recordsMap){
 
-                        record = new Record(hashMap.get("ID"), hashMap.get("ID_Recorded"), hashMap.get("File_Name"), hashMap.get("File_Extension"),
-                                hashMap.get("File_Size"));
+                        record = new Record(hashMap.get("ID"), hashMap.get("ID_Recorded"), hashMap.get("File_Name"),
+                                hashMap.get("File_Extension"), hashMap.get("File_Size"), hashMap.get("heard"));
 
 
                         recordList.add(record);
@@ -292,7 +293,8 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
 
         // init records
-        if (MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded") && Boolean.parseBoolean(master.getType())){
+        if (MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded")
+                && Boolean.parseBoolean(master.getType())){
 
                 holder.onDeleteMaster = new OnDeleteMaster() {
                     @Override
@@ -319,10 +321,8 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
             @Override
             public void onClick(View v) {
 
-                if (MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded"))
-                    holder.deleteMaster(master.getId(), master.getIdUSER(), position, true);
-                else
-                    holder.deleteMaster(master.getId(), master.getIdUSER(), position, false);
+                holder.deleteMaster(master.getId(), master.getIdUSER(), position,
+                        MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded"));
             }
         });
 
@@ -332,7 +332,7 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
             public void onClick(View v) {
 
 
-                if (!MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded")){
+                if (!MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded") && !listenerRecordedCars){
 
                     Bundle bundle = new Bundle();
                     bundle.putSerializable("master", master);

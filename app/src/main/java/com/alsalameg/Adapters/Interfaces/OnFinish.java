@@ -1,4 +1,4 @@
-package com.alsalameg.Adapters;
+package com.alsalameg.Adapters.Interfaces;
 
 import com.alsalameg.Models.UploadingRecord;
 

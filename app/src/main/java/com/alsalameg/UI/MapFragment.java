@@ -2,6 +2,7 @@ package com.alsalameg.UI;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.FragmentManager;
@@ -64,9 +65,8 @@ public class MapFragment extends BaseFragment {
     private SupportMapFragment mapFragment;
     private OnMapReadyCallback callback;
     private LatLng latLng;
-    private List<Marker> markerList, markers;
+    private List<Car> carsList, cars;
     private Marker selectedMarker;
-    private boolean isEnablingGps;
 
     // vars for api
     private MapViewModel mapViewModel;
@@ -89,6 +89,7 @@ public class MapFragment extends BaseFragment {
 
         fetchCurrentLocation();
     }
+
 
     private void setListeners() {
 
@@ -127,23 +128,55 @@ public class MapFragment extends BaseFragment {
         });
     }
 
-    private boolean checkPermission() {
 
-        if (!Constants.checkLocationPermission(getActivity())) {
+    private void fetchCurrentLocation() {
 
-            showInfoDialogWithOneButton(getResources().getString(R.string.req_loc_perm),
-                    getResources().getString(R.string.req_loc_perm_message), getResources().getString(R.string.req_loc_perm_pos_btn),
-                    new Closure() {
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkPermission()) {
+            return;
+        }
+
+        if (!isGPSEnabled(getContext())){
+
+            showWarningDialog(getResources().getString(R.string.enable_gps), getResources().getString(R.string.enable_gps_msg),
+                    getResources().getString(R.string.enable), new Closure() {
                         @Override
                         public void exec() {
 
-                            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+                            getActivity().startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+
                         }
-                    }, false);
-            return false;
-        } else return true;
+                    }, true);
+        }
+
+        else {
+
+            fusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
+                    new CancellationToken() {
+                        @Override
+                        public boolean isCancellationRequested() {
+                            return false;
+                        }
+
+                        @Override
+                        public CancellationToken onCanceledRequested(OnTokenCanceledListener onTokenCanceledListener) {
+                            return null;
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    if (location != null) {
+                        currentLocation = location;
+
+                        setGoogleMap();
+                    }
+                }
+            });
+        }
+
     }
+
 
     private void setGoogleMap() {
 
@@ -175,34 +208,35 @@ public class MapFragment extends BaseFragment {
 
                 final int[] click = {0};
 
-                markers = new ArrayList<>();
+                cars = new ArrayList<>();
 
                 googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
 
-                        markers.clear();
+                        cars.clear();
 
-                        for (Marker marker1 : markerList) {
+                        for (Car car : carsList) {
 
-                            if (marker.getPosition().longitude + marker.getPosition().latitude == marker1.getPosition().longitude +
-                                    marker1.getPosition().latitude)
-                                markers.add(marker1);
+                            if (marker.getPosition().longitude + marker.getPosition().latitude == Double.parseDouble(car.getLongitude())
+                                    + Double.parseDouble(car.getLatitude()))
+                                cars.add(car);
 
                         }
 
-                        if (markers.size() > 1) {
+                        if (cars.size() > 1) {
 
                             FragmentManager fm = getActivity().getSupportFragmentManager();
                             SameMultipleLatlongMarksFragment sameMultipleLatlongMarksFragment =
-                                    new SameMultipleLatlongMarksFragment(markers, latLng);
+                                    new SameMultipleLatlongMarksFragment(cars, latLng);
                             sameMultipleLatlongMarksFragment.show(fm, "fragment_new_activity");
+
                         } else {
 
                             if (selectedMarker == null)
                                 selectedMarker = marker;
 
-                            if (selectedMarker.getPosition().longitude + marker.getPosition().latitude ==
+                            if (selectedMarker.getPosition().longitude + selectedMarker.getPosition().latitude ==
                                     marker.getPosition().longitude + marker.getPosition().latitude) {
 
                                 click[0]++;
@@ -237,57 +271,6 @@ public class MapFragment extends BaseFragment {
         mapFragment.getMapAsync(callback);
     }
 
-    private void fetchCurrentLocation() {
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(getActivity());
-
-        isEnablingGps = false;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkPermission()) {
-            return;
-        }
-
-        if (!isGPSEnabled(getContext())){
-
-            showWarningDialog(getResources().getString(R.string.enable_gps), getResources().getString(R.string.enable_gps_msg),
-                    getResources().getString(R.string.enable), new Closure() {
-                        @Override
-                        public void exec() {
-
-                            getActivity().startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-
-                            isEnablingGps = true;
-                        }
-                    }, true);
-        }
-
-        else {
-
-            fusedLocationProviderClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY,
-                    new CancellationToken() {
-                        @Override
-                        public boolean isCancellationRequested() {
-                            return false;
-                        }
-
-                        @Override
-                        public CancellationToken onCanceledRequested(OnTokenCanceledListener onTokenCanceledListener) {
-                            return null;
-                        }
-                    }).addOnSuccessListener(new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    if (location != null) {
-                        currentLocation = location;
-
-                        setGoogleMap();
-                    }
-                }
-            });
-        }
-
-    }
-
 
     private void requestCarsLocations(GoogleMap googleMap) {
 
@@ -297,6 +280,7 @@ public class MapFragment extends BaseFragment {
                 carMarkObserver(googleMap));
     }
 
+
     private Observer<List<Car>> carMarkObserver(GoogleMap googleMap) {
 
         return new Observer<List<Car>>() {
@@ -305,15 +289,15 @@ public class MapFragment extends BaseFragment {
 
                 if (cars != null) {
 
-                    markerList = new ArrayList<>();
+                    carsList = new ArrayList<>();
 
                     if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
 
                         hideProgress();
 
-                        if (!cars.isEmpty()) {
+                        if (!cars.get(0).getId().equals("")) {
 
-                            if (!cars.get(0).getId().equals("")) {
+                            if (!cars.isEmpty()) {
 
                                 Marker marker;
 
@@ -324,19 +308,65 @@ public class MapFragment extends BaseFragment {
                                             .title(car.getPlateNumber() + " , " + car.getKind() + " , " + car.getBank()));
 
                                     marker.setTag(car);
-                                    markerList.add(marker);
                                     marker.showInfoWindow();
+
                                 }
+
+                                carsList.addAll(cars);
+
+                                configureSearchBar(googleMap);
+
                             } else {
 
-                                showFailedDialog(getResources().getString(R.string.fail_load_cars), true);
+                                showFailedDialog(getResources().getString(R.string.no_cars), true);
                             }
                         } else
-                            showFailedDialog(getResources().getString(R.string.no_cars), true);
+                            showFailedDialog(getResources().getString(R.string.fail_load_cars), true);
                     }
                 }
             }
         };
+    }
+
+
+    private void configureSearchBar(GoogleMap googleMap){
+
+        fragmentMapBinding.searchBar.setVisibility(View.VISIBLE);
+
+        fragmentMapBinding.searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+
+                if (query.equals(""))
+                    setGoogleMap();
+
+                else {
+
+                    for (Car car: carsList){
+
+                        if (query.equals(car.getPlateNumber())){
+
+                            googleMap.clear();
+                            googleMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(
+                                    car.getLatitude()), Double.parseDouble(car.getLongitude()))).icon(getMark(car.getStatus()))
+                                    .title(car.getPlateNumber() + " , " + car.getKind() + " , " + car.getBank()));
+                        }
+
+                    }
+                }
+
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+
+                if (newText.equals(""))
+                    setGoogleMap();
+
+                return false;
+            }
+        });
     }
 
 
@@ -370,6 +400,36 @@ public class MapFragment extends BaseFragment {
         }
     }
 
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+
+    private boolean checkPermission() {
+
+        if (!Constants.checkLocationPermission(getActivity())) {
+
+            showInfoDialogWithOneButton(getResources().getString(R.string.req_loc_perm),
+                    getResources().getString(R.string.req_loc_perm_message), getResources().getString(R.string.req_loc_perm_pos_btn),
+                    new Closure() {
+                        @Override
+                        public void exec() {
+
+                            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+                        }
+                    }, false);
+            return false;
+        } else return true;
+    }
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -382,12 +442,4 @@ public class MapFragment extends BaseFragment {
         }
     }
 
-    private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {
-        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorResId);
-        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight());
-        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(), vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        vectorDrawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
 }

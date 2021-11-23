@@ -92,7 +92,7 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
 
         }
 
-
+        // TODO: 11/23/2021 add insert to room rechis when start to upload
 
         private class UploadAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
 

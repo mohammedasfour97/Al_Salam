@@ -46,7 +46,7 @@
     </style>
 
     <style name="ProgressBar_style" parent="android:Widget.ProgressBar">
-        <item name="colorAccent">@color/purple_500</item>
+        <item name="colorAccent">@color/colorPrimary</item>
     </style>
 
     <style name="Sliding_Right_Left_Dialog_Animation">
@@ -54,13 +54,12 @@
         <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>
     </style>
 
-    <style name="Fading_Dialog_Animation">
-        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
-        <item name="android:windowExitAnimation">@android:anim/fade_out</item>
-    </style>
-
     <style name="Sliding_Top_Down_Dialog_Animation">
         <item name="android:windowEnterAnimation">@anim/slide_up</item>
         <item name="android:windowExitAnimation">@anim/slide_down</item>
+    </style>
+
+    <style name="PrimAccent" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/colorPrimary</item>
     </style>
 </resources>

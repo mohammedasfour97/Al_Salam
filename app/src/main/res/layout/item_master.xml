@@ -25,8 +25,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="@drawable/prim_solid_top_redius"
-                android:gravity="right">
+                android:background="@drawable/prim_solid_top_redius">
 
                 <ImageView
                     android:id="@+id/deleteBtn"
@@ -35,7 +34,7 @@
                     android:layout_marginHorizontal="@dimen/_10sdp"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:src="@drawable/ic_baseline_delete_white_24"
-                    android:layout_gravity="start"/>
+                    android:layout_gravity="end"/>
 
                 <TextView
                     android:id="@+id/vehicle_numTxt"
@@ -192,7 +191,7 @@
                     android:layout_width="@dimen/_50sdp"
                     android:layout_height="@dimen/_50sdp"
                     android:layout_gravity="center"
-                    style="@style/ProgressBar_style"
+                    android:theme="@style/ProgressBar_style"
                     android:visibility="gone" />
             </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

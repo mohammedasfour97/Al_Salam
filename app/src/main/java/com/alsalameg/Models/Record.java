@@ -2,14 +2,15 @@ package com.alsalameg.Models;
 
 public class Record {
 
-    private String id, idRecorded, fileName, fileExtension, fileSize;
+    private String id, idRecorded, fileName, fileExtension, fileSize, heard;
 
-    public Record(String id, String idRecorded, String fileName, String fileExtension, String fileSize) {
+    public Record(String id, String idRecorded, String fileName, String fileExtension, String fileSize, String heard) {
         this.id = id;
         this.idRecorded = idRecorded;
         this.fileName = fileName;
         this.fileExtension = fileExtension;
         this.fileSize = fileSize;
+        this.heard = heard;
     }
 
     public Record() {
@@ -53,5 +54,13 @@ public class Record {
 
     public void setFileSize(String fileSize) {
         this.fileSize = fileSize;
+    }
+
+    public String getHeard() {
+        return heard;
+    }
+
+    public void setHeard(String heard) {
+        this.heard = heard;
     }
 }

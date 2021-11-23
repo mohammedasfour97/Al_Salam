@@ -51,6 +51,7 @@ public class ListenerAddRecordedCarFragment extends BaseFragment {
 
     //vars for spinner
     private ArrayAdapter<IDName> spinnerArrayAdapter;
+    private List<IDName> regionList;
     private String selectedRegionID;
 
     /// vars for recyclerviews ///
@@ -78,6 +79,7 @@ public class ListenerAddRecordedCarFragment extends BaseFragment {
 
         setListeners();
         initRecyclerViews();
+        initRegionSpinner();
         initObservers();
 
         getRecordsList();
@@ -158,6 +160,15 @@ public class ListenerAddRecordedCarFragment extends BaseFragment {
                 ,bundle);
             }
         });
+
+
+        fragmentListenerAddRecordedCarBinding.delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                renewAddRecordedCarsList();
+            }
+        });
     }
 
 
@@ -172,17 +183,30 @@ public class ListenerAddRecordedCarFragment extends BaseFragment {
         recordsAdapter.setHasStableIds(true);
         fragmentListenerAddRecordedCarBinding.recordsRecycler.recyclerview.setAdapter(recordsAdapter);
 
+
+
         addRecordedCarsList = new ArrayList<>();
 
-        for (int a=0; a<4; a++)
-            addRecordedCarsList.add("");
-
         addRecordedCarsAdapter = new ListenerAddRecordedCarsAdapter(addRecordedCarsList , master, getContext(), this);
-        fragmentListenerAddRecordedCarBinding.addRecordedCarRecycler.recyclerview.setLayoutManager(mLayoutManager);
+        LinearLayoutManager mLayoutManager2 = new LinearLayoutManager(getContext());
+        fragmentListenerAddRecordedCarBinding.addRecordedCarRecycler.recyclerview.setLayoutManager(mLayoutManager2);
         fragmentListenerAddRecordedCarBinding.addRecordedCarRecycler.recyclerview.addItemDecoration(new DividerItemDecoration(getContext(),
                 LinearLayoutManager.VERTICAL));
         addRecordedCarsAdapter.setHasStableIds(true);
-        fragmentListenerAddRecordedCarBinding.addRecordedCarRecycler.recyclerview.setAdapter(recordsAdapter);
+        fragmentListenerAddRecordedCarBinding.addRecordedCarRecycler.recyclerview.setAdapter(addRecordedCarsAdapter);
+
+        renewAddRecordedCarsList();
+    }
+
+
+    private void initRegionSpinner(){
+
+        regionList = new ArrayList<>();
+        regionList.add(new IDName("0", getResources().getString(R.string.choose_region)));
+
+        spinnerArrayAdapter = new ArrayAdapter<IDName>(getContext(), android.R.layout.simple_spinner_item, regionList);
+        spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down vieww
+        fragmentListenerAddRecordedCarBinding.regionsSpinner.setAdapter(spinnerArrayAdapter);
     }
 
 
@@ -207,9 +231,8 @@ public class ListenerAddRecordedCarFragment extends BaseFragment {
 
                         } else {
 
-                            spinnerArrayAdapter = new ArrayAdapter<IDName>(getContext(), android.R.layout.simple_spinner_item, idNames);
-                            spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down vieww
-                            fragmentListenerAddRecordedCarBinding.regionsSpinner.setAdapter(spinnerArrayAdapter);
+                            regionList.addAll(idNames);
+                            spinnerArrayAdapter.notifyDataSetChanged();
 
                             //set selected item
 
@@ -315,10 +338,41 @@ public class ListenerAddRecordedCarFragment extends BaseFragment {
         fragmentListenerAddRecordedCarBinding.vichelTypeEdt.setText(master.getVehicleType());
         fragmentListenerAddRecordedCarBinding.vichelNumberEdt.setText(master.getVehicleNumber());
         fragmentListenerAddRecordedCarBinding.vichelNotesTxt.setText(master.getNotes());
+        */
         fragmentListenerAddRecordedCarBinding.latLngTxt.setText(getResources().getString(R.string.latitude) + " : " + master.getLatitude()
-        + "\t" + getResources().getString(R.string.longitude) + " : " + master.getLongitude());
-         */
-        
+                + " || " + getResources().getString(R.string.longitude) + " : " + master.getLongitude());
+
+
+    }
+
+
+    private void getRecordsList(){
+
+        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.load_records_msg), false);
+
+        listenRecordsViewModel.getMasterRecordListMutableLiveData(master.getId(), MyApplication.getTinyDB().getString(Constants.KEY_USERID))
+                .observe(getViewLifecycleOwner(), recordsListObserver);
+    }
+
+
+    private void getRegions(){
+
+        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.load_regions_msg), false);
+
+        makeRecordsViewModel.getGetRegionsLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID))
+                .observe(getViewLifecycleOwner(), regionsObserver);
+    }
+
+
+    private void renewAddRecordedCarsList(){
+
+        addRecordedCarsList.clear();
+
+        for (int a=0; a<5; a++)
+            addRecordedCarsList.add("");
+
+        addRecordedCarsAdapter.notifyDataSetChanged();
+
     }
 
 
@@ -360,22 +414,5 @@ public class ListenerAddRecordedCarFragment extends BaseFragment {
     }
 
      */
-
-    private void getRegions(){
-
-        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.load_regions_msg), false);
-
-        makeRecordsViewModel.getGetRegionsLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID))
-                .observe(getViewLifecycleOwner(), regionsObserver);
-    }
-
-
-    private void getRecordsList(){
-
-        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.load_records_msg), false);
-
-        listenRecordsViewModel.getMasterRecordListMutableLiveData(master.getId(), MyApplication.getTinyDB().getString(Constants.KEY_USERID))
-                .observe(getViewLifecycleOwner(), recordsListObserver);
-    }
 
 }
