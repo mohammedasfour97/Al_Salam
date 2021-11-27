@@ -104,5 +104,8 @@
     <string name="enable">تفعيل</string>
     <string name="detecting_your_loc_msg">برجاء الإنتظار جارى تحديد موقعك</string>
     <string name="record_not_upload_msg">لم يتم رفع التسجيل الصوتى … أعد المحاولة</string>
+    <string name="send">إرسال</string>
+    <string name="rec_his_list">أرشيف التسجيلات</string>
+    <string name="history">الأرشيف</string>
 
 </resources>

@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/fragment_login"
-        android:name="com.alsalameg.UI.LoginFragment"
+        android:name="com.alsalamegypt.UI.LoginFragment"
         tools:layout="@layout/fragment_login">
 
         <action
@@ -44,7 +44,7 @@
 
     <fragment
         android:id="@+id/fragment_map"
-        android:name="com.alsalameg.UI.MapFragment"
+        android:name="com.alsalamegypt.UI.MapFragment"
         tools:layout="@layout/fragment_user_map">
 
     <action
@@ -59,7 +59,7 @@
 
     <fragment
         android:id="@+id/fragment_main_records"
-        android:name="com.alsalameg.UI.MainRecordFragment"
+        android:name="com.alsalamegypt.UI.MainRecordFragment"
         tools:layout="@layout/fragment_main_records">
 
         <action
@@ -75,7 +75,7 @@
 
     <fragment
         android:id="@+id/fragment_listen_to_records"
-        android:name="com.alsalameg.UI.ListenRecordsFragment"
+        android:name="com.alsalamegypt.UI.ListenRecordsFragment"
         tools:layout="@layout/fragment_listen_masters">
 
         <action
@@ -99,7 +99,7 @@
 
     <fragment
         android:id="@+id/fragment_listener_add_recorded_car"
-        android:name="com.alsalameg.UI.ListenerAddRecordedCarFragment"
+        android:name="com.alsalamegypt.UI.ListenerAddRecordedCarFragment"
         tools:layout="@layout/fragment_listener_add_recorded_car">
 
         <action

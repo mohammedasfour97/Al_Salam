@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/navigation_make_record"
-        android:name="com.alsalameg.UI.MakeRecordsFragment"
+        android:name="com.alsalamegypt.UI.MakeRecordsFragment"
         android:label="@string/record"
         tools:layout="@layout/fragment_make_records">
     <action
@@ -17,13 +17,13 @@
 
     <fragment
         android:id="@+id/navigation_listen_records"
-        android:name="com.alsalameg.UI.ListenRecordsFragment"
+        android:name="com.alsalamegypt.UI.ListenRecordsFragment"
         android:label="@string/my_records"
         tools:layout="@layout/fragment_listen_masters" />
 
     <fragment
         android:id="@+id/navigation_records_history"
-        android:name="com.alsalameg.UI.RecordHistoryFragment"
+        android:name="com.alsalamegypt.UI.RecordHistoryFragment"
         android:label="@string/history"
         tools:layout="@layout/fragment_listen_masters" />
 
