@@ -27,8 +27,17 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_baseline_autorenew_24"
                 android:layout_centerVertical="true"
-                android:layout_toEndOf="@id/standard_toolbar_logout_btn"
-                android:layout_toRightOf="@id/standard_toolbar_logout_btn" />
+                android:layout_toEndOf="@id/standard_toolbar_logout_btn" />
+
+            <ImageView
+                android:id="@+id/standard_toolbar_delete_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_baseline_delete_white_30"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:layout_margin="@dimen/_10sdp"
+                android:visibility="gone"/>
 
             <TextView
                 android:id="@+id/standard_toolbar_title_txt"
@@ -40,11 +49,35 @@
 
         </RelativeLayout>
 
-        <include
-            android:id="@+id/fragment_listen_recordsrecycler"
-            android:layout_height="wrap_content"
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/fragmentListenMasters_scrollView"
             android:layout_width="match_parent"
-            layout="@layout/recycler"/>
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <include
+                    android:id="@+id/fragment_listen_recordsrecycler"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    layout="@layout/recycler"/>
+
+                <ProgressBar
+                    android:id="@+id/progress"
+                    android:layout_width="@dimen/_50sdp"
+                    android:layout_height="@dimen/_50sdp"
+                    android:layout_margin="@dimen/_10sdp"
+                    android:layout_gravity="center"
+                    android:visibility="gone"/>
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+        </androidx.core.widget.NestedScrollView>
+
 
     </androidx.appcompat.widget.LinearLayoutCompat>
+
 </layout>

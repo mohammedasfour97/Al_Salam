@@ -1,6 +1,7 @@
 package com.alsalamegypt.UI;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +13,19 @@ import com.alsalamegypt.RecordHistory;
 import com.alsalamegypt.MyApplication;
 import com.alsalamegypt.R;
 import com.alsalamegypt.Repositories.MakeRecordsRepository;
+import com.alsalamegypt.ViewModels.MakeRecordsViewModel;
 import com.alsalamegypt.databinding.FragmentListenMastersBinding;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
@@ -28,7 +34,14 @@ public class RecordHistoryFragment extends BaseFragment {
     private FragmentListenMastersBinding fragmentListenMastersBinding;
     private RecordsHistoryAdapter recordsHistoryAdapter;
     private List<RecordHistory> recordHistoryList;
-    private MakeRecordsRepository makeRecordsRepository;
+
+    /// Vars for apis /////
+    private MakeRecordsViewModel makeRecordsViewModel;
+    private Observer<List<RecordHistory>> recordHistoryListObserver;
+    private Observer<Integer> deleteAllHistoryObserver;
+
+    private final int SPLASH_DISPLAY_LENGTH = 500;
+
 
 
     @Nullable
@@ -49,12 +62,24 @@ public class RecordHistoryFragment extends BaseFragment {
         initUI();
         setListeners();
         initRecyclerView();
-        requestRecordsList();
+        initObservers();
+
+        new Handler().postDelayed(new Runnable(){
+            @Override
+            public void run() {
+
+                requestRecordsList();
+
+            }
+        }, SPLASH_DISPLAY_LENGTH);
+
     }
 
     private void initUI(){
 
         fragmentListenMastersBinding.standardToolbarTitleTxt.setText(getResources().getString(R.string.rec_his_list));
+
+        fragmentListenMastersBinding.standardToolbarDeleteBtn.setVisibility(View.VISIBLE);
     }
 
 
@@ -94,10 +119,50 @@ public class RecordHistoryFragment extends BaseFragment {
             }
         });
 
+
+        fragmentListenMastersBinding.standardToolbarDeleteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                if (recordHistoryList.isEmpty()){
+
+                    showFailedDialog(getResources().getString(R.string.no_data_to_remove), true);
+                    return;
+                }
+
+
+                showInfoDialogWithTwoButtons(getResources().getString(R.string.sure),
+                        getResources().getString(R.string.sure_del_all_arch), getResources().getString(R.string.yes),
+                        getResources().getString(R.string.no), new Closure() {
+                            @Override
+                            public void exec() {
+
+                                ///// Del all archive /////
+
+                                showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.del_all_arch_prog),
+                                        false);
+
+                                makeRecordsViewModel.getDeleteAllRecordHistoryMutableLiveData().observe(getViewLifecycleOwner(),
+                                        deleteAllHistoryObserver);
+                            }
+                        }, new Closure() {
+                            @Override
+                            public void exec() {
+
+                                hideInfoDialogWithTwoButton();
+                            }
+                        }, true);
+
+            }
+        });
+
     }
 
 
     private void initRecyclerView(){
+
+        recordHistoryList = new ArrayList<>();
 
         recordsHistoryAdapter = new RecordsHistoryAdapter(recordHistoryList , getContext(), this);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext());
@@ -111,6 +176,78 @@ public class RecordHistoryFragment extends BaseFragment {
 
     private void requestRecordsList(){
 
+        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_rec_his)
+                , false);
 
+        makeRecordsViewModel.getGetAllRecordHistoryMutableLiveData().observe(getViewLifecycleOwner(), recordHistoryListObserver);
+    }
+
+
+    private void initObservers(){
+
+        makeRecordsViewModel = ViewModelProviders.of(this).get(MakeRecordsViewModel.class);
+
+        recordHistoryListObserver = new Observer<List<RecordHistory>>() {
+            @Override
+            public void onChanged(List<RecordHistory> recordHistories) {
+
+                if (recordHistories!= null){
+
+                        hideProgress();
+
+                        if (!recordHistories.isEmpty()){
+
+                            if (recordHistories.get(0).getId()!= -1){
+
+                                recordHistoryList.clear();
+                                recordHistoryList.addAll(recordHistories);
+                                recordsHistoryAdapter.notifyDataSetChanged();
+                            }
+
+                            else {
+
+                                showFailedDialog(getResources().getString(R.string.err_load_rec_his), false);
+                            }
+
+                        }
+
+                        else{
+
+                            showSnackBar(R.string.no_record_history);
+                        }
+
+
+                    }
+                }
+
+        };
+
+
+        deleteAllHistoryObserver = new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+
+                if (integer!=null){
+
+                    if (getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+
+                        hideProgress();
+
+                        if (integer!=0 && integer!=-1){
+
+                            showSuccessDialog(getResources().getString(R.string.succ_del_all_arch_prog), true);
+
+                            int size = recordHistoryList.size();
+                            recordHistoryList.clear();
+                            recordsHistoryAdapter.notifyItemRangeRemoved(0, size);
+
+                        }
+
+                        else
+                            showFailedDialog(getResources().getString(R.string.fail_del_all_arch_prog), false);
+                    }
+                }
+            }
+        };
     }
 }

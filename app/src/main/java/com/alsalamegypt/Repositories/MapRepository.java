@@ -60,7 +60,6 @@ public class MapRepository extends BaseRepository {
 
             if (carsList != null) {
 
-
                 for (HashMap<String, String> map : carsList) {
 
                     car = new Car(map.get("ID"), map.get("ID_MasterDailyChit"), map.get("PlateNumber"), map.get("Kind"),
@@ -69,7 +68,7 @@ public class MapRepository extends BaseRepository {
                             map.get("Customer"), map.get("Maker"), map.get("ID_Regions"), map.get("DateCreate"), map.get("DateEdite"),
                             map.get("Original_Number"), map.get("After_Repetition"), map.get("Corresponding_Number"),
                             map.get("FullName"), map.get("Regions"), map.get("Vehicle_Number"), map.get("Vehicle_Type"), map.get("Location"),
-                            map.get("District"), map.get("Longitude"), map.get("Latitude"), map.get("Sorting"));
+                            map.get("District"), map.get("Longitude"), map.get("Latitude"), map.get("Sorting"), map.get("Colors"));
 
                     carList.add(car);
                 }

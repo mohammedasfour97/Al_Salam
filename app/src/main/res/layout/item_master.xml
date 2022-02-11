@@ -8,6 +8,7 @@
 <!--            type="com.alsalameg.Models.Record" />-->
 <!--    </data>-->
 
+
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,6 +23,7 @@
             android:orientation="vertical">
 
             <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/top_radius_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
@@ -34,7 +36,7 @@
                     android:layout_marginHorizontal="@dimen/_10sdp"
                     android:layout_marginTop="@dimen/_10sdp"
                     android:src="@drawable/ic_baseline_delete_white_24"
-                    android:layout_gravity="end"/>
+                    android:layout_gravity="end" />
 
                 <TextView
                     android:id="@+id/vehicle_numTxt"
@@ -180,11 +182,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <include
-                    android:id="@+id/item_record_records_recycler"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    layout="@layout/recycler"/>
+                    android:visibility="gone"/>
 
                 <ProgressBar
                     android:id="@+id/progress"
@@ -193,6 +195,16 @@
                     android:layout_gravity="center"
                     android:theme="@style/ProgressBar_style"
                     android:visibility="gone" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/load_rec_list_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/load_rec_list_btn"
+                    style="@style/Bold_White_Color_TextView_style"
+                    android:layout_gravity="center"
+                    android:visibility="gone"/>
+
             </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 

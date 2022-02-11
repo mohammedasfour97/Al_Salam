@@ -22,7 +22,7 @@ public class RoomDatabaseModule {
     public synchronized RecordHistoryRoomDatabase getInstance() {
 
         return Room.databaseBuilder(context,
-                    RecordHistoryRoomDatabase.class, "record_history_table")
+                    RecordHistoryRoomDatabase.class, "record_history")
                     .fallbackToDestructiveMigration()
                     .build();
         }

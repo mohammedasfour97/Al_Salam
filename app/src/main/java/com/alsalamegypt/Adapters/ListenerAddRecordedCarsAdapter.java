@@ -62,11 +62,7 @@ public class ListenerAddRecordedCarsAdapter extends RecyclerView.Adapter<Listene
                 return false;
             }
 
-            else if (TextUtils.isEmpty(this.itemListenerAddRecordedCarBinding.vichelTypeEdt.getText().toString())) {
-                this.itemListenerAddRecordedCarBinding.vichelTypeEdt.setError(context.getResources().getString(R.string.enter) + " " +
-                        context.getResources().getString(R.string.vichel_type));
-                return false;
-            }
+
             else if (((ListenerAddRecordedCarFragment)fragment).getSelectedRegionID().equals("0")){
 
                 Toast.makeText(context, R.string.choose_region_message, Toast.LENGTH_SHORT).show();
@@ -171,7 +167,7 @@ public class ListenerAddRecordedCarsAdapter extends RecyclerView.Adapter<Listene
         //// init loading btn /////
 
         holder.itemListenerAddRecordedCarBinding.loadingBtn.setEnableShrink(true)
-                .setEnableRestore(false)
+                .setEnableRestore(true)
                 .setDisableClickOnLoading(true)
                 .setShrinkDuration(450)
                 .setLoadingPosition(DrawableTextView.POSITION.START)

@@ -1,18 +1,42 @@
 package com.alsalamegypt.Repositories;
 
+import android.media.AudioManager;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import com.alsalamegypt.BaseClasses.BaseRepository;
 import com.alsalamegypt.Models.IDName;
 import com.alsalamegypt.Models.Master;
 import com.alsalamegypt.RecordHistory;
 import com.alsalamegypt.RoomDB.RecordHistoryDao;
+import com.alsalamegypt.UploadRecordFirebase.MainActivity;
+import com.alsalamegypt.Utils;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -20,7 +44,8 @@ public class MakeRecordsRepository extends BaseRepository {
 
     private RecordHistoryDao recordHistoryDao;
 
-    private MutableLiveData<String> uploadRecordMutableLiveData, insertRecordMasterLiveData, uploadRecordToMasterLiveData;
+    private MutableLiveData<String> insertRecordMasterLiveData, uploadRecordToMasterLiveData;
+    private MutableLiveData<Map<String, String>> uploadRecordMutableLiveData;
     private MutableLiveData<List<IDName>> getRegionsLiveData;
     private MutableLiveData<List<Master>> getRecorderDailyCarsMutableLiveData;
     private MutableLiveData<Long> insertRecordHistoryMutableLiveData;
@@ -37,11 +62,92 @@ public class MakeRecordsRepository extends BaseRepository {
     }
     
 
-    public MutableLiveData<String> getMutableLiveData(byte[] recordBytes, String fileName, String userId) {
+    /*public MutableLiveData<String> getMutableLiveData(byte[] recordBytes, String fileName, String userId) {
 
         uploadRecordMutableLiveData = new MutableLiveData<>();
 
         new UploadAsyncClass(recordBytes, fileName, userId).execute();
+
+        return uploadRecordMutableLiveData;
+    }
+
+     */
+
+    public MutableLiveData<Map<String, String>> getUploadRecordMutableLiveData(Uri filePath, String fileName) {
+
+        uploadRecordMutableLiveData = new MutableLiveData<>();
+
+        HashMap<String,String> hashMap = new HashMap<>();
+        hashMap.put("success", "");
+        hashMap.put("progress", "0");
+
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageReference = storage.getReference();
+
+        StorageReference ref = storageReference.child("audios/" + fileName);
+        UploadTask uploadTask = ref.putFile(filePath);
+
+        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                            @Override
+                            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                                if (!task.isSuccessful()) {
+                                    throw task.getException();
+                                }
+
+                                // Continue with the task to get the download URL
+                                return ref.getDownloadUrl();
+                            }
+                        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                if (task.isSuccessful()) {
+
+                                    Uri downloadUri = task.getResult();
+
+                                    String url = downloadUri.toString();
+
+                                    hashMap.put("success", url);
+                                    hashMap.put("progress", "100");
+
+                                    uploadRecordMutableLiveData.postValue(hashMap);
+                                } else {
+                                    // Handle failures
+                                    // ...
+                                }
+                            }
+                        });
+
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        hashMap.put("success", "false");
+                        hashMap.put("progress", "0");
+
+                        uploadRecordMutableLiveData.postValue(hashMap);
+                    }
+                })
+                .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+
+                        double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
+                                .getTotalByteCount());
+
+                        hashMap.put("success", "progress");
+                        hashMap.put("progress", String.valueOf(progress));
+
+                        uploadRecordMutableLiveData.postValue(hashMap);
+
+                    }
+                });
+
 
         return uploadRecordMutableLiveData;
     }
@@ -120,6 +226,16 @@ public class MakeRecordsRepository extends BaseRepository {
     }
 
 
+    public MutableLiveData<Integer> getDeleteRecordHistoryMutableLiveData(String masterId) {
+
+        deleteRecordHistoryMutableLiveData = new MutableLiveData<>();
+
+        new DeleteRecordHistoryAsyncTask(masterId).execute();
+
+        return deleteRecordHistoryMutableLiveData;
+    }
+
+
     public MutableLiveData<List<RecordHistory>> getGetAllRecordHistoryMutableLiveData() {
 
         getAllRecordHistoryMutableLiveData = new MutableLiveData<>();
@@ -150,9 +266,7 @@ public class MakeRecordsRepository extends BaseRepository {
     }
 
 
-
-
-    private class UploadAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
+    /*private class UploadAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
 
         private byte[] recordBytes;
         private String fileName, userId;
@@ -186,6 +300,8 @@ public class MakeRecordsRepository extends BaseRepository {
         }
 
     }
+
+     */
 
 
     private class GetRegionsAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
@@ -305,7 +421,7 @@ public class MakeRecordsRepository extends BaseRepository {
 
         @Override
         protected List<HashMap<String,String>> doInBackground(Void... voids) {
-            return webServices.getMasters(id);
+            return webServices.getRecoderDailyCars(id);
         }
 
         @Override
@@ -322,7 +438,8 @@ public class MakeRecordsRepository extends BaseRepository {
                     master = new Master(hashMap.get("ID"), hashMap.get("Vehicle_Number"), hashMap.get("Vehicle_Type"), hashMap.get("Location"),
                             hashMap.get("District"), hashMap.get("Longitude"), hashMap.get("Latitude"), hashMap.get("Status"),
                             hashMap.get("Sorting"), hashMap.get("Notes"), hashMap.get("ID_Regions"), hashMap.get("Regions"),
-                            hashMap.get("ID_USER"), hashMap.get("DateEdite"), hashMap.get("DateCreate"), hashMap.get("Type"));
+                            hashMap.get("ID_USER"), hashMap.get("DateEdite"), hashMap.get("DateCreate"), hashMap.get("Type"),
+                            hashMap.get("heard"));
 
                     list.add(master);
 
@@ -372,14 +489,24 @@ public class MakeRecordsRepository extends BaseRepository {
     private class DeleteRecordHistoryAsyncTask extends AsyncTask<Void, Void, Integer> {
 
         private RecordHistory recordHistory;
+        private String masterId;
 
         public DeleteRecordHistoryAsyncTask(RecordHistory recordHistory) {
             this.recordHistory = recordHistory;
         }
 
+        public DeleteRecordHistoryAsyncTask(String masterId) {
+            this.masterId = masterId;
+        }
+
         @Override
         protected Integer doInBackground(Void... voids) {
-            return recordHistoryDao.delete(recordHistory);
+
+            if (recordHistory!=null)
+                return recordHistoryDao.delete(recordHistory);
+
+            else
+                return recordHistoryDao.delete(Integer.parseInt(masterId));
         }
 
         @Override
@@ -432,7 +559,7 @@ public class MakeRecordsRepository extends BaseRepository {
     }
 
 
-    private class GetRecordHistoryAsyncTask extends AsyncTask<Void, Void, LiveData<RecordHistory>> {
+    private class GetRecordHistoryAsyncTask extends AsyncTask<Void, Void, RecordHistory> {
 
         private int id;
 
@@ -441,22 +568,16 @@ public class MakeRecordsRepository extends BaseRepository {
         }
 
         @Override
-        protected LiveData<RecordHistory> doInBackground(Void... voids) {
+        protected RecordHistory doInBackground(Void... voids) {
             return recordHistoryDao.getRecordHistory(id);
         }
 
         @Override
-        protected void onPostExecute(LiveData<RecordHistory> recordHistoryLiveData) {
-            super.onPostExecute(recordHistoryLiveData);
+        protected void onPostExecute(RecordHistory recordHistory) {
+            super.onPostExecute(recordHistory);
 
-            RecordHistory recordHistory;
 
-            if (recordHistoryLiveData != null && recordHistoryLiveData.getValue() != null) {
-
-                recordHistory = recordHistoryLiveData.getValue();
-            }
-
-            else {
+            if (recordHistory == null) {
 
                 recordHistory = new RecordHistory();
                 recordHistory.setId(-1);
@@ -469,23 +590,22 @@ public class MakeRecordsRepository extends BaseRepository {
     }
 
 
-
-    private class GetAllRecordHistoryAsyncTask extends AsyncTask<Void, Void, LiveData<List<RecordHistory>>> {
+    private class GetAllRecordHistoryAsyncTask extends AsyncTask<Void, Void, List<RecordHistory>> {
 
         @Override
-        protected LiveData<List<RecordHistory>> doInBackground(Void... voids) {
+        protected List<RecordHistory> doInBackground(Void... voids) {
             return recordHistoryDao.getAllRecordHistory();
         }
 
         @Override
-        protected void onPostExecute(LiveData<List<RecordHistory>> recordHistoryList) {
+        protected void onPostExecute(List<RecordHistory> recordHistoryList) {
             super.onPostExecute(recordHistoryList);
 
             List<RecordHistory> recordHistories = new ArrayList<>();
 
-            if (recordHistoryList != null && recordHistoryList.getValue() != null){
+            if (recordHistoryList != null ){
 
-                recordHistories.addAll(recordHistoryList.getValue());
+                recordHistories.addAll(recordHistoryList);
             }
 
             else {
@@ -494,6 +614,8 @@ public class MakeRecordsRepository extends BaseRepository {
                 recordHistory.setId(-1);
                 recordHistories.add(recordHistory);
             }
+
+            Collections.reverse(recordHistories);
 
             getAllRecordHistoryMutableLiveData.postValue(recordHistories);
         }

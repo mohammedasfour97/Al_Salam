@@ -6,8 +6,10 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +25,10 @@ import com.alsalamegypt.Models.IDName;
 import com.alsalamegypt.Models.Master;
 import com.alsalamegypt.Models.UploadingRecord;
 import com.alsalamegypt.MyApplication;
+import com.alsalamegypt.Notifications.NotificationBuilder;
+import com.alsalamegypt.Notifications.UploadRecordService;
 import com.alsalamegypt.R;
+import com.alsalamegypt.RecordHistory;
 import com.alsalamegypt.Utils;
 import com.alsalamegypt.ViewModels.MakeRecordsViewModel;
 import com.alsalamegypt.databinding.FragmentMakeRecordsBinding;
@@ -42,31 +47,40 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.CancellationToken;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.OnTokenCanceledListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import static android.app.Activity.RESULT_OK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
-public class MakeRecordsFragment extends BaseFragment {
+public class MakeRecordsFragment extends BaseFragment implements Serializable {
 
     public FragmentMakeRecordsBinding fragmentMakeRecordsBinding;
 
@@ -74,7 +88,9 @@ public class MakeRecordsFragment extends BaseFragment {
     private AudioRecorder audioRecorder;
     private String recordFilePath;
     private File parentFile, recordFile;
-    private String recordPath, recordFileName;
+    private String recordFileName;
+    private Uri recordFileUri;
+    private final int PICK_AUD_REQUEST = 71;
 
     //Variables for map
     private Location currentLocation;
@@ -90,8 +106,7 @@ public class MakeRecordsFragment extends BaseFragment {
     //vars for spinner
     private ArrayAdapter<IDName> spinnerArrayAdapter;
     private List<IDName> regionList;
-    private String selectedRegionID;
-
+    private IDName selectedRegion;
 
     // vars for recyclerview///
     private UploadingRecordsProgressAdapter uploadingRecordsProgressAdapter;
@@ -99,9 +114,11 @@ public class MakeRecordsFragment extends BaseFragment {
 
     //VariablesForServices
     private MakeRecordsViewModel makeRecordsViewModel;
-    private Observer<String> uploadRecordObserver, uploadRecordToMasterObserver, addMasterObserver;
+    private Observer<String> uploadRecordToMasterObserver, addMasterObserver;
     private Observer<List<IDName>> regionsObserver;
-    private String masterId;
+    private Master master;
+    private FirebaseStorage storage;
+    private StorageReference storageReference;
 
     @Nullable
     @Override
@@ -119,8 +136,7 @@ public class MakeRecordsFragment extends BaseFragment {
 
         setListeners();
         initRegionSpinner();
-        initRecyclerView();
-        configureTheRecorder();
+        //initRecyclerView();
         fetchCurrentLocation();
         initObservers();
 
@@ -172,14 +188,59 @@ public class MakeRecordsFragment extends BaseFragment {
 //                !MyApplication.getTinyDB().getString("master_id").equals(""))
 //                    fragmentMakeRecordsBinding.fragmentMakeRecordsRecorderLayout.setVisibility(View.VISIBLE);
 //                else
-//                    showFailedDialog(getResources().getString(R.string.add_master_fir), true);
+//                    showFailedDialog(getResources().getString(R.string.add_master_fir), true)
+                if (checkBeforeRecord()){
 
-                if (selectedMark!=null)
+                    /*showInfoDialogWithTwoButtons(getResources().getString(R.string.choose_rec_way),
+                            getResources().getString(R.string.choose_rec_eay_msg), getResources().getString(R.string.open_fl_exp),
+                            getResources().getString(R.string.rec_from_app), new Closure() {
+                                @Override
+                                public void exec() {
+
+                                    chooseAud();
+                                }
+                            }, new Closure() {
+                                @Override
+                                public void exec() {
+
+                                    fragmentMakeRecordsBinding.fragmentMakeRecordsRecorderLayout.setVisibility(View.VISIBLE);
+                                }
+                            }, true)
+                     */
+
                     fragmentMakeRecordsBinding.fragmentMakeRecordsRecorderLayout.setVisibility(View.VISIBLE);
-                else
-                    Toast.makeText(getContext(), getResources().getString(R.string.choose_point_firstly),
-                            Toast.LENGTH_SHORT).show();
 
+                }
+            }
+        });
+
+
+        fragmentMakeRecordsBinding.fragmentMakeRecordsRecordFromExpBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (checkBeforeRecord()){
+
+                    /*showInfoDialogWithTwoButtons(getResources().getString(R.string.choose_rec_way),
+                            getResources().getString(R.string.choose_rec_eay_msg), getResources().getString(R.string.open_fl_exp),
+                            getResources().getString(R.string.rec_from_app), new Closure() {
+                                @Override
+                                public void exec() {
+
+                                    chooseAud();
+                                }
+                            }, new Closure() {
+                                @Override
+                                public void exec() {
+
+                                    fragmentMakeRecordsBinding.fragmentMakeRecordsRecorderLayout.setVisibility(View.VISIBLE);
+                                }
+                            }, true);
+
+                     */
+                    chooseAud();
+
+                }
             }
         });
 
@@ -187,7 +248,7 @@ public class MakeRecordsFragment extends BaseFragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-                selectedRegionID = ((IDName)parent.getSelectedItem()).getId();
+                selectedRegion = ((IDName)parent.getSelectedItem());
             }
 
             @Override
@@ -234,44 +295,34 @@ public class MakeRecordsFragment extends BaseFragment {
                     return true;
                 }
 
-                boolean recordPermissionAvailable = ContextCompat.checkSelfPermission(getContext(), Manifest.permission.RECORD_AUDIO) ==
-                        PERMISSION_GRANTED;
-                if (recordPermissionAvailable) {
-                    return true;
-                }
-
-
-                ActivityCompat.
-                        requestPermissions(getActivity(), new String[]{Manifest.permission.RECORD_AUDIO},
-                                0);
-
-                return false;
+                return checkRecordPermission();
 
             }
         });
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !checkRecordPermission())
-        {return;}
 
-            fragmentMakeRecordsBinding.fragmentMakeRecordsRecordButton.setEnabled(true);
-
-            fragmentMakeRecordsBinding.fragmentMakeRecordsRecordButton.setRecordView(fragmentMakeRecordsBinding.fragmentMakeRecordsRecordView);
-            fragmentMakeRecordsBinding.fragmentMakeRecordsRecordView.setSlideToCancelText(getResources().getString(R.string.swipe_to_cancel));
+        fragmentMakeRecordsBinding.fragmentMakeRecordsRecordButton.setEnabled(true);
 
 
+        fragmentMakeRecordsBinding.fragmentMakeRecordsRecordButton.setRecordView(fragmentMakeRecordsBinding.fragmentMakeRecordsRecordView);
 
-            fragmentMakeRecordsBinding.fragmentMakeRecordsRecordView.setOnRecordListener(new OnRecordListener() {
+
+        fragmentMakeRecordsBinding.fragmentMakeRecordsRecordView.setSlideToCancelText(getResources().getString(R.string.swipe_to_cancel));
+
+
+
+        fragmentMakeRecordsBinding.fragmentMakeRecordsRecordView.setOnRecordListener(new OnRecordListener() {
                 @Override
                 public void onStart() {
 
-                    if (selectedRegionID.equals("0")){
+                    if (selectedRegion.getId().equals("0")){
 
                         Toast.makeText(getContext(), getResources().getString(R.string.choose_region_message), Toast.LENGTH_SHORT).show();
                     }
 
-                    setRecordPath();
-
                     if (checkSelectedPoint()){
+
+                        setRecordPath();
 
                         try {
                             audioRecorder.start(recordFilePath);
@@ -302,42 +353,44 @@ public class MakeRecordsFragment extends BaseFragment {
                         recordFile.delete();
 
                         showFailedDialog(getResources().getString(R.string.not_recorder_no_selected_point), true);
+
+                        return;
                     }
 
-                    else if (selectedRegionID.equals("0")){
+                    if (selectedRegion.getId().equals("0")){
 
                         recordFile.delete();
                         Toast.makeText(getContext(), getResources().getString(R.string.choose_region_message), Toast.LENGTH_SHORT).show();
+
+                        return;
                     }
 
-                    else{
 
-                        showInfoDialogWithTwoButtons(getResources().getString(R.string.sure_make_record_title),
-                                getResources().getString(R.string.sure_make_record) + "\n" + getResources().getString(R.string.period)
-                                        + recordTime / 1000 + " " + getResources().getString(R.string.second) + "\n" +
-                                        getResources().getString(R.string.location) + selectedAdress, getResources().getString(R.string.yes), getResources().getString(R.string.no),
-                                new Closure() {
-                                    @Override
-                                    public void exec() {
 
-                                        insertMasterRecord();
+                     showInfoDialogWithTwoButtons(getResources().getString(R.string.sure_make_record_title),
+                             getResources().getString(R.string.sure_make_record) + "\n" + getResources().getString(R.string.period)
+                                     + recordTime / 1000 + " " + getResources().getString(R.string.second) + "\n" +
+                                     getResources().getString(R.string.location) + selectedAdress, getResources().getString(R.string.yes), getResources().getString(R.string.no),
+                             new Closure() {
+                                 @Override
+                                 public void exec() {
 
-//                                        Bundle bundle = new Bundle();
-//                                        bundle.putString("address", selectedAdress);
-//                                        bundle.putString("path", recordFilePath);
-//                                        Navigation.findNavController(getActivity(),R.id.fragment_main_record_fragment_nav_host_fragment).navigate(
-//                                                R.id.action_fragment_make_records_to_fragment_listen_records, bundle);
-                                    }
-                                }, new Closure() {
-                                    @Override
-                                    public void exec() {
+                                     insertMasterRecord();
 
-                                        hideInfoDialogWithTwoButton();
-                                    }
-                                }, false);
-                    }
+//                                     Bundle bundle = new Bundle();
+//                                     bundle.putString("address", selectedAdress);
+//                                     bundle.putString("path", recordFilePath);
+//                                     Navigation.findNavController(getActivity(),R.id.fragment_main_record_fragment_nav_host_fragment).navigate(
+//                                             R.id.action_fragment_make_records_to_fragment_listen_records, bundle);
+                                 }
+                             }, new Closure() {
+                                 @Override
+                                 public void exec() {
 
-                    }
+                                     hideInfoDialogWithTwoButton();
+                                 }
+                             }, false);
+                }
 
                 @Override
                 public void onLessThanSecond() {
@@ -402,6 +455,8 @@ public class MakeRecordsFragment extends BaseFragment {
                         currentLocation = location;
 
                         setGoogleMap();
+
+                        configureTheRecorder();
                     }
                 }
             });
@@ -466,7 +521,7 @@ public class MakeRecordsFragment extends BaseFragment {
                             selectedSubAdminArea = getAdressDetailsFromLatLong(selectedLatLan).getSubAdminArea();
                             selectedSubLocality = getAdressDetailsFromLatLong(selectedLatLan).getSubLocality();
 
-                            masterId = null;
+                            master = null;
 
 
                             fragmentMakeRecordsBinding.fragmentMakeRecordsRecorderLayout.setVisibility(View.GONE);
@@ -509,62 +564,6 @@ public class MakeRecordsFragment extends BaseFragment {
     }
 
 
-    private void insertMasterRecord(){
-
-//        if (selectedRegionID.equals("0")){
-//
-//            Toast.makeText(getContext(), getResources().getString(R.string.choose_region_message), Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-        if (masterId!=null){
-
-            uploadRecord();
-            return;
-        }
-
-        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.add_master_loading_msg),
-                false);
-
-        makeRecordsViewModel.insertMasterRecordString(Utils.generateUniqueNumber(), "", selectedAdress,
-                Utils.chooseNonNull(selectedSubLocality, selectedSubAdminArea), String.valueOf(selectedLatLan.longitude)
-                , String.valueOf(selectedLatLan.latitude),MyApplication.getTinyDB().getString(Constants.KEY_USERID), selectedRegionID,
-                "", true).observe(getViewLifecycleOwner(), addMasterObserver);
-    }
-
-
-    private void uploadRecord(){
-
-        /*if (hasInternetConnection(getContext())) {
-
-            try {
-                InputStream iStream = getActivity().getContentResolver().openInputStream(Uri.fromFile(new File(recordFilePath)));
-                byte[] voiceBytes = getBytes(iStream);
-
-                showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.uploading_record),
-                        false);
-
-                makeRecordsViewModel.getUploadRecordMutableLiveData(voiceBytes, recordFileName, MyApplication.getTinyDB().getString
-                        (Constants.KEY_USERID)).observe(getViewLifecycleOwner(), uploadRecordObserver);
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                showFailedDialog(getResources().getString(R.string.error_upload_record), true);
-            } catch (IOException e) {
-                e.printStackTrace();
-                showFailedDialog(getResources().getString(R.string.error_upload_record), true);
-            }
-
-        }
-
-         */
-
-        Toast.makeText(getContext(), getResources().getString(R.string.cut_upload_record_warn_msg), Toast.LENGTH_LONG).show();
-        uploadingRecordList.add(new UploadingRecord(recordFilePath, recordFileName, masterId));
-        uploadingRecordsProgressAdapter.notifyDataSetChanged();
-
-    }
-
-
     private void initObservers(){
 
         regionsObserver = new Observer<List<IDName>>() {
@@ -582,6 +581,7 @@ public class MakeRecordsFragment extends BaseFragment {
 
                     else {
 
+                        initRegionSpinner();
                         regionList.addAll(idNames);
                         spinnerArrayAdapter.notifyDataSetChanged();
                     }
@@ -657,10 +657,10 @@ public class MakeRecordsFragment extends BaseFragment {
 
                         default:
 
-                            masterId = s;
+                            master.setId(s);
 
                             //// Upload Record /////
-                            uploadRecord();
+                            insertRecordToArchive();
 
                     }
 
@@ -712,6 +712,222 @@ public class MakeRecordsFragment extends BaseFragment {
         };
 
          */
+
+    }
+
+
+    private void insertMasterRecord(){
+
+//        if (selectedRegionID.equals("0")){
+//
+//            Toast.makeText(getContext(), getResources().getString(R.string.choose_region_message), Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+        if (master!=null){
+
+            insertRecordToArchive();
+            return;
+        }
+
+        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.add_master_loading_msg),
+                false);
+
+        master = new Master();
+
+        master.setVehicleNumber(Utils.generateUniqueNumber());
+        master.setVehicleType("");
+        master.setLocation(selectedAdress);
+        master.setDistrict(Utils.chooseNonNull(selectedSubLocality, selectedSubAdminArea));
+        master.setLongitude(String.valueOf(selectedLatLan.longitude));
+        master.setLatitude(String.valueOf(selectedLatLan.latitude));
+        master.setIdRegions(selectedRegion.getId());
+        master.setRegions(selectedRegion.getName());
+        master.setNotes("");
+        master.setType(String.valueOf(true));
+
+        makeRecordsViewModel.insertMasterRecordString(master.getVehicleNumber(), "", selectedAdress,
+                Utils.chooseNonNull(selectedSubLocality, selectedSubAdminArea), String.valueOf(selectedLatLan.longitude)
+                , String.valueOf(selectedLatLan.latitude),MyApplication.getTinyDB().getString(Constants.KEY_USERID),
+                selectedRegion.getId(), "", true).observe(getViewLifecycleOwner(), addMasterObserver);
+    }
+
+
+    private void insertRecordToArchive(){
+
+
+        RecordHistory recordHistory = new RecordHistory(Integer.parseInt(master.getId()), master.getIdRegions(),master.getRegions(),
+                master.getVehicleNumber(), master.getLocation(), recordFileName, recordFileUri.getPath(), String.valueOf(false));
+
+        makeRecordsViewModel.getInsertRecordHistoryMutableLiveData(recordHistory).observe(getViewLifecycleOwner()
+                ,uploadRecordToArchiveObserver(recordHistory));
+    }
+
+
+    private void uploadRecord(RecordHistory recordHistory){
+
+        /*if (hasInternetConnection(getContext())) {
+
+            try {
+                InputStream iStream = getActivity().getContentResolver().openInputStream(Uri.fromFile(new File(recordFilePath)));
+                byte[] voiceBytes = getBytes(iStream);
+
+                showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.uploading_record),
+                        false);
+
+                makeRecordsViewModel.getUploadRecordMutableLiveData(voiceBytes, recordFileName, MyApplication.getTinyDB().getString
+                        (Constants.KEY_USERID)).observe(getViewLifecycleOwner(), uploadRecordObserver);
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                showFailedDialog(getResources().getString(R.string.error_upload_record), true);
+            } catch (IOException e) {
+                e.printStackTrace();
+                showFailedDialog(getResources().getString(R.string.error_upload_record), true);
+            }
+
+        }
+
+         */
+
+        /*Toast.makeText(getContext(), getResources().getString(R.string.cut_upload_record_warn_msg), Toast.LENGTH_LONG).show();
+        uploadingRecordList.add(new UploadingRecord(recordFileUri, recordFileName, master));
+        uploadingRecordsProgressAdapter.notifyDataSetChanged();
+
+         */
+
+
+        ///// Updated to make notification for upload progress /////
+
+        if (hasInternetConnection(getContext())) {
+
+
+            /*Intent intent = new Intent(((MainActivity)getActivity()),UploadRecordService.class);
+            intent.putExtra("record_history", recordHistory);
+
+
+            ((MainActivity)getActivity()).startService(intent);
+
+             */
+            NotificationBuilder notificationBuilder = new NotificationBuilder(((MainActivity)getActivity()))
+                    .buildProgressNotification(recordHistory.getRecordName());
+
+            storage = FirebaseStorage.getInstance();
+            storageReference = storage.getReference();
+
+            StorageReference ref = storageReference.child("audios/" + recordFileName);
+            UploadTask uploadTask = ref.putFile(recordFileUri);
+
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+                    Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                        @Override
+                        public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                            if (!task.isSuccessful()) {
+                                throw task.getException();
+                            }
+
+                            // Continue with the task to get the download URL
+                            return ref.getDownloadUrl();
+                        }
+                    }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Uri> task) {
+                            if (task.isSuccessful()) {
+
+                                recordHistory.setRecordName(task.getResult().toString());
+                                addUploadedRecordToMaster(recordHistory);
+
+                            } else {
+
+                                notificationBuilder.showProgress(-1);
+                            }
+                        }
+                    });
+
+                }
+            })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            notificationBuilder.showProgress(-1);
+                        }
+                    })
+                    .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+
+                            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
+                                    .getTotalByteCount());
+
+                            notificationBuilder.showProgress(progress);
+
+
+                        }
+                    });
+
+
+
+            /*makeRecordsViewModel.getUploadRecordMutableLiveData(recordFileUri, recordFileName).observe(getViewLifecycleOwner(),
+                    uploadRecordObserver(recordHistory, new NotificationBuilder(((MainActivity)getActivity()))
+                            .buildProgressNotification(recordHistory.getRecordName())));
+
+             */
+
+                /*try {
+                    InputStream iStream = fragment.getActivity().getContentResolver()
+                            .openInputStream(Uri.fromFile(new File(uploadingRecord.getRecordFilePath())));
+                    byte[] voiceBytes = Utils.getBytes(iStream);
+
+
+                    if (fragment.hasInternetConnection(context)) {
+
+                        UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.progressCircular.setVisibility(
+                                View.VISIBLE);
+                        UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText.setText(
+                                fragment.getResources().getString(R.string.uploading_record) + "\n" + uploadingRecord.getRecordName());
+
+                        //// request to upload/////
+                        new UploadAsyncClass(voiceBytes, uploadingRecord.getRecordName(), MyApplication.getTinyDB().getString
+                                (Constants.KEY_USERID), uploadingRecord).execute();
+                    }
+
+
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    fragment.showFailedDialog(fragment.
+                            getResources().getString(R.string.error_upload_record), true);
+
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    fragment.showFailedDialog(fragment.
+                            getResources().getString(R.string.error_upload_record), true);
+
+                }
+
+
+                 */
+        }
+
+    }
+
+
+    public void addUploadedRecordToMaster(RecordHistory recordHistory){
+
+        makeRecordsViewModel.insertRecordToMasterLiveDatag(master.getId(), recordHistory.getRecordName(),
+                "3gp", String.valueOf(Utils.getImageSizeFromUriInMegaByte(recordFileUri, getContext()))
+                , MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(),
+                uploadRecordToMasterObserver(recordHistory));
+    }
+
+
+    private void updateRecordHistory(RecordHistory recordHistory){
+
+        makeRecordsViewModel.getUpdateRecordHistoryMutableLiveData(recordHistory).observe(getViewLifecycleOwner(),
+                updateRecordHistoryObserver(recordHistory));
     }
 
 
@@ -768,6 +984,168 @@ public class MakeRecordsFragment extends BaseFragment {
     }
 
 
+    private Observer<Long> uploadRecordToArchiveObserver(RecordHistory recordHistory){
+
+        return new Observer<Long>() {
+            @Override
+            public void onChanged(Long aLong) {
+
+                if (aLong !=null){
+
+                    if (getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+
+                        if (aLong!= -1 && aLong!= 0){
+
+                            recordHistory.setId(Integer.parseInt(String.valueOf(aLong)));
+
+                            uploadRecord(recordHistory);
+                        }
+
+                        else {
+
+                            showFailedDialog(getResources().getString(R.string.error_upload_record), true);
+
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+
+    private Observer<Map<String,String>> uploadRecordObserver(RecordHistory recordHistory, NotificationBuilder notificationBuilder){
+
+        return new Observer<Map<String, String>>() {
+            @Override
+            public void onChanged(Map<String, String> stringStringMap) {
+
+                if (stringStringMap != null) {
+
+                    if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
+
+                        switch (stringStringMap.get("success")) {
+
+                            case "": ///// Still trying to upload
+
+                                notificationBuilder.showProgress(0);
+
+                                break;
+
+                            case "false":
+
+                                //hideProgress();
+
+                                notificationBuilder.showProgress(-1);
+
+                                showFailedDialog(getResources().getString(R.string.error_upload_record),
+                                        true);
+                                break;
+
+                            case "progress":
+
+                                notificationBuilder.showProgress(Double.parseDouble(stringStringMap.get("progress")));
+                                break;
+
+                            default:
+                                //// Successed ////
+
+                                recordHistory.setRecordName(stringStringMap.get("success"));
+                                addUploadedRecordToMaster(recordHistory);
+
+
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+
+    private Observer<String> uploadRecordToMasterObserver(RecordHistory recordHistory){
+
+        return new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+
+                if (s!=null){
+
+                    if (getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+
+                        //hideProgress();
+
+                        boolean succUploaded;
+                        String failedMsg = "";
+
+                        switch (s){
+
+                            case "error" :
+
+                                succUploaded = false;
+
+                                failedMsg = getResources().getString(R.string.add_rec_to_master_fail_msg);
+
+                                break;
+
+                            case "-1" :
+
+                                succUploaded = false;
+
+                                failedMsg = getResources().getString(R.string.added_record_before);
+
+                                break;
+
+                            case "0":
+
+                                succUploaded = false;
+
+                                failedMsg = getResources().getString(R.string.add_rec_to_master_fail_msg);
+
+                                break;
+
+                            default:
+
+                                succUploaded = true;
+
+                        }
+
+
+                        if (succUploaded){
+
+                            Toast.makeText(getContext(), getResources().getString(R.string.add_rec_to_master_succ_msg),
+                                    Toast.LENGTH_SHORT).show();
+
+                        }
+
+                        else {
+
+                            Toast.makeText(getContext(), failedMsg, Toast.LENGTH_SHORT).show();
+
+
+                        }
+
+                        recordHistory.setIsUploaded(String.valueOf(succUploaded));
+
+                        updateRecordHistory(recordHistory);
+                    }
+
+                }
+            }
+        };
+    }
+
+
+    private Observer<Integer> updateRecordHistoryObserver(RecordHistory recordHistory){
+
+        return new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+
+                /////////////
+            }
+        };
+    }
+
+
     private Address getAdressDetailsFromLatLong(LatLng latLng) {
 
         Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
@@ -795,25 +1173,47 @@ public class MakeRecordsFragment extends BaseFragment {
     }
 
 
+    private void chooseAud() {
+        Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+        startActivityForResult(intent, PICK_AUD_REQUEST);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == PICK_AUD_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null ){
+
+            recordFileName = getActivity().getApplicationContext().getPackageName() + "_" + Utils.getStringRandomCode() + ".3gp";
+
+            recordFileUri = data.getData();
+
+            insertMasterRecord();
+        }
+
+
+    }
+
+
     private void setRecordPath(){
 
         audioRecorder = new AudioRecorder();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US);
+        recordFileName = getActivity().getApplicationContext().getPackageName() + "_" + Utils.getStringRandomCode() + ".3gp";
 
         parentFile = new File(getActivity().getExternalFilesDir("com.alsalameg"), "records");
 
         if (!parentFile.exists())
             parentFile.mkdirs();
 
-        recordFileName = getActivity().getApplicationContext().getPackageName() + "_" + dateFormat.format(new Date()) + ".mp3";
 
         recordFilePath = parentFile.getAbsolutePath() + "/" + recordFileName;
 
         recordFile = new File(recordFilePath);
 
-    }
+        recordFileUri = Uri.fromFile(recordFile);
 
+    }
 
     private boolean checkRecordPermission() {
 
@@ -860,10 +1260,26 @@ public class MakeRecordsFragment extends BaseFragment {
 
         if (selectedLatLan==null){
 
-            Toast.makeText(getContext(), getResources().getString(R.string.no_selected_point), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), getResources().getString(R.string.choose_point_firstly),
+                    Toast.LENGTH_SHORT).show();
+
             return false;
         }
         else return true;
+    }
+
+
+    private boolean checkBeforeRecord(){
+
+        if (selectedRegion.getId().equals("0")){
+
+            Toast.makeText(getContext(), getResources().getString(R.string.choose_region_message),
+                    Toast.LENGTH_SHORT).show();
+
+            return false;
+        }
+
+        else return checkRecordPermission() && checkSelectedPoint();
     }
 
 

@@ -2,7 +2,7 @@
     <string name="app_name">شركة السلام</string>
     <string name="password">كلمة السر</string>
     <string name="login">تسجيل الدخول</string>
-    <string name="google_maps_key">AIzaSyDbD_ikRqyF7gZcuDtGHFuGNtNd7yXuM_c</string>
+    <string name="google_maps_key">AIzaSyCCbFJiVGcuKK8syU2ib1iWySwrX2sl2A4</string>
     <string name="req_loc_perm">السماح بالوصول للموقع</string>
     <string name="req_loc_perm_message">يرجى السماح بالوصول للموقع للتمكن من فتح الخريطة</string>
     <string name="req_uid_perm">السماح بالوصول للمعرف</string>
@@ -107,5 +107,29 @@
     <string name="send">إرسال</string>
     <string name="rec_his_list">أرشيف التسجيلات</string>
     <string name="history">الأرشيف</string>
+    <string name="err_load_rec">خطأ فى تحميل التسجيل الصوتى</string>
+    <string name="err_load_rec_his">حدث خطأ أثناء تحميل أرشيف التسجيلات</string>
+    <string name="no_record_history">لا يوجد تسجيلات صوتية فى أرشيف التسجيلات</string>
+    <string name="loading_rec_his">جارى تحميل أرشيف التسجيلات</string>
+    <string name="company">الشركة</string>
+    <string name="sure_lis_to_all_rec">هل تم الاستماع لكل التسجيلات ؟</string>
+    <string name="del_master_lis">فى حالة التأكيد سيتم حذف النقطة والتسجيلات</string>
+    <string name="suc_delete_rec">تم حذف التسجيل الصوتى</string>
+    <string name="fail_delete_rec">فشل فى حذف التسجيل الصوتى</string>
+    <string name="fail_delete_rec_arch">فشل فى حذف التسجيل الصوتى من الأرشيف</string>
+    <string name="sure_del_rec">هل تريد بالفعل حذف التسجيل الصوتى ؟</string>
+    <string name="fail_del">فشل فى المسح</string>
+    <string name="del_all_arch_prog">جارى مسح كل الأرشيف</string>
+    <string name="succ_del_all_arch_prog">تم مسح كل الأرشيف</string>
+    <string name="fail_del_all_arch_prog">فشل مسح كل الأرشيف</string>
+    <string name="no_data_to_remove">لا يوجد بيانات للمسح !</string>
+    <string name="sure_del_all_arch">هل أنت متأكد من مسح كل الأرشبف ؟</string>
+    <string name="load_rec_list_btn">تحميل تسجيلات النقطة</string>
+    <string name="choose_rec_way">اختيار طريقة التسجيل</string>
+    <string name="choose_rec_eay_msg">يرجى الإختيار بين الرفع من التطبيق أو التسجيل من الجوال
+ملحوظة : الأفضل هو التسجيل من الجوال</string>
+    <string name="open_fl_exp">التسجيل من الجوال</string>
+    <string name="rec_from_app">التسجيل من التطبيق</string>
+
 
 </resources>

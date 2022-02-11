@@ -17,6 +17,7 @@ import com.alsalamegypt.Constants;
 import com.alsalamegypt.MyApplication;
 import com.alsalamegypt.R;
 import com.alsalamegypt.Models.User;
+import com.alsalamegypt.Utils;
 import com.alsalamegypt.ViewModels.LoginViewModel;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 

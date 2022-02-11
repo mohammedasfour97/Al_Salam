@@ -71,10 +71,10 @@ public class CarMarkerDetailsFragment extends DialogFragment {
 
     private void setData(){
 
-        fragmentDialogCarMarkerDetailsBinding.bankTxt.setText(getResources().getString(R.string.bank) + " " + car.getBank());
+        fragmentDialogCarMarkerDetailsBinding.bankTxt.setText(getResources().getString(R.string.bank) + " " + car.getNotes());
         fragmentDialogCarMarkerDetailsBinding.customerNameTxt.setText(getResources().getString(R.string.cust_name) + " : " +
                 car.getCustomer());
-        fragmentDialogCarMarkerDetailsBinding.notesTxt.setText(getResources().getString(R.string.notes) + " : " + car.getNotes());
+        fragmentDialogCarMarkerDetailsBinding.companyTxt.setText(getResources().getString(R.string.company) + " : " + car.getBank());
         fragmentDialogCarMarkerDetailsBinding.contractNumTxt.setText(getResources().getString(R.string.cont_num) + " : " +
                 car.getContractNumber());
         fragmentDialogCarMarkerDetailsBinding.statusTxt.setText(getResources().getString(R.string.status) + " : " + car.getStatus());

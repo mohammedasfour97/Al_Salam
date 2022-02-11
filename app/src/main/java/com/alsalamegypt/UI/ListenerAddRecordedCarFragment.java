@@ -1,6 +1,7 @@
 package com.alsalamegypt.UI;
 
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import com.alsalamegypt.Utils;
 import com.alsalamegypt.ViewModels.ListenRecordsViewModel;
 import com.alsalamegypt.ViewModels.MakeRecordsViewModel;
 import com.alsalamegypt.databinding.FragmentListenerAddRecordedCarBinding;
+import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +42,7 @@ public class ListenerAddRecordedCarFragment extends BaseFragment {
     private FragmentListenerAddRecordedCarBinding fragmentListenerAddRecordedCarBinding;
     private Observer<List<Record>> recordsListObserver;
     private Observer<List<IDName>> regionsObserver;
-    private Observer<String> addRecordedCarObsever;
+    private Observer<String> deleteRecordObserver, updateHeardRecordObserver;
     private ListenRecordsViewModel listenRecordsViewModel;
     private MakeRecordsViewModel makeRecordsViewModel;
 
@@ -138,7 +140,47 @@ public class ListenerAddRecordedCarFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
 
-               ((MainActivity) getActivity()).navController.popBackStack();
+                boolean someRecordNotHeard = false;
+
+                for (Record record : recordList){
+
+                    if (record.getHeard().equals("false")){
+
+                        someRecordNotHeard = true;
+                        break;
+                    }
+
+                }
+
+                if (someRecordNotHeard){
+
+                    showInfoDialogWithTwoButtons(getResources().getString(R.string.sure), getResources().getString(R.string.sure_lis_to_all_rec)
+                                    + "\n" + getResources().getString(R.string.del_master_lis),
+                            getResources().getString(R.string.yes), getResources().getString(R.string.no), new Closure() {
+                                @Override
+                                public void exec() {
+
+                                    showDefaultProgressDialog();
+
+                                    setHeardToAllRecords();
+                                }
+                            }, new Closure() {
+                                @Override
+                                public void exec() {
+
+                                    ((MainActivity)getActivity()).navController.popBackStack();
+                                }
+                            }, true);
+                }
+
+                else {
+
+                    showDefaultProgressDialog();
+
+                    setHeardToAllRecords();
+
+                }
+
             }
         });
 
@@ -226,6 +268,7 @@ public class ListenerAddRecordedCarFragment extends BaseFragment {
 
                         } else {
 
+                            initRegionSpinner();
                             regionList.addAll(idNames);
                             spinnerArrayAdapter.notifyDataSetChanged();
 
@@ -267,6 +310,93 @@ public class ListenerAddRecordedCarFragment extends BaseFragment {
 
                         getRegions();
                     }
+                }
+            }
+        };
+
+
+        updateHeardRecordObserver = new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+
+                if (s != null){
+
+                    if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
+
+                        if (!s.equals("")){
+
+                            if (recordList.get(recordList.size()-1).getFileName().contains("firebase"))
+                                deleteRecord();
+
+                            else {
+
+                                if (recordList.size() > 1) {
+
+                                    recordList.remove(recordList.size() - 1);
+
+                                    setHeardToAllRecords();
+                                }
+
+                                else {
+
+                                    hideProgress();
+
+                                    ((MainActivity)getActivity()).navController.popBackStack();
+                                }
+                            }
+
+                        }
+
+                        else {
+
+                            hideProgress();
+
+                            showFailedDialog(getResources().getString(R.string.err_loading), true);
+                        }
+
+                    }
+
+                }
+            }
+        };
+
+
+        deleteRecordObserver = new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+
+                if (s!=null){
+
+                    if (getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+
+                        if (!TextUtils.isEmpty(s)){
+
+                            if (recordList.size() > 1){
+
+                                recordList.remove(recordList.size() - 1);
+
+                                setHeardToAllRecords();
+                            }
+
+                            else {
+
+                                hideProgress();
+
+                                ((MainActivity)getActivity()).navController.popBackStack();
+                            }
+
+
+                        }
+
+                        else{
+
+                            hideProgress();
+
+                            showFailedDialog(getResources().getString(R.string.fail_delete_rec), true);
+                        }
+
+                    }
+
                 }
             }
         };
@@ -358,6 +488,23 @@ public class ListenerAddRecordedCarFragment extends BaseFragment {
                 .observe(getViewLifecycleOwner(), regionsObserver);
     }
 
+
+    private void setHeardToAllRecords(){
+
+        listenRecordsViewModel.getUpdateHeardMutableLiveData(recordList.get(recordList.size()-1).getId(),
+              MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(), updateHeardRecordObserver);
+
+    }
+
+
+    private void deleteRecord(){
+
+            listenRecordsViewModel.getDeleteRecordFirebaseMutableLiveData(recordList.get(recordList.size()-1).getFileName()
+                    .substring(recordList.get(recordList.size()-1).getFileName().indexOf("com.alsalameg"),
+                            recordList.get(recordList.size()-1).getFileName().indexOf("?alt"))).observe(getViewLifecycleOwner(),
+                    deleteRecordObserver);
+
+    }
 
     private void renewAddRecordedCarsList(){
 

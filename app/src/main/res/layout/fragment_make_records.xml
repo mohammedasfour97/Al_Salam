@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -15,10 +16,10 @@
 
             <include
                 android:id="@+id/map"
-                android:layout_height="match_parent"
-                android:layout_width="match_parent"
                 layout="@layout/fragment_map"
-                android:layout_above="@id/fragment_make_records_recorder_layout"/>
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/fragment_make_records_recorder_layout" />
 
             <RelativeLayout
                 android:id="@+id/fragment_make_records_recorder_layout"
@@ -33,7 +34,7 @@
                     android:id="@+id/fragment_make_records_record_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@id/fragment_make_records_record_button"
+                    android:layout_toStartOf="@id/fragment_make_records_record_button"
                     android:layout_centerVertical="true"
                     app:slide_to_cancel_arrow="@drawable/recv_ic_arrow"
                     app:slide_to_cancel_arrow_color="#000000"
@@ -50,7 +51,7 @@
                     android:id="@+id/fragment_make_records_record_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
                     android:layout_margin="@dimen/_5sdp"
                     android:background="@drawable/recv_bg_mic"
                     android:scaleType="centerInside"
@@ -76,7 +77,6 @@
                     android:id="@+id/fragment_make_records_logout_btn"
                     android:layout_width="@dimen/_30sdp"
                     android:layout_height="@dimen/_30sdp"
-                    android:layout_marginLeft="@dimen/_10sdp"
                     android:padding="@dimen/_5sdp"
                     android:background="@drawable/prim_solid_circle"
                     android:src="@drawable/ic_baseline_power_settings_new_24"
@@ -86,32 +86,40 @@
                     android:id="@+id/fragment_make_records_reload_btn"
                     android:layout_width="@dimen/_30sdp"
                     android:layout_height="@dimen/_30sdp"
-                    android:layout_marginLeft="@dimen/_10sdp"
                     android:padding="@dimen/_5sdp"
                     android:background="@drawable/prim_solid_circle"
                     android:src="@drawable/ic_baseline_autorenew_24"
-                    android:layout_marginStart="@dimen/_10sdp" />
+                    android:layout_marginStart="@dimen/_20sdp" />
 
                 <ImageView
                     android:id="@+id/fragment_make_records_record_btn"
                     android:layout_width="@dimen/_30sdp"
                     android:layout_height="@dimen/_30sdp"
                     android:padding="@dimen/_5sdp"
-                    android:layout_marginLeft="@dimen/_10sdp"
                     android:background="@drawable/prim_solid_circle"
                     android:src="@drawable/ic_baseline_keyboard_voice_24"
-                    android:layout_marginStart="@dimen/_10sdp" />
+                    android:layout_marginStart="@dimen/_20sdp" />
 
-                <androidx.appcompat.widget.AppCompatSpinner
-                    android:id="@+id/regions_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/_10sdp"
-                    android:background="@drawable/edit_text_background"
-                    android:padding="10dp"
-                    style="@style/Regular_Primary_Color_TextView_style"
-                    android:layout_marginStart="@dimen/_10sdp" />
+                <ImageView
+                    android:id="@+id/fragment_make_records_record_from_exp_btn"
+                    android:layout_width="@dimen/_30sdp"
+                    android:layout_height="@dimen/_30sdp"
+                    android:padding="@dimen/_7sdp"
+                    android:background="@drawable/prim_solid_circle"
+                    android:src="@drawable/ic_baseline_folder_24"
+                    android:layout_marginStart="@dimen/_20sdp"
+                    android:visibility="gone"/>
+
             </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.AppCompatSpinner
+                android:id="@+id/regions_spinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edit_text_background"
+                android:padding="10dp"
+                style="@style/Regular_Primary_Color_TextView_style"
+                android:layout_marginStart="@dimen/_10sdp" />
 
             <include
                 android:id="@+id/uploading_records_process_list"

@@ -1,58 +1,72 @@
 package com.alsalamegypt.Models;
 
+import android.net.Uri;
+
 public class UploadingRecord {
 
-    private String recordName, recordFilePath, masterId;
+    private String recordName;
+    private Uri recordFileUri;
     private Boolean isUploaded, isUploading;
+    private Master master;
 
     public UploadingRecord() {
     }
 
-    public UploadingRecord(String recordFilePath, String recordName, String masterId) {
+    public UploadingRecord(Uri recordFileUri, String recordName, Master master) {
         this.recordName = recordName;
-        this.recordFilePath = recordFilePath;
-        this.masterId = masterId;
+        this.recordFileUri = recordFileUri;
+        this.master = master;
         isUploaded = false;
         isUploading = false;
     }
+
 
     public String getRecordName() {
         return recordName;
     }
 
+
     public void setRecordName(String recordName) {
         this.recordName = recordName;
     }
 
-    public String getRecordFilePath() {
-        return recordFilePath;
+
+    public Uri getRecordFileUri() {
+        return recordFileUri;
     }
 
-    public void setRecordFilePath(String recordFilePath) {
-        this.recordFilePath = recordFilePath;
+
+    public void setRecordFileUri(Uri recordFilePath) {
+        this.recordFileUri = recordFilePath;
     }
+
 
     public Boolean getUploaded() {
         return isUploaded;
     }
 
+
     public void setUploaded(Boolean uploaded) {
         isUploaded = uploaded;
     }
+
 
     public Boolean getUploading() {
         return isUploading;
     }
 
+
     public void setUploading(Boolean uploading) {
         isUploading = uploading;
     }
 
-    public String getMasterId() {
-        return masterId;
+
+    public Master getMaster() {
+        return master;
     }
 
-    public void setMasterId(String masterId) {
-        this.masterId = masterId;
+
+    public void setMaster(Master master) {
+        this.master = master;
     }
 }

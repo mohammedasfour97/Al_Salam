@@ -1,25 +1,32 @@
 package com.alsalamegypt.Repositories;
 
+import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.alsalamegypt.BaseClasses.BaseRepository;
 import com.alsalamegypt.Models.Master;
 import com.alsalamegypt.Models.Record;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
 public class ListenRecordsRepository extends BaseRepository {
 
-    private MutableLiveData<List<Master>> masterListMutableLiveData, masterListenerListMutableLiveData,
-            masterListenerRecordedCarsMutableLiveData;
+    private MutableLiveData<List<Master>> masterListMutableLiveData;
     private MutableLiveData<List<Record>> masterRecordsMutableLiveData;
-    private MutableLiveData<String> deleteMasterWithRecordsMutableLiveData, deleteRecordMutableLiveData, addRecordedCarMutableLiveData,
-    deleteListenerRecordedCarMutableLivedata, updateHeardMutableLiveData;
+    private MutableLiveData<String> deleteMasterWithRecordsMutableLiveData, deleteRecordMutableLiveData,
+    deleteRecordFirebaseMutableLiveData, addRecordedCarMutableLiveData, deleteListenerRecordedCarMutableLivedata,
+            updateHeardMutableLiveData;
 
     public ListenRecordsRepository() {
 
@@ -35,14 +42,16 @@ public class ListenRecordsRepository extends BaseRepository {
         return masterListMutableLiveData;
     }
 
-    public MutableLiveData<List<Master>> getMasterListenerListMutableLiveData(String id) {
 
-        masterListenerListMutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<List<Master>> getMasterListenerListMutableLiveData(String id, int pageIndex, int pageSize) {
 
-        new GetMasterListenerListAsyncClass(id).execute();
+        masterListMutableLiveData = new MutableLiveData<>();
 
-        return masterListenerListMutableLiveData;
+        new GetMasterListenerListAsyncClass(id, pageIndex, pageSize).execute();
+
+        return masterListMutableLiveData;
     }
+
 
     public MutableLiveData<List<Record>> getMasterRecordsMutableLiveData(String id, String id_user) {
 
@@ -53,6 +62,7 @@ public class ListenRecordsRepository extends BaseRepository {
         return masterRecordsMutableLiveData;
     }
 
+
     public MutableLiveData<String> getDeleteMasterWithRecordsMutableLiveData(String masterId, String idUser) {
 
         deleteMasterWithRecordsMutableLiveData = new MutableLiveData<>();
@@ -61,6 +71,7 @@ public class ListenRecordsRepository extends BaseRepository {
 
         return deleteMasterWithRecordsMutableLiveData;
     }
+
 
     public MutableLiveData<String> getDeleteRecordMutableLiveData(String recordId, String idUser) {
 
@@ -71,13 +82,42 @@ public class ListenRecordsRepository extends BaseRepository {
         return deleteRecordMutableLiveData;
     }
 
+
+    public MutableLiveData<String> getDeleteRecordFirebaseMutableLiveData(String recordName) {
+
+        deleteRecordFirebaseMutableLiveData = new MutableLiveData<>();
+
+
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageReference = storage.getReference();
+
+        StorageReference ref = storageReference.child("audios/" + recordName);
+
+        ref.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+
+                deleteRecordFirebaseMutableLiveData.postValue("DONE");
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+
+                deleteRecordFirebaseMutableLiveData.postValue("");
+            }
+        });
+
+        return deleteRecordFirebaseMutableLiveData;
+    }
+
+
     public MutableLiveData<List<Master>> getMasterListenerRecordedCarsMutableLiveData(String id, String id_user) {
 
-        masterListenerRecordedCarsMutableLiveData = new MutableLiveData<>();
+        masterListMutableLiveData = new MutableLiveData<>();
 
         new GetMasterListenerRecordedCarsAsyncClass(id, id_user).execute();
 
-        return masterListenerRecordedCarsMutableLiveData;
+        return masterListMutableLiveData;
     }
 
     public MutableLiveData<String> getAddRecordedCarMutableLiveData(String vehicleNumber, String vehicleType, String location, String district,
@@ -177,7 +217,8 @@ public class ListenRecordsRepository extends BaseRepository {
                     master = new Master(hashMap.get("ID"), hashMap.get("Vehicle_Number"), hashMap.get("Vehicle_Type"), hashMap.get("Location"),
                             hashMap.get("District"), hashMap.get("Longitude"), hashMap.get("Latitude"), hashMap.get("Status"),
                             hashMap.get("Sorting"), hashMap.get("Notes"), hashMap.get("ID_Regions"), hashMap.get("Regions"),
-                            hashMap.get("ID_USER"), hashMap.get("DateEdite"), hashMap.get("DateCreate"), hashMap.get("Type"));
+                            hashMap.get("ID_USER"), hashMap.get("DateEdite"), hashMap.get("DateCreate"), hashMap.get("Type"),
+                            hashMap.get("heard"));
 
                     list.add(master);
 
@@ -203,14 +244,17 @@ public class ListenRecordsRepository extends BaseRepository {
     private class GetMasterListenerListAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
 
         private String id;
+        private int pageIndex, pageSize;
 
-        public GetMasterListenerListAsyncClass(String id) {
+        public GetMasterListenerListAsyncClass(String id, int pageIndex, int pageSize) {
             this.id = id;
+            this.pageIndex = pageIndex;
+            this.pageSize = pageSize;
         }
 
         @Override
         protected List<HashMap<String,String>> doInBackground(Void... voids) {
-            return webServices.getListenerMasters(id);
+            return webServices.getListenerMasters(id, pageIndex, pageSize);
         }
 
         @Override
@@ -227,7 +271,8 @@ public class ListenRecordsRepository extends BaseRepository {
                     master = new Master(hashMap.get("ID"), hashMap.get("Vehicle_Number"), hashMap.get("Vehicle_Type"), hashMap.get("Location"),
                             hashMap.get("District"), hashMap.get("Longitude"), hashMap.get("Latitude"), hashMap.get("Status"),
                             hashMap.get("Sorting"), hashMap.get("Notes"), hashMap.get("ID_Regions"), hashMap.get("Regions"),
-                            hashMap.get("ID_USER"), hashMap.get("DateEdite"), hashMap.get("DateCreate"), hashMap.get("Type"));
+                            hashMap.get("ID_USER"), hashMap.get("DateEdite"), hashMap.get("DateCreate"), hashMap.get("Type"),
+                            hashMap.get("heard"));
 
                     list.add(master);
 
@@ -243,7 +288,7 @@ public class ListenRecordsRepository extends BaseRepository {
                 list.add(master);
             }
 
-            masterListenerListMutableLiveData.postValue(list);
+            masterListMutableLiveData.postValue(list);
         }
 
     }
@@ -323,7 +368,7 @@ public class ListenRecordsRepository extends BaseRepository {
                             hashMap.get("Location"), hashMap.get("District"), hashMap.get("Longitude"), hashMap.get("Latitude"),
                             hashMap.get("Status"), hashMap.get("Sorting"), hashMap.get("Notes"), hashMap.get("ID_Regions"),
                             hashMap.get("Regions"), hashMap.get("ID_USER"), hashMap.get("DateEdite"), hashMap.get("DateCreate"),
-                            hashMap.get("Type"));
+                            hashMap.get("Type"), hashMap.get("heard"));
 
                     list.add(master);
 
@@ -339,7 +384,7 @@ public class ListenRecordsRepository extends BaseRepository {
                 list.add(master);
             }
 
-            masterListenerRecordedCarsMutableLiveData.postValue(list);
+            masterListMutableLiveData.postValue(list);
         }
 
     }

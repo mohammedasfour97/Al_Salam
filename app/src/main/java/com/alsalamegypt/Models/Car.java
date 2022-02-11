@@ -4,14 +4,14 @@ public class Car {
 
     private String id, idMasterDailyChit, plateNumber, kind, contractNumber, shasNumber, color, bank, notes, status, determineStatus,
             determineObserver, idVehicles, customer, maker, idRegions, dateCreate, dateEdite, originalNumber, afterRepetition,
-            correspondingNumber, fullName, regions, vehicleNumber, vehicleType, location, district, longitude, latitude, sorting;
+            correspondingNumber, fullName, regions, vehicleNumber, vehicleType, location, district, longitude, latitude, sorting, colors;
 
     public Car(String id, String idMasterDailyChit, String plateNumber, String kind, String contractNumber, String shasNumber,
                String color, String bank, String notes, String status, String determineStatus, String determineObserver,
                String idVehicles, String customer, String maker, String idRegions, String dateCreate, String dateEdite,
                String originalNumber, String afterRepetition, String correspondingNumber, String fullName, String regions,
                String vehicleNumber, String vehicleType, String location, String district, String longitude, String latitude,
-               String sorting) {
+               String sorting, String colors) {
         this.id = id;
         this.idMasterDailyChit = idMasterDailyChit;
         this.plateNumber = plateNumber;
@@ -42,6 +42,7 @@ public class Car {
         this.longitude = longitude;
         this.latitude = latitude;
         this.sorting = sorting;
+        this.colors = colors;
     }
 
     public Car() {
@@ -285,5 +286,13 @@ public class Car {
 
     public void setSorting(String sorting) {
         this.sorting = sorting;
+    }
+
+    public String getColors() {
+        return colors;
+    }
+
+    public void setColors(String colors) {
+        this.colors = colors;
     }
 }

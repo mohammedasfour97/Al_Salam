@@ -71,6 +71,16 @@
                 style="@style/Regular_Primary_Color_TextView_style" />
 
             <TextView
+                android:id="@+id/companyTxt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_10sdp"
+                android:layout_marginRight="@dimen/_10sdp"
+                android:layout_marginLeft="@dimen/_10sdp"
+                android:textSize="15sp"
+                style="@style/Regular_Primary_Color_TextView_style" />
+
+            <TextView
                 android:id="@+id/bankTxt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -131,16 +141,6 @@
             <!--                android:textColor="@color/white"-->
             <!--                style="@style/Regular_White_Color_TextView_style" />-->
 
-
-            <TextView
-                android:id="@+id/notesTxt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/_10sdp"
-                android:layout_marginRight="@dimen/_10sdp"
-                android:layout_marginLeft="@dimen/_10sdp"
-                android:textSize="15sp"
-                style="@style/Regular_Primary_Color_TextView_style" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/confirm_button"

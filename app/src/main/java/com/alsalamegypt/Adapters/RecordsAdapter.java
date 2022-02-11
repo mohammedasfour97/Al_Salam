@@ -2,10 +2,13 @@ package com.alsalamegypt.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.Toast;
 
 import com.alsalamegypt.Adapters.Interfaces.OnDeleteMaster;
 import com.alsalamegypt.BaseClasses.BaseFragment;
@@ -13,14 +16,17 @@ import com.alsalamegypt.Constants;
 import com.alsalamegypt.MyApplication;
 import com.alsalamegypt.R;
 import com.alsalamegypt.Models.Record;
+import com.alsalamegypt.Utils;
 import com.alsalamegypt.ViewModels.ListenRecordsViewModel;
 import com.alsalamegypt.databinding.ItemRecordPlayerBinding;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 
+import java.io.File;
 import java.util.List;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.RecyclerView;
@@ -43,7 +49,7 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
         }
 
 
-        private void deleteRecord(String recordId, String idUser, int pos){
+        private void deleteRecord(Record record, String idUser, int pos){
 
             fragment.showInfoDialogWithTwoButtons(context.getResources().getString(R.string.delete), context.getResources().
                     getString(R.string.sure_delete_record), context.getResources().getString(R.string.yes), context.getResources().
@@ -53,8 +59,15 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
 
                     fragment.showProgressDialog("", context.getResources().getString(R.string.loading_msg), false);
 
-                    listenRecordsViewModel.getDeleteRecordMutableLiveData(recordId, idUser).observe(fragment.getViewLifecycleOwner(),
-                            deleteRecordObserver(pos));
+                    MutableLiveData<String> getDeleteRecord;
+
+                    if (record.getFileName().contains("firebase"))
+                        getDeleteRecord = listenRecordsViewModel.getDeleteRecordFirebaseMutableLiveData(record.getFileName().substring(
+                                record.getFileName().indexOf("com.alsalameg"), record.getFileName().indexOf("?alt")));
+                    else
+                        getDeleteRecord = listenRecordsViewModel.getDeleteRecordMutableLiveData(record.getId(), idUser);
+
+                    getDeleteRecord.observe(fragment.getViewLifecycleOwner(), deleteRecordObserver(pos));
                 }
             }, new Closure() {
                 @Override
@@ -70,6 +83,8 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
 
         private void updateHeard(String recId){
 
+            fragment.showDefaultProgressDialog();
+
             listenRecordsViewModel.getUpdateHeardMutableLiveData(recId, MyApplication.getTinyDB().getString(Constants.KEY_USERID))
                     .observe(fragment.getViewLifecycleOwner(), updateHeardObserver());
         }
@@ -80,18 +95,24 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
                 @Override
                 public void onChanged(String id) {
 
+                    fragment.hideProgress();
+
                     if (id!=null){
 
                         if (fragment.getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
-
-                            fragment.hideProgress();
 
                             if (!TextUtils.isEmpty(id)){
 
                                 RecordsAdapter.this.recordList.remove(pos);
                                 RecordsAdapter.this.notifyItemRemoved(pos);
                                 RecordsAdapter.this.notifyDataSetChanged();
+
+                                if (recordList.size() == 0)
+                                    onDeleteMaster.deleteMaster();
                             }
+
+                            else
+                                fragment.showFailedDialog(context.getResources().getString(R.string.fail_delete_rec), true);
                         }
                     }
                 }
@@ -105,10 +126,14 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
                 @Override
                 public void onChanged(String msg) {
 
+                    fragment.hideProgress();
+
                     if (msg!=null){
 
                         if (fragment.getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
 
+                            recordList.get(RecordsViewHolder.this.getAdapterPosition()).setHeard("true");
+                            RecordsAdapter.this.notifyDataSetChanged();
                             //////
                         }
                     }
@@ -148,22 +173,48 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
 
         Record record = recordList.get(position);
 
-        holder.itemRecordPlayerBinding.voicePlayerView.setAudio(Constants.ImageURl + record.getFileName());
+        try {
+            if (record.getFileName().contains("firebase"))
+                holder.itemRecordPlayerBinding.voicePlayerView.setAudio(record.getFileName());
+            else
+                holder.itemRecordPlayerBinding.voicePlayerView.setAudio(Constants.ImageURl + record.getFileName());
+        }catch (Exception e){
 
-        /// hide delete if the listener who is listening
+            Toast.makeText(context, context.getResources().getString(R.string.err_load_rec) + " " + record.getFileName(),
+                    Toast.LENGTH_SHORT).show();
+        }
 
-        if (!MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded"))
+        /// hide delete if the listener who is listening and change background color if is heard
+
+        if (!MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded")){
+
             holder.itemRecordPlayerBinding.deleteRecord.setVisibility(View.GONE);
+            holder.itemRecordPlayerBinding.isListenedCheckbox.setVisibility(View.VISIBLE);
 
+            if (Boolean.parseBoolean(record.getHeard())){
 
-        holder.itemRecordPlayerBinding.voicePlayerView.setImgPlayClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+                holder.itemRecordPlayerBinding.voicePlayerView.setPlayPaueseBackgroundColor
+                        (context.getResources().getColor(R.color.orange));
+                holder.itemRecordPlayerBinding.voicePlayerView.setTimingBackgroundColor(context.getResources().getColor(R.color.orange));
+                holder.itemRecordPlayerBinding.voicePlayerView.setVisualizationPlayedColor(
+                        context.getResources().getColor(R.color.orange));
 
-                if (MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Listener"))
-                    holder.updateHeard(record.getId());
+                holder.itemRecordPlayerBinding.isListenedCheckbox.setChecked(true);
+                holder.itemRecordPlayerBinding.isListenedCheckbox.setEnabled(false);
             }
-        });
+
+        }
+
+
+//        holder.itemRecordPlayerBinding.voicePlayerView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//                if (MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Listener") &&
+//                !Boolean.parseBoolean(record.getHeard()))
+//                    holder.updateHeard(record.getId());
+//            }
+//        });
 
         //if (MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Listener") && r)
 
@@ -183,10 +234,17 @@ public class RecordsAdapter extends RecyclerView.Adapter<RecordsAdapter.RecordsV
             @Override
             public void onClick(View v) {
 
-                if (recordList.size() == 1)
-                    onDeleteMaster.deleteMaster();
-                else
-                    holder.deleteRecord(record.getId(), MyApplication.getTinyDB().getString(Constants.KEY_USERID), position);
+                holder.deleteRecord(record, MyApplication.getTinyDB().getString(Constants.KEY_USERID), position);
+            }
+        });
+
+
+        holder.itemRecordPlayerBinding.isListenedCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+
+                holder.updateHeard(record.getId());
+
             }
         });
 

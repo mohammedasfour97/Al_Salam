@@ -2,6 +2,7 @@ package com.alsalamegypt;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -9,9 +10,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
@@ -20,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import dagger.Module;
 import dagger.Provides;
@@ -27,6 +31,10 @@ import dagger.Provides;
 import com.alsalamegypt.Models.IDName;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 
 import java.io.ByteArrayOutputStream;
@@ -97,6 +105,7 @@ public class Utils {
         return str.substring(pos + separator.length());
     }
 
+
     public static void displayImageOriginal(Context ctx, ImageView img, String url) {
         try {
             Glide.with(ctx).load(url)
@@ -106,6 +115,7 @@ public class Utils {
         }
     }
 
+
     public static void setPref(Context context,String key,String value) {
         SharedPreferences pref = context.getApplicationContext().getSharedPreferences("app", 0);
         SharedPreferences.Editor editor = pref.edit();
@@ -113,8 +123,9 @@ public class Utils {
         editor.commit();
     }
 
+
     // Fetches reg id from shared preferences
-    // and displays on the screen
+    // and displays on the scree
     public static String getPref(Context context,String key) {
         SharedPreferences pref = context.getApplicationContext().getSharedPreferences("app", 0);
         String result = pref.getString(key, "");
@@ -131,11 +142,13 @@ public class Utils {
     return ResourcesCompat.getFont(context, R.font.cairo_regular);
     }
 
+
     public static void setDefaultFont(TextView textView, Context context){
         Typeface typeface = ResourcesCompat.getFont(context, R.font.cairo_regular);
         textView.setTypeface(typeface);
         textView.setTextSize(14f);
     }
+
 
     public static  void openSettings(Context context) {
         Toast.makeText(context, "Please open location Permission", Toast.LENGTH_SHORT).show();
@@ -184,6 +197,7 @@ public class Utils {
         context.startActivity(intent);
     }
 
+
     public String convertNullToEmpty(String s){
 
         String value = s;
@@ -192,6 +206,7 @@ public class Utils {
 
         return value;
     }
+
 
     public static String chooseNonNull(String first, String second){
 
@@ -202,6 +217,7 @@ public class Utils {
         else return "";
     }
 
+
     public String chooseNonEmpty(String first, String second){
 
         if (first!=null)
@@ -211,10 +227,12 @@ public class Utils {
         else return "";
     }
 
+
     public static String generateUniqueNumber(){
 
         return new SimpleDateFormat("yyyyMMddHHmmss", Locale.US).format(new Date());
     }
+
 
     public static String formatDate(String format, String date ){
 
@@ -230,6 +248,7 @@ public class Utils {
         }
     }
 
+
     public static byte[] getBytes(InputStream inputStream) throws IOException {
         ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
         int bufferSize = 1024;
@@ -241,10 +260,26 @@ public class Utils {
         }
         return byteBuffer.toByteArray();
     }
+
+
+    public static String getStringRandomCode(){
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US);
+        return dateFormat.format(new Date());
+    }
+
+    public static int getIntRandomCode(){
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("mmssSSS", Locale.US);
+        return Integer.parseInt(dateFormat.format(new Date()));
+    }
+
+
     public static String getStringKeyValue(Context context, int key, String value){
 
         return context.getResources().getString(key) + " " + ":" + " " + value;
     }
+
 
     public static void hideIfEmpty(List<View> viewList, List<String> values){
 
@@ -254,6 +289,7 @@ public class Utils {
                 viewList.get(a).setVisibility(View.GONE);
         }
     }
+
 
     public static IDName getSelectedIDNameItemInSpinner(List<IDName> list, String name){
 
@@ -272,6 +308,7 @@ public class Utils {
         return returnedIDName;
     }
 
+
     public static void setAllEmpty(List<EditText> editTextList){
 
         for (EditText editText : editTextList)
@@ -284,6 +321,7 @@ public class Utils {
         for (View view : viewList)
             view.setEnabled(enable);
     }
+
 
     public static void animateViewVisibility(final View view, final int visibility)
     {
@@ -322,6 +360,30 @@ public class Utils {
         resources.updateConfiguration(config, resources.getDisplayMetrics());
     }
 
+
+    @SuppressLint("Range")
+    public static String getFileName(Context context, Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
+    }
+
     public static double getImageSizeFromUriInMegaByte(Uri filePath, Context context) {
         String scheme = filePath.getScheme();
         double dataSize = 0;
@@ -348,4 +410,6 @@ public class Utils {
         }
         return dataSize / (1024 * 1024);
     }
+
+
 }

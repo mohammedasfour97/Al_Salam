@@ -13,8 +13,8 @@ import androidx.room.Update;
 @Dao
 public interface RecordHistoryDao {
 
-    @Query("SELECT * FROM record_history_table")
-    LiveData<List<RecordHistory>> getAllRecordHistory();
+    @Query("SELECT * FROM record_history_table WHERE is_uploaded = 'false'")
+    List<RecordHistory> getAllRecordHistory();
 
     @Insert
     long insert(RecordHistory recordHistory);
@@ -23,14 +23,17 @@ public interface RecordHistoryDao {
     int update (RecordHistory recordHistory);
 
     @Query("SELECT * FROM record_history_table WHERE id > :id")
-    LiveData<RecordHistory> getRecordHistory(int id);
+    RecordHistory getRecordHistory(int id);
 
 
     @Query("SELECT * FROM record_history_table WHERE record_name > :recName")
-    LiveData<RecordHistory> getRecordHistory(String  recName);
+    RecordHistory getRecordHistory(String  recName);
 
     @Delete
     int delete(RecordHistory recordHistory);
+
+    @Query("DELETE FROM record_history_table WHERE master_id like :masterId")
+    int delete(int masterId);
 
     @Query("DELETE FROM record_history_table")
     int deleteAllRecordHistory();

@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.alsalamegypt.Adapters.MastersAdapter;
 import com.alsalamegypt.BaseClasses.BaseFragment;
 import com.alsalamegypt.Constants;
@@ -20,6 +19,7 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.widget.NestedScrollView;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
@@ -30,11 +30,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 public class ListenRecordsFragment extends BaseFragment {
 
     private FragmentListenMastersBinding fragmentListenRecordsBinding;
-    private Observer<List<Master>> getMasterListObserver, getListenerMasterListObserver;
+    private Observer<List<Master>> getMasterListObserver, getMastersByPageListObserver;
     private MastersAdapter mastersAdapter;
     private List<Master> masterList;
     private ListenRecordsViewModel listenRecordsViewModel;
     private boolean isRecorder;
+    private int pageNum;
 
     @Nullable
     @Override
@@ -52,9 +53,9 @@ public class ListenRecordsFragment extends BaseFragment {
 
         initUI();
         setListeners();
-        initRecyclerView();
         initObservers();
-        requestMasters();
+        initRecyclerView();
+
     }
 
 
@@ -118,26 +119,53 @@ public class ListenRecordsFragment extends BaseFragment {
             @Override
             public void onClick(View v) {
 
-                requestMasters();
+                initRecyclerView();
             }
         });
 
+
+        fragmentListenRecordsBinding.fragmentListenMastersScrollView.setOnScrollChangeListener(
+                new NestedScrollView.OnScrollChangeListener() {
+                    @Override
+                    public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+
+                        if (!isRecorder && !getArguments().getBoolean("lis_rec_car")){
+
+                            if (scrollY == v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight()) {
+
+                                pageNum++;
+                                requestMasters();
+                            }
+                        }
+
+                    }
+                });
     }
 
 
     private void initRecyclerView(){
 
         masterList = new ArrayList<>();
-        if (!isRecorder && getArguments().getBoolean("lis_rec_car"))
-            mastersAdapter = new MastersAdapter(masterList , getContext(), this, true);
-        else
+
+        ///// Listener Masters Main Page ////
+
+        if (!isRecorder && !getArguments().getBoolean("lis_rec_car"))
             mastersAdapter = new MastersAdapter(masterList , getContext(), this, false);
+
+        ///// Listener Recorded Cars /////
+
+        else
+            mastersAdapter = new MastersAdapter(masterList , getContext(), this, true);
+
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         fragmentListenRecordsBinding.fragmentListenRecordsrecycler.recyclerview.setLayoutManager(mLayoutManager);
         fragmentListenRecordsBinding.fragmentListenRecordsrecycler.recyclerview.addItemDecoration(new DividerItemDecoration(getContext(),
                 LinearLayoutManager.VERTICAL));
         mastersAdapter.setHasStableIds(true);
         fragmentListenRecordsBinding.fragmentListenRecordsrecycler.recyclerview.setAdapter(mastersAdapter);
+
+        pageNum = 1;
+        requestMasters();
     }
 
 
@@ -170,7 +198,8 @@ public class ListenRecordsFragment extends BaseFragment {
             }
         };
 
-        getListenerMasterListObserver = new Observer<List<Master>>() {
+
+        getMastersByPageListObserver = new Observer<List<Master>>() {
             @Override
             public void onChanged(List<Master> masters) {
 
@@ -180,22 +209,30 @@ public class ListenRecordsFragment extends BaseFragment {
 
                         hideProgress();
 
-                        if (masters.isEmpty())
-                            showSnackBar(R.string.no_records);
-
-                        else {
+                        if (!masters.isEmpty()) {
 
                             if (masters.get(0).getId().equals("-1"))
                                 showFailedDialog(getResources().getString(R.string.err_loading), true);
+
                             else {
-                                masterList.clear();
+                                //masterList.clear();
                                 masterList.addAll(masters);
                                 mastersAdapter.notifyDataSetChanged();
                             }
                         }
 
+                        else {
+
+                            //// Check if reaches the end of the page //////
+
+                            if (pageNum == 1)
+                                showSnackBar(R.string.no_records);
+
+                        }
+
+                        }
+
                     }
-                }
             }
         };
     }
@@ -206,18 +243,18 @@ public class ListenRecordsFragment extends BaseFragment {
         showDefaultProgressDialog();
 
         if (isRecorder)
-            listenRecordsViewModel.getMasterListMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(
-                getViewLifecycleOwner(), getMasterListObserver);
+            listenRecordsViewModel.getMasterListMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID))
+                    .observe(getViewLifecycleOwner(), getMasterListObserver);
 
         else{
 
             if (getArguments().getBoolean("lis_rec_car"))
                 listenRecordsViewModel.getMasterListenerRecordedCarsMutableLiveData(getArguments().getString("master_id"),
                         MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(),
-                        getListenerMasterListObserver);
+                        getMasterListObserver);
             else
-                listenRecordsViewModel.getMasterListenerListMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID))
-                        .observe(getViewLifecycleOwner(), getMasterListObserver);
+                listenRecordsViewModel.getMasterListenerListMutableLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID),
+                        pageNum, Constants.PAGE_SIZE).observe(getViewLifecycleOwner(), getMastersByPageListObserver);
         }
 
     }

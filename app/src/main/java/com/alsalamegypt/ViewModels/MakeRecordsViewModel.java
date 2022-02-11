@@ -1,11 +1,14 @@
 package com.alsalamegypt.ViewModels;
 
+import android.net.Uri;
+
 import com.alsalamegypt.Models.IDName;
 import com.alsalamegypt.Models.Master;
 import com.alsalamegypt.RecordHistory;
 import com.alsalamegypt.Repositories.MakeRecordsRepository;
 
 import java.util.List;
+import java.util.Map;
 
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -19,9 +22,9 @@ public class MakeRecordsViewModel extends ViewModel {
         makeRecordsRepository = new MakeRecordsRepository();
     }
 
-    public MutableLiveData<String> getUploadRecordMutableLiveData(byte[] recordBytes, String fileName, String userId){
+    public MutableLiveData<Map<String, String>> getUploadRecordMutableLiveData(Uri filePath, String fileName){
 
-        return makeRecordsRepository.getMutableLiveData(recordBytes, fileName, userId);
+        return makeRecordsRepository.getUploadRecordMutableLiveData(filePath,fileName);
     }
 
     public MutableLiveData<List<IDName>> getGetRegionsLiveData(String userId) {
@@ -61,6 +64,12 @@ public class MakeRecordsViewModel extends ViewModel {
     public MutableLiveData<Integer> getDeleteRecordHistoryMutableLiveData(RecordHistory recordHistory) {
 
         return makeRecordsRepository.getDeleteRecordHistoryMutableLiveData(recordHistory);
+    }
+
+
+    public MutableLiveData<Integer> getDeleteRecordHistoryMutableLiveData(String masterId) {
+
+        return makeRecordsRepository.getDeleteRecordHistoryMutableLiveData(masterId);
     }
 
 

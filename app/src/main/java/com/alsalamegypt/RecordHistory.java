@@ -1,17 +1,22 @@
 package com.alsalamegypt;
 
+import java.io.Serializable;
+
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 @Entity(tableName = "record_history_table")
-public class RecordHistory {
+public class RecordHistory implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     private int id ;
 
     @ColumnInfo(name = "master_id")
-    private String masterId;
+    private int masterId;
+
+    @ColumnInfo(name = "region_id")
+    private String region_id;
 
     @ColumnInfo(name = "region")
     private String region;
@@ -35,11 +40,12 @@ public class RecordHistory {
     public RecordHistory() {
     }
 
-    public RecordHistory(int id, String masterId, String region, String plateNumber, String address, String recordName,
+    public RecordHistory(int masterId, String region_id, String region, String plateNumber, String address, String recordName,
                          String recordFilePath, String isUploaded) {
-        this.id = id;
+
         this.masterId = masterId;
         this.region = region;
+        this.region_id = region_id;
         this.plateNumber = plateNumber;
         this.address = address;
         this.recordName = recordName;
@@ -55,11 +61,11 @@ public class RecordHistory {
         this.id = id;
     }
 
-    public String getMasterId() {
+    public int getMasterId() {
         return masterId;
     }
 
-    public void setMasterId(String masterId) {
+    public void setMasterId(int masterId) {
         this.masterId = masterId;
     }
 
@@ -110,5 +116,13 @@ public class RecordHistory {
 
     public void setIsUploaded(String isUploaded) {
         this.isUploaded = isUploaded;
+    }
+
+    public String getRegion_id() {
+        return region_id;
+    }
+
+    public void setRegion_id(String region_id) {
+        this.region_id = region_id;
     }
 }

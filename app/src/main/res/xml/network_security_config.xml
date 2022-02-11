@@ -3,6 +3,6 @@
     <base-config cleartextTrafficPermitted="true">
     </base-config>
     <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="true">alsalameg.com</domain>
+        <domain includeSubdomains="true">alsalamegypt.com</domain>
     </domain-config>
 </network-security-config>

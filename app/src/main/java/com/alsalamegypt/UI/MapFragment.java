@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
@@ -16,6 +17,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Build;
@@ -23,6 +25,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.alsalamegypt.BaseClasses.BaseFragment;
 import com.alsalamegypt.Constants;
@@ -56,12 +59,11 @@ import java.util.List;
 public class MapFragment extends BaseFragment {
 
     // vars for google map
-    private Location currentLocation;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private FragmentUserMapBinding fragmentMapBinding;
     private SupportMapFragment mapFragment;
     private OnMapReadyCallback callback;
-    private LatLng latLng;
+    private LatLng currentLatLng;
     private List<Car> carsList, cars;
     private Marker selectedMarker;
 
@@ -164,9 +166,8 @@ public class MapFragment extends BaseFragment {
                 @Override
                 public void onSuccess(Location location) {
                     if (location != null) {
-                        currentLocation = location;
 
-                        setGoogleMap();
+                        setGoogleMap(location);
                     }
                 }
             });
@@ -175,7 +176,7 @@ public class MapFragment extends BaseFragment {
     }
 
 
-    private void setGoogleMap() {
+    private void setGoogleMap(Location currentLocation) {
 
                  /*if (currentLocation != null) {
 
@@ -196,9 +197,12 @@ public class MapFragment extends BaseFragment {
                 if (checkPermission()) {
 
                     googleMap.setMyLocationEnabled(true);
-                    latLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 20));
+
+                    currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 20));
+
+
                 }
 
                 requestCarsLocations(googleMap);
@@ -225,7 +229,7 @@ public class MapFragment extends BaseFragment {
 
                             FragmentManager fm = getActivity().getSupportFragmentManager();
                             SameMultipleLatlongMarksFragment sameMultipleLatlongMarksFragment =
-                                    new SameMultipleLatlongMarksFragment(cars, latLng);
+                                    new SameMultipleLatlongMarksFragment(cars, currentLatLng);
                             sameMultipleLatlongMarksFragment.show(fm, "fragment_new_activity");
 
                         } else {
@@ -242,7 +246,7 @@ public class MapFragment extends BaseFragment {
 
                                     FragmentManager fm = getActivity().getSupportFragmentManager();
                                     CarMarkerDetailsFragment carMarkerDetailsFragment = new CarMarkerDetailsFragment(
-                                            (Car) marker.getTag(), latLng);
+                                            (Car) marker.getTag(), currentLatLng);
                                     carMarkerDetailsFragment.show(fm, "fragment_new_activity");
 
                                     click[0] = 0;
@@ -292,33 +296,37 @@ public class MapFragment extends BaseFragment {
 
                         hideProgress();
 
-                        if (!cars.get(0).getId().equals("")) {
+                        if (!cars.isEmpty()) {
 
-                            if (!cars.isEmpty()) {
+                            if (!cars.get(0).getId().equals("")) {
+
+                                googleMap.clear();
 
                                 Marker marker;
 
                                 for (Car car : cars) {
 
                                     marker = googleMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(
-                                            car.getLatitude()), Double.parseDouble(car.getLongitude()))).icon(getMark(car.getStatus()))
-                                            .title(car.getPlateNumber() + " , " + car.getKind() + " , " + car.getBank()));
+                                            car.getLatitude()), Double.parseDouble(car.getLongitude()))).icon(getMark(car.getColors()))
+                                            .title(car.getPlateNumber() + " , " + car.getKind() + " , " + car.getNotes() + " ," +
+                                                    car.getBank()));
 
                                     marker.setTag(car);
                                     marker.showInfoWindow();
 
                                 }
 
+                                carsList.clear();
                                 carsList.addAll(cars);
 
                                 configureSearchBar(googleMap);
 
                             } else {
 
-                                showFailedDialog(getResources().getString(R.string.no_cars), true);
+                                showFailedDialog(getResources().getString(R.string.fail_load_cars), true);
                             }
                         } else
-                            showFailedDialog(getResources().getString(R.string.fail_load_cars), true);
+                            showFailedDialog(getResources().getString(R.string.no_cars), true);
                     }
                 }
             }
@@ -335,21 +343,41 @@ public class MapFragment extends BaseFragment {
             public boolean onQueryTextSubmit(String query) {
 
                 if (query.equals(""))
-                    setGoogleMap();
+
+                    requestCarsLocations(googleMap);
 
                 else {
 
+                    boolean isExist = false;
+
+                    googleMap.clear();
+
                     for (Car car: carsList){
 
-                        if (query.equals(car.getPlateNumber())){
+                        if (car.getPlateNumber().contains(query) || car.getKind().contains(query) || car.getNotes().contains(query)
+                        || car.getBank().contains(query)){
 
-                            googleMap.clear();
-                            googleMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(
-                                    car.getLatitude()), Double.parseDouble(car.getLongitude()))).icon(getMark(car.getStatus()))
-                                    .title(car.getPlateNumber() + " , " + car.getKind() + " , " + car.getBank()));
+                            Marker marker = googleMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(
+                                    car.getLatitude()), Double.parseDouble(car.getLongitude()))).icon(getMark(car.getColors()))
+                                    .title(car.getPlateNumber() + " , " + car.getKind() + " , " + car.getNotes()
+                                     + " , " + car.getBank()));
+
+                            marker.showInfoWindow();
+                            marker.setTag(car);
+
+                            LatLng markLatLng = new LatLng(Double.parseDouble(car.getLatitude()),Double.parseDouble(car.getLongitude()));
+
+                            googleMap.moveCamera(CameraUpdateFactory.newLatLng(markLatLng));
+                            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markLatLng, 13));
+
+
+                            isExist = true;
                         }
 
                     }
+
+                    if (!isExist)
+                        Toast.makeText(getContext(), getResources().getString(R.string.no_cars), Toast.LENGTH_SHORT).show();
                 }
 
                 return false;
@@ -359,7 +387,7 @@ public class MapFragment extends BaseFragment {
             public boolean onQueryTextChange(String newText) {
 
                 if (newText.equals(""))
-                    setGoogleMap();
+                    requestCarsLocations(googleMap);
 
                 return false;
             }
@@ -367,7 +395,21 @@ public class MapFragment extends BaseFragment {
     }
 
 
-    private BitmapDescriptor getMark(String carStatus) {
+    private BitmapDescriptor getMark(String hexColor) {
+
+        int color = Color.parseColor(hexColor);
+        int r = (color >> 16) & 0xFF;
+        int g = (color >> 8) & 0xFF;
+        int b = (color >> 0) & 0xFF;
+
+        float[] hslColor = new float[3];
+
+        ColorUtils.RGBToHSL(r,g,b,hslColor);
+
+        return BitmapDescriptorFactory.defaultMarker(hslColor[0]);
+
+    }
+    /*private BitmapDescriptor getMark(String carStatus) {
 
         switch (carStatus) {
 
@@ -396,6 +438,8 @@ public class MapFragment extends BaseFragment {
                 return BitmapDescriptorFactory.defaultMarker();
         }
     }
+
+     */
 
 
     private BitmapDescriptor bitmapDescriptorFromVector(Context context, int vectorResId) {

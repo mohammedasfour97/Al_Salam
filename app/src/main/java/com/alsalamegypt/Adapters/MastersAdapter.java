@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.alsalamegypt.Adapters.Interfaces.OnDeleteMaster;
 import com.alsalamegypt.Api.WebServices;
@@ -19,6 +20,7 @@ import com.alsalamegypt.Models.Record;
 import com.alsalamegypt.UI.MainActivity;
 import com.alsalamegypt.Utils;
 import com.alsalamegypt.ViewModels.ListenRecordsViewModel;
+import com.alsalamegypt.ViewModels.MakeRecordsViewModel;
 import com.alsalamegypt.databinding.ItemMasterBinding;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -50,6 +52,23 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
     private final ListenRecordsViewModel listenRecordsViewModel;
     private boolean listenerRecordedCars;
 
+    public MastersAdapter(List<Master> masterList, Context context, BaseFragment fragment) {
+        this.masterList = masterList;
+        this.context = context;
+        this.fragment = fragment;
+        listenRecordsViewModel = ViewModelProviders.of(fragment).get(ListenRecordsViewModel.class);
+    }
+
+
+    public MastersAdapter(List<Master> masterList, Context context, BaseFragment fragment, boolean listenerRecordedCars) {
+        this.masterList = masterList;
+        this.context = context;
+        this.fragment = fragment;
+        this.listenerRecordedCars = listenerRecordedCars;
+        listenRecordsViewModel = ViewModelProviders.of(fragment).get(ListenRecordsViewModel.class);
+    }
+
+
     public class MastersViewHolder extends RecyclerView.ViewHolder {
 
         private final ItemMasterBinding itemRecordBinding;
@@ -71,6 +90,19 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
             this.itemRecordBinding = itemRecordBinding;
         }
+
+
+        private void loadRecords(String id){
+
+            MastersViewHolder.this.itemRecordBinding.progress.setVisibility(View.VISIBLE);
+            MastersViewHolder.this.itemRecordBinding.loadRecListBtn.setVisibility(View.GONE);
+
+//            fragment.showProgressDialog(context.getResources().getString(R.string.loading),
+//                    context.getResources().getString(R.string.loading_msg), false);
+
+            new GetMasterRecordsAsyncClass(id).execute();
+        }
+
 
         class GetMasterRecordsAsyncClass extends AsyncTask<String, String, List<HashMap<String,String>>> {
 
@@ -99,6 +131,8 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
                 if (recordsMap!=null){
 
+                    //fragment.hideProgress();
+
                     Record record;
                     List<Record> recordList = new ArrayList<>();
                     for (HashMap<String,String> hashMap : recordsMap){
@@ -111,19 +145,19 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
                     }
 
+                    MastersViewHolder.this.itemRecordBinding.recyclerview.setVisibility(View.VISIBLE);
                     MastersViewHolder.this.recordList.addAll(recordList);
                     MastersViewHolder.this.recordsAdapter.notifyDataSetChanged();
+                }
+                else {
+
+                    fragment.showFailedDialog(context.getResources().getString(R.string.err_load_rec), true);
+
+                    MastersViewHolder.this.itemRecordBinding.loadRecListBtn.setVisibility(View.VISIBLE);
                 }
 
             }
 
-        }
-
-
-        private void loadRecords(String id){
-
-            MastersViewHolder.this.itemRecordBinding.progress.setVisibility(View.VISIBLE);
-            new GetMasterRecordsAsyncClass(id).execute();
         }
 
 
@@ -139,10 +173,10 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
                     if (isRecorder)
                         listenRecordsViewModel.getDeleteMasterWithRecordsMutableLiveData(masterId, idUser).observe(MastersAdapter.this.fragment
-                            .getViewLifecycleOwner(), deleteMasterObserver(pos));
+                                .getViewLifecycleOwner(), deleteMasterObserver(masterId, pos, isRecorder));
                     else
                         listenRecordsViewModel.getDeleteListenerRecordedCarMutableLiveData(masterId, idUser).observe(MastersAdapter.this.fragment
-                                .getViewLifecycleOwner(), deleteMasterObserver(pos));
+                                .getViewLifecycleOwner(), deleteMasterObserver(masterId, pos, isRecorder));
                 }
             }, new Closure() {
                 @Override
@@ -155,7 +189,8 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
         }
 
-        private Observer<String> deleteMasterObserver(int pos){
+
+        private Observer<String> deleteMasterObserver(String masterId, int pos, boolean isRecorder){
 
             return new Observer<String>() {
                 @Override
@@ -172,27 +207,51 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
                                 MastersAdapter.this.masterList.remove(pos);
                                 MastersAdapter.this.notifyItemRemoved(pos);
                                 MastersAdapter.this.notifyDataSetChanged();
+
+                                if (isRecorder)
+                                    deleteMasterRecordFromArchieve(masterId);
+                            }
+
+                            else {
+
+                                fragment.showFailedDialog(context.getResources().getString(R.string.fail_del), true);
                             }
                         }
                     }
                 }
             };
         }
-    }
 
-    public MastersAdapter(List<Master> masterList, Context context, BaseFragment fragment) {
-        this.masterList = masterList;
-        this.context = context;
-        this.fragment = fragment;
-        listenRecordsViewModel = ViewModelProviders.of(fragment).get(ListenRecordsViewModel.class);
-    }
 
-    public MastersAdapter(List<Master> masterList, Context context, BaseFragment fragment, boolean listenerRecordedCars) {
-        this.masterList = masterList;
-        this.context = context;
-        this.fragment = fragment;
-        this.listenerRecordedCars = listenerRecordedCars;
-        listenRecordsViewModel = ViewModelProviders.of(fragment).get(ListenRecordsViewModel.class);
+        private void deleteMasterRecordFromArchieve(String masterId){
+
+            ViewModelProviders.of(fragment).get(MakeRecordsViewModel.class).getDeleteRecordHistoryMutableLiveData(masterId)
+                    .observe(fragment.getViewLifecycleOwner(), deleteMasterRecordsFromArchiveObserver());
+        }
+
+
+        private Observer<Integer> deleteMasterRecordsFromArchiveObserver(){
+
+            return new Observer<Integer>() {
+                @Override
+                public void onChanged(Integer integer) {
+
+                    if (integer !=null){
+
+                        if (fragment.getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+
+                            if (integer== -1 || integer== 0){
+
+                                //fragment.showFailedDialog(context.getResources().getString(R.string.fail_delete_rec_arch), false);
+
+                            }
+
+                        }
+                    }
+                }
+            };
+        }
+
     }
 
     @Override
@@ -206,7 +265,7 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
     @Override
     public void onBindViewHolder(MastersViewHolder holder, int position) {
 
-        Master master = masterList.get(position);
+        Master master = masterList.get(holder.getAdapterPosition());
 
         holder.viewList.add(holder.itemRecordBinding.notesTxt);
         holder.viewList.add(holder.itemRecordBinding.districtTxt);
@@ -234,12 +293,19 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
         holder.itemRecordBinding.vehcileTypeTxt.setText(Utils.getStringKeyValue(context, R.string.vichel_type, master.getVehicleType()));
         holder.itemRecordBinding.vehicleNumTxt.setText(Utils.getStringKeyValue(context, R.string.vichel_num, master.getVehicleNumber()));
 
-        /// hide delete if the listener who is listening
+
+        /// hide delete if the listener who is listening and change color if master is heard ////
 
         if (!MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded")){
 
-            if (!listenerRecordedCars)
+            if (!listenerRecordedCars){
+
                 holder.itemRecordBinding.deleteBtn.setVisibility(View.GONE);
+
+//                if (master.getHeard().equals("1"))
+//                    holder.itemRecordBinding.topRadiusLayout.setBackground(context.getResources().getDrawable
+//                            (R.drawable.orange_solid_top_radius_));
+            }
         }
 
 
@@ -292,29 +358,41 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
         });
 
 
-        // init records
+
         if (MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded")
                 && Boolean.parseBoolean(master.getType())){
 
-                holder.onDeleteMaster = new OnDeleteMaster() {
-                    @Override
-                    public void deleteMaster() {
+            holder.itemRecordBinding.loadRecListBtn.setVisibility(View.VISIBLE);
+            holder.itemRecordBinding.recyclerview.setVisibility(View.GONE);
 
-                        holder.deleteMaster(master.getId(), master.getIdUSER(), position, true);
-                    }
-                };
+            holder.onDeleteMaster = new OnDeleteMaster() {
+                @Override
+                public void deleteMaster() {
 
-                holder.recordList = new ArrayList<>();
-                holder.recordsAdapter = new RecordsAdapter(holder.recordList , holder.onDeleteMaster, context, fragment);
-                LinearLayoutManager mLayoutManager = new LinearLayoutManager(context);
-                holder.itemRecordBinding.itemRecordRecordsRecycler.recyclerview.setLayoutManager(mLayoutManager);
-                holder.itemRecordBinding.itemRecordRecordsRecycler.recyclerview.addItemDecoration(new DividerItemDecoration(context,
-                        LinearLayoutManager.VERTICAL));
-                holder.recordsAdapter.setHasStableIds(true);
-                holder.itemRecordBinding.itemRecordRecordsRecycler.recyclerview.setAdapter(holder.recordsAdapter);
+                    holder.deleteMaster(master.getId(), master.getIdUSER(), position, true);
+                }
+            };
+        }
 
-                holder.loadRecords(master.getId());
-            }
+
+
+        holder.itemRecordBinding.loadRecListBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                    holder.recordList = new ArrayList<>();
+                    holder.recordsAdapter = new RecordsAdapter(holder.recordList , holder.onDeleteMaster, context, fragment);
+                    LinearLayoutManager mLayoutManager = new LinearLayoutManager(context);
+                    holder.itemRecordBinding.recyclerview.setLayoutManager(mLayoutManager);
+                    holder.itemRecordBinding.recyclerview.addItemDecoration(new DividerItemDecoration(context,
+                            LinearLayoutManager.VERTICAL));
+                    holder.recordsAdapter.setHasStableIds(true);
+                    holder.itemRecordBinding.recyclerview.setAdapter(holder.recordsAdapter);
+
+                    holder.loadRecords(master.getId());
+                }
+
+        });
 
 
         holder.itemRecordBinding.deleteBtn.setOnClickListener(new View.OnClickListener() {
@@ -323,6 +401,7 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
 
                 holder.deleteMaster(master.getId(), master.getIdUSER(), position,
                         MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded"));
+
             }
         });
 
@@ -331,8 +410,7 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
             @Override
             public void onClick(View v) {
 
-
-                if (!MyApplication.getTinyDB().getString(Constants.KEY_USER_TYPE).equals("Recorded") && !listenerRecordedCars){
+                if (!listenerRecordedCars){
 
                     Bundle bundle = new Bundle();
                     bundle.putSerializable("master", master);
@@ -350,18 +428,18 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
         return masterList.size();
     }
 
-    @Override
-    public long getItemId(int position)
-    {
-
-        return Long.parseLong(masterList.get(position).getId());
-    }
-
-    @Override
-    public int getItemViewType(int position)
-    {
-        return Integer.parseInt(masterList.get(position).getId());
-    }
+//    @Override
+//    public long getItemId(int position)
+//    {
+//
+//        return Long.parseLong(masterList.get(position).getId());
+//    }
+//
+//    @Override
+//    public int getItemViewType(int position)
+//    {
+//        return Integer.parseInt(masterList.get(position).getId());
+//    }
 
     /*
     private void loadRecords(String id, MastersViewHolder mastersViewHolder){

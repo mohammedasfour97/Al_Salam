@@ -5,11 +5,11 @@ import java.io.Serializable;
 public class Master implements Serializable {
 
     private String id, vehicleNumber, vehicleType, location, district, longitude, latitude, status, sorting, notes, idRegions, regions, idUSER,
-            dateEdit, dateCreate, type;
+            dateEdit, dateCreate, type, heard;
 
     public Master(String id, String vehicleNumber, String vehicleType, String location, String district, String longitude, String latitude,
                   String status, String sorting, String notes, String idRegions, String regions, String idUSER, String dateEdit,
-                  String dateCreate, String type) {
+                  String dateCreate, String type, String heard) {
         this.id = id;
         this.vehicleNumber = vehicleNumber;
         this.vehicleType = vehicleType;
@@ -26,6 +26,7 @@ public class Master implements Serializable {
         this.dateEdit = dateEdit;
         this.dateCreate = dateCreate;
         this.type = type;
+        this.heard = heard;
     }
 
     public Master() {
@@ -157,5 +158,13 @@ public class Master implements Serializable {
 
     public void setRegions(String regions) {
         this.regions = regions;
+    }
+
+    public String getHeard() {
+        return heard;
+    }
+
+    public void setHeard(String heard) {
+        this.heard = heard;
     }
 }

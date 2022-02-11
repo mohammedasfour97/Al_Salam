@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -41,11 +42,14 @@
 
             <androidx.appcompat.widget.SearchView
                 android:id="@+id/search_bar"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/_10sdp"
+                android:layout_marginVertical="@dimen/_10sdp"
+                android:layout_marginStart="@dimen/_10sdp"
+                android:layout_marginEnd="@dimen/_50sdp"
                 android:background="@drawable/white_solid_prim_stroke"
                 android:layout_toEndOf="@id/fragment_map_reload_btn"
+                app:iconifiedByDefault="false"
                 style="@style/Regular_Primary_Color_TextView_style"
                 android:visibility="gone"/>
 

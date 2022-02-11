@@ -2,15 +2,18 @@ package com.alsalamegypt.UI;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.alsalamegypt.BaseClasses.BaseFragment;
 import com.alsalamegypt.Constants;
 import com.alsalamegypt.MyApplication;
 import com.alsalamegypt.R;
 import com.alsalamegypt.Models.User;
+import com.alsalamegypt.Utils;
 import com.alsalamegypt.ViewModels.LoginViewModel;
 import com.alsalamegypt.databinding.FragmentLoginBinding;
 
@@ -86,6 +89,7 @@ public class LoginFragment extends BaseFragment {
 
                         loginViewModel.userMutableLiveData(usernameText, passwordText, MyApplication.getTinyDB()
                                 .getString(Constants.KEY_UID)).observe(getViewLifecycleOwner(), loginObserver);
+
                         //((MainActivity)getActivity()).navController.navigate(R.id.action_fragment_login_to_fragment_main_records);
                     }
                 }
@@ -147,6 +151,7 @@ public class LoginFragment extends BaseFragment {
                         else {
 
                             showFailedDialog(getResources().getString(R.string.username_pass_err), true);
+                            //showFailedDialog("error" +  user.getId(), true);
                         }
                     }
 

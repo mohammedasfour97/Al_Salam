@@ -54,9 +54,10 @@ public class SameMultipleMarksAdapter extends RecyclerView.Adapter<SameMultipleM
     public void onBindViewHolder(SameMultipleMarksAdapter.SameMultipleMarksViewHolder holder, int position) {
 
         Car car = carList.get(position);
-        holder.itemSameMultipleLatlongMarksBinding.bankTxt.setText(car.getBank());
+        holder.itemSameMultipleLatlongMarksBinding.bankTxt.setText(car.getNotes());
         holder.itemSameMultipleLatlongMarksBinding.kindTxt.setText(car.getKind());
         holder.itemSameMultipleLatlongMarksBinding.plateNumberTxt.setText(car.getPlateNumber());
+        holder.itemSameMultipleLatlongMarksBinding.companyTxt.setText(car.getBank());
         holder.itemSameMultipleLatlongMarksBinding.statusTxt.setText(car.getStatus());
 
         /////  change icon color ///////

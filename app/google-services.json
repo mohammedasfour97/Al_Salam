@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:582305388565:android:0dc581accd2cededc0961c",
+        "mobilesdk_app_id": "1:582305388565:android:d133e53703cf13f7c0961c",
         "android_client_info": {
-          "package_name": "com.alsalameg"
+          "package_name": "com.alsalamegypt"
         }
       },
       "oauth_client": [

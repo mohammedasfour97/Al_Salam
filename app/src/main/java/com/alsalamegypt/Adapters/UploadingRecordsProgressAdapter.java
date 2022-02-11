@@ -11,9 +11,11 @@ import android.widget.Toast;
 import com.alsalamegypt.Api.WebServices;
 import com.alsalamegypt.BaseClasses.BaseFragment;
 import com.alsalamegypt.Constants;
+import com.alsalamegypt.Models.Master;
 import com.alsalamegypt.Models.UploadingRecord;
 import com.alsalamegypt.MyApplication;
 import com.alsalamegypt.R;
+import com.alsalamegypt.RecordHistory;
 import com.alsalamegypt.Utils;
 import com.alsalamegypt.ViewModels.MakeRecordsViewModel;
 import com.alsalamegypt.databinding.ItemRecordPlayerBinding;
@@ -25,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Lifecycle;
@@ -39,9 +42,20 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
     private BaseFragment fragment;
     private MakeRecordsViewModel makeRecordsViewModel;
 
+    public UploadingRecordsProgressAdapter(List<UploadingRecord> uploadingRecordList ,Context context,
+                                           BaseFragment fragment) {
+        this.uploadingRecordList = uploadingRecordList;
+        this.context = context;
+        this.fragment = fragment;
+
+        makeRecordsViewModel = ViewModelProviders.of(fragment).get(MakeRecordsViewModel.class);
+    }
+
+
     public class UploadingRecordsProgressViewHolder extends RecyclerView.ViewHolder {
 
         private ItemUploadingRecordProcessBinding itemUploadingRecordProcessBinding;
+        private RecordHistory recordHistory;
 
         public UploadingRecordsProgressViewHolder(ItemUploadingRecordProcessBinding itemUploadingRecordProcessBinding) {
             super(itemUploadingRecordProcessBinding.getRoot());
@@ -50,18 +64,66 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
         }
 
 
-        private void insertRecordToArcheive(UploadingRecord uploadingRecord){
+        private void insertRecordToArchive(UploadingRecord uploadingRecord){
 
-            
+            Master master = uploadingRecord.getMaster();
+
+            recordHistory = new RecordHistory(Integer.parseInt(master.getId()), master.getIdRegions(),master.getRegions(),
+                    master.getVehicleNumber(), master.getLocation(), uploadingRecord.getRecordName(),
+                    uploadingRecord.getRecordFileUri().getPath(), String.valueOf(false));
+
+            makeRecordsViewModel.getInsertRecordHistoryMutableLiveData(recordHistory).observe(fragment.getViewLifecycleOwner()
+                    ,uploadRecordHistoryObserver(uploadingRecord));
         }
 
-        private void uploadRecord(String recordFilePath, String recordFileName, UploadingRecord uploadingRecord, String id){
+
+
+        private Observer<Long> uploadRecordHistoryObserver(UploadingRecord uploadingRecord){
+
+            return new Observer<Long>() {
+                @Override
+                public void onChanged(Long aLong) {
+
+                    if (aLong !=null){
+
+                        if (fragment.getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+
+                            if (aLong!= -1 && aLong!= 0){
+
+                                recordHistory.setId(Integer.parseInt(String.valueOf(aLong)));
+                                uploadRecord(uploadingRecord);
+                            }
+
+                            else {
+
+                                fragment.showFailedDialog(fragment.
+                                        getResources().getString(R.string.error_upload_record), true);
+
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+
+
+        private void uploadRecord(UploadingRecord uploadingRecord){
 
             if (fragment.hasInternetConnection(context)) {
 
-                try {
+
+                UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.progressCircular.setVisibility(
+                        View.VISIBLE);
+                UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText.setText(
+                        fragment.getResources().getString(R.string.uploading_record) + "\n" + uploadingRecord.getRecordName());
+
+                makeRecordsViewModel.getUploadRecordMutableLiveData(uploadingRecord.getRecordFileUri(), uploadingRecord.getRecordName())
+                        .observe(fragment.getViewLifecycleOwner(), uploadRecordObserver(uploadingRecord));
+
+                /*try {
                     InputStream iStream = fragment.getActivity().getContentResolver()
-                            .openInputStream(Uri.fromFile(new File(recordFilePath)));
+                            .openInputStream(Uri.fromFile(new File(uploadingRecord.getRecordFilePath())));
                     byte[] voiceBytes = Utils.getBytes(iStream);
 
 
@@ -70,12 +132,11 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
                         UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.progressCircular.setVisibility(
                                 View.VISIBLE);
                         UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText.setText(
-                                fragment.getResources().getString(R.string.uploading_record)
-                                        + "\n" + recordFileName);
+                                fragment.getResources().getString(R.string.uploading_record) + "\n" + uploadingRecord.getRecordName());
 
                         //// request to upload/////
-                        new UploadAsyncClass(voiceBytes, recordFileName, MyApplication.getTinyDB().getString
-                                (Constants.KEY_USERID), uploadingRecord, id).execute();
+                        new UploadAsyncClass(voiceBytes, uploadingRecord.getRecordName(), MyApplication.getTinyDB().getString
+                                (Constants.KEY_USERID), uploadingRecord).execute();
                     }
 
 
@@ -83,30 +144,79 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
                     e.printStackTrace();
                     fragment.showFailedDialog(fragment.
                             getResources().getString(R.string.error_upload_record), true);
+
+
                 } catch (IOException e) {
                     e.printStackTrace();
                     fragment.showFailedDialog(fragment.
                             getResources().getString(R.string.error_upload_record), true);
+
                 }
 
+
+                 */
             }
 
         }
 
 
-        private class UploadAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
+        private Observer<Map<String,String>> uploadRecordObserver(UploadingRecord uploadingRecord){
+
+            return new Observer<Map<String, String>>() {
+                @Override
+                public void onChanged(Map<String, String> stringStringMap) {
+
+                    if (stringStringMap != null) {
+
+                        if (fragment.getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
+
+                            switch (stringStringMap.get("success")) {
+
+                                case "": ///// Still trying to upload
+                                    break;
+
+                                case "false":
+
+                                    fragment.showFailedDialog(fragment.getResources().getString(R.string.error_upload_record),
+                                            true);
+
+                                    UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.progressCircular
+                                            .setVisibility(View.GONE);
+                                    UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText.setText(
+                                            uploadingRecord.getRecordName());
+                                    break;
+
+                                case "progress":
+
+                                    UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText.setText(
+                                            fragment.getResources().getString(R.string.uploading_record) + "\n"
+                                                    + uploadingRecord.getRecordName() + "  " + stringStringMap.get("progress"));
+                                    break;
+
+                                default:
+                                    //// Successed ////
+
+                                    uploadingRecord.setRecordName(stringStringMap.get("success"));
+                                    addUploadedRecordToMaster(uploadingRecord);
+
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        /*private class UploadAsyncClass extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
 
             private byte[] recordBytes;
-            private String fileName, userId, uploadedRecordId;
+            private String fileName, userId;
             private UploadingRecord uploadingRecord;
 
-            public UploadAsyncClass(byte[] recordBytes, String fileName, String userId, UploadingRecord uploadingRecord,
-                                    String uploadedRecordId) {
+            public UploadAsyncClass(byte[] recordBytes, String fileName, String userId, UploadingRecord uploadingRecord) {
                 this.recordBytes = recordBytes;
                 this.fileName = fileName;
                 this.userId = userId;
                 this.uploadingRecord = uploadingRecord;
-                this.uploadedRecordId = uploadedRecordId;
             }
 
             @Override
@@ -137,8 +247,8 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
                         UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.progressCircular.setVisibility(
                                 View.GONE);
                         UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText.setText(
-                                uploadingRecordList.get(Integer.parseInt(uploadedRecordId))
-                                        .getRecordName());
+                                uploadingRecord.getRecordName());
+
                     }
                 }
 
@@ -149,24 +259,26 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
 
                     UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.progressCircular.setVisibility(
                             View.GONE);
-                    UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText.setText(
-                            uploadingRecordList.get(Integer.parseInt(uploadedRecordId))
-                                    .getRecordName());
+                    UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText
+                            .setText(uploadingRecord.getRecordName());
+
                 }
 
             }
 
         }
 
+         */
 
         private void addUploadedRecordToMaster(UploadingRecord uploadingRecord){
 
-            makeRecordsViewModel.insertRecordToMasterLiveDatag(uploadingRecord.getMasterId(), uploadingRecord.getRecordName(),
-                    "3gp", String.valueOf(Utils.getImageSizeFromUriInMegaByte(Uri.fromFile(new File
-                            (uploadingRecord.getRecordFilePath())), context)), MyApplication.getTinyDB().getString
-                            (Constants.KEY_USERID)).observe(fragment.getViewLifecycleOwner(), uploadRecordToMasterObserver(
-                                    uploadingRecord));
+            makeRecordsViewModel.insertRecordToMasterLiveDatag(uploadingRecord.getMaster().getId(), uploadingRecord.getRecordName(),
+                    "3gp", String.valueOf(Utils.getImageSizeFromUriInMegaByte(uploadingRecord.getRecordFileUri(), context))
+                    , MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(fragment.getViewLifecycleOwner(),
+                    uploadRecordToMasterObserver(
+                            uploadingRecord));
         }
+
 
 
         private Observer<String> uploadRecordToMasterObserver(UploadingRecord uploadingRecord){
@@ -214,29 +326,35 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
 
                             }
 
+                            UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.progressCircular
+                                    .setVisibility(View.GONE);
+
+
                             if (succUploaded){
 
-                                Toast.makeText(context, context.getResources().getString(R.string.add_rec_to_master_succ_msg)
-                                        , Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, context.getResources().getString(R.string.add_rec_to_master_succ_msg), Toast.LENGTH_SHORT).show();
 
-                                UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.progressCircular
-                                        .setVisibility(View.GONE);
                                 UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText.setText(
                                         fragment.getResources().getString(R.string.succ_upload_record));
                                 UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.reloadRecordIcon
                                         .setImageDrawable(fragment.getResources().getDrawable(R.drawable.ic_baseline_close_prim_24));
-                                uploadingRecord.setUploaded(true);
+
+                                uploadingRecordList.remove(uploadingRecord);
+                                notifyItemRemoved(uploadingRecordList.indexOf(uploadingRecord));
                             }
 
                             else {
 
                                 Toast.makeText(context, failedMsg, Toast.LENGTH_SHORT).show();
 
-                                UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.progressCircular
-                                        .setVisibility(View.GONE);
                                 UploadingRecordsProgressViewHolder.this.itemUploadingRecordProcessBinding.loadingText.setText(
                                         uploadingRecord.getRecordName());
                             }
+
+                            uploadingRecord.setUploaded(succUploaded);
+                            recordHistory.setIsUploaded(String.valueOf(succUploaded));
+
+                            updateRecordHistory();
                         }
 
                     }
@@ -244,15 +362,27 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
             };
         }
 
-    }
 
-    public UploadingRecordsProgressAdapter(List<UploadingRecord> uploadingRecordList ,Context context,
-                                           BaseFragment fragment) {
-        this.uploadingRecordList = uploadingRecordList;
-        this.context = context;
-        this.fragment = fragment;
 
-        makeRecordsViewModel = ViewModelProviders.of(fragment).get(MakeRecordsViewModel.class);
+        private void updateRecordHistory(){
+
+            makeRecordsViewModel.getUpdateRecordHistoryMutableLiveData(recordHistory).observe(fragment.getViewLifecycleOwner(),
+                    updateRecordHistoryObserver());
+        }
+
+
+
+        private Observer<Integer> updateRecordHistoryObserver(){
+
+            return new Observer<Integer>() {
+                @Override
+                public void onChanged(Integer integer) {
+
+                    /////////////
+                }
+            };
+        }
+
     }
 
     @Override
@@ -285,8 +415,7 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
                 }
 
                 else
-                    holder.uploadRecord(uploadingRecord.getRecordFilePath(), uploadingRecord.getRecordName(), uploadingRecord,
-                        String.valueOf(position));
+                    holder.uploadRecord(uploadingRecord);
             }
         });
 
@@ -295,8 +424,7 @@ public class UploadingRecordsProgressAdapter extends RecyclerView.Adapter
         if (!uploadingRecord.getUploading()) {
 
             uploadingRecord.setUploading(true);
-            holder.uploadRecord(uploadingRecord.getRecordFilePath(), uploadingRecord.getRecordName(), uploadingRecord,
-                    String.valueOf(position));
+            holder.insertRecordToArchive(uploadingRecord);
         }
 
     }

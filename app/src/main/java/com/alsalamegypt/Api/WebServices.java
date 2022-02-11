@@ -1,12 +1,19 @@
 package com.alsalamegypt.Api;
 
 import android.util.Base64;
+import android.util.Log;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.inject.Singleton;
 
+import androidx.annotation.NonNull;
 import dagger.Module;
 import dagger.Provides;
 
@@ -19,7 +26,7 @@ public class WebServices {
 
 
     public ArrayList<HashMap<String, String>> getUserInfoService(String username , String Password, String uid) {
-        MasterSlayer MS = new MasterSlayer("GetLogin");
+        SoupRequest MS = new SoupRequest("GetLogin");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
         send_params.add("USERNAME");
@@ -60,7 +67,7 @@ public class WebServices {
 
 
     public ArrayList<HashMap<String, String>> uploadRecordFile(byte[] fileBytes , String fileNmae, String id_user) {
-        MasterSlayer MS = new MasterSlayer("UploadFile", 0);
+        SoupRequest MS = new SoupRequest("UploadFile", 0);
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
         send_params.add("fle");
@@ -89,7 +96,7 @@ public class WebServices {
 
 
     public ArrayList<HashMap<String, String>> getRegions(String id) {
-        MasterSlayer MS = new MasterSlayer("GetRegions");
+        SoupRequest MS = new SoupRequest("GetRegions");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
         send_params.add("ID");
@@ -116,7 +123,7 @@ public class WebServices {
     public ArrayList<HashMap<String, String>> insertRecordMaster(String vehicleNumber, String vehicleType, String location, String district,
                                                                 String longitude, String latitude, String idUSER, String idRegions,
                                                                 String notes , boolean type) {
-        MasterSlayer MS = new MasterSlayer("ADD_Recorded");
+        SoupRequest MS = new SoupRequest("ADD_Recorded");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -159,7 +166,7 @@ public class WebServices {
 
     public ArrayList<HashMap<String, String>> insertRecordFileToMaster(String idRecorded,String fileName ,String fileExtension,
                                                                        String fileSize,String idUser) {
-        MasterSlayer MS = new MasterSlayer("ADD_Recorded_Files");
+        SoupRequest MS = new SoupRequest("ADD_Recorded_Files");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -193,7 +200,7 @@ public class WebServices {
 
     public ArrayList<HashMap<String, String>> getMasters(String id) {
 
-        MasterSlayer MS = new MasterSlayer("GETRecorded");
+        SoupRequest MS = new SoupRequest("GETRecorded");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -222,6 +229,7 @@ public class WebServices {
         request_params.add("DateEdite");
         request_params.add("DateCreate");
         request_params.add("Type");
+        request_params.add("heard");
 
         MS.setRequest_paramName(request_params);
         /** 3 - any image */
@@ -234,7 +242,7 @@ public class WebServices {
 
     public ArrayList<HashMap<String, String>> getMasterRecords(String id, String user_id) {
 
-        MasterSlayer MS = new MasterSlayer("GETRecorded_Files");
+        SoupRequest MS = new SoupRequest("GETRecorded_Files");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -255,6 +263,7 @@ public class WebServices {
         request_params.add("File_Name");
         request_params.add("File_Extension");
         request_params.add("File_Size");
+        request_params.add("heard");
 
         MS.setRequest_paramName(request_params);
         /** 3 - any image */
@@ -272,7 +281,7 @@ public class WebServices {
             fun = "Delete_Recorded";
         else
             fun = "Delete_Recorded_Files";
-        MasterSlayer MS = new MasterSlayer(fun);
+        SoupRequest MS = new SoupRequest(fun);
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -300,7 +309,7 @@ public class WebServices {
 
     public ArrayList<HashMap<String, String>> getCars(String id) {
 
-        MasterSlayer MS = new MasterSlayer("GetMap");
+        SoupRequest MS = new SoupRequest("GetMapp", 0);
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -345,6 +354,7 @@ public class WebServices {
         request_params.add("Notes");
         request_params.add("Status");
         request_params.add("FullName");
+        request_params.add("Colors");
         MS.setRequest_paramName(request_params);
         /** 3 - any image */
         // MS.setIsImage1("ProductPicture");
@@ -356,7 +366,7 @@ public class WebServices {
 
     public ArrayList<HashMap<String, String>> confirmCar(String id, String confirmation, String latitude, String longitude) {
 
-        MasterSlayer MS = new MasterSlayer("UpdateMap");
+        SoupRequest MS = new SoupRequest("UpdateMap");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -388,7 +398,7 @@ public class WebServices {
 
     public ArrayList<HashMap<String, String>> getListenerMasters(String id) {
 
-        MasterSlayer MS = new MasterSlayer("Getlistener");
+        SoupRequest MS = new SoupRequest("Getlistener");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -418,6 +428,54 @@ public class WebServices {
         request_params.add("DateCreate");
         request_params.add("Type");
         request_params.add("Transfer");
+        request_params.add("heard");
+
+        MS.setRequest_paramName(request_params);
+        /** 3 - any image */
+        // MS.setIsImage1("ProductPicture");
+        // MS.setIsImage2("Voice");
+
+        return MS.Call();
+    }
+
+
+    public ArrayList<HashMap<String, String>> getListenerMasters(String id, int pageIndex, int pageSize) {
+
+        SoupRequest MS = new SoupRequest("GetMoblistenerPageWise");
+        /**1 - any parameter send */
+        ArrayList<String> send_params = new ArrayList<String>();
+
+        send_params.add("ID_Listen");
+        send_params.add("PageIndex");
+        send_params.add("PageSize");
+
+        ArrayList<String> send_params_value = new ArrayList<String>();
+
+        send_params_value.add(id);
+        send_params_value.add(String.valueOf(pageIndex));
+        send_params_value.add(String.valueOf(pageSize));
+
+        MS.addsendparam(send_params, send_params_value);
+
+        /**2 - request */
+        ArrayList<String> request_params = new ArrayList<String>();
+        request_params.add("ID");
+        request_params.add("Vehicle_Number");
+        request_params.add("Vehicle_Type");
+        request_params.add("Location");
+        request_params.add("District");
+        request_params.add("Longitude");
+        request_params.add("Latitude");
+        request_params.add("Status");
+        request_params.add("Sorting");
+        request_params.add("Notes");
+        request_params.add("Regions");
+        request_params.add("ID_USER");
+        request_params.add("DateEdite");
+        request_params.add("DateCreate");
+        request_params.add("Type");
+        request_params.add("Transfer");
+        request_params.add("heard");
 
         MS.setRequest_paramName(request_params);
         /** 3 - any image */
@@ -431,7 +489,7 @@ public class WebServices {
     public ArrayList<HashMap<String, String>> insertRecodedCar(String vehicleNumber, String vehicleType, String location, String district,
                                                                  String longitude, String latitude, String idUSER, String idRegions,
                                                                  String notes, String masterId) {
-        MasterSlayer MS = new MasterSlayer("ADD_listener");
+        SoupRequest MS = new SoupRequest("ADD_listener");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -475,7 +533,7 @@ public class WebServices {
 
     public ArrayList<HashMap<String, String>> getListenerRecordedCars(String id, String id_user) {
 
-        MasterSlayer MS = new MasterSlayer("Getlistenerrecordings");
+        SoupRequest MS = new SoupRequest("Getlistenerrecordings");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -503,10 +561,12 @@ public class WebServices {
         request_params.add("Sorting");
         request_params.add("Notes");
         request_params.add("ID_Regions");
+        request_params.add("Regions");
         request_params.add("ID_USER");
         request_params.add("DateEdite");
         request_params.add("DateCreate");
         request_params.add("ID_Recorded");
+        request_params.add("heard");
 
         MS.setRequest_paramName(request_params);
         /** 3 - any image */
@@ -519,7 +579,7 @@ public class WebServices {
 
     public ArrayList<HashMap<String, String>> getUpdateHeard(String id, String id_user) {
 
-        MasterSlayer MS = new MasterSlayer("Update_heard");
+        SoupRequest MS = new SoupRequest("Update_heard");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -547,7 +607,7 @@ public class WebServices {
 
     public ArrayList<HashMap<String, String>> deleteListenerRecordedCarMaster(String masterId, String idUser) {
 
-        MasterSlayer MS = new MasterSlayer("Delete_listener");
+        SoupRequest MS = new SoupRequest("Delete_listener");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -575,7 +635,7 @@ public class WebServices {
 
     public ArrayList<HashMap<String, String>> getRecoderDailyCars(String id) {
 
-        MasterSlayer MS = new MasterSlayer("GetRecordedDay");
+        SoupRequest MS = new SoupRequest("GetRecordedDay");
         /**1 - any parameter send */
         ArrayList<String> send_params = new ArrayList<String>();
 
@@ -613,4 +673,34 @@ public class WebServices {
 
         return MS.Call();
     }
+
+
+    public ArrayList<HashMap<String, String>> updateFirebaseToken(String userId, String firebaseToken) {
+
+        SoupRequest MS = new SoupRequest("Update_deviceId");
+        /**1 - any parameter send */
+        ArrayList<String> send_params = new ArrayList<String>();
+
+        send_params.add("ID");
+        send_params.add("deviceId");
+
+        ArrayList<String> send_params_value = new ArrayList<String>();
+
+        send_params_value.add(userId);
+        send_params_value.add(firebaseToken);
+
+        MS.addsendparam(send_params, send_params_value);
+
+        /**2 - request */
+        ArrayList<String> request_params = new ArrayList<String>();
+        request_params.add("error");
+        MS.setRequest_paramName(request_params);
+        /** 3 - any image */
+        // MS.setIsImage1("ProductPicture");
+        // MS.setIsImage2("Voice");
+
+        return MS.Call();
+    }
+
+
 }
