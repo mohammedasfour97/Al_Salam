@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.widget.Toast;
 
 
 import com.alsalamegypt.Api.WebServices;
@@ -47,8 +48,9 @@ public class MyApplication extends Application {
 
         tinyDBInstance = new TinyDB(getApplicationContext());
 
-        if (TextUtils.isEmpty(MyApplication.getTinyDB().getString(Constants.KEY_UID)))
-            MyApplication.getTinyDB().putString("uid", Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
+        if (TextUtils.isEmpty(getTinyDB().getString(Constants.KEY_UID)))
+            getTinyDB().putString(Constants.KEY_UID, Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID));
+
     }
 
     public static WebServiceComponent getWebServiceComponent() {

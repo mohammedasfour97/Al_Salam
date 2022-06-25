@@ -4,7 +4,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.BitmapCompat;
 import androidx.core.graphics.ColorUtils;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
@@ -16,15 +19,29 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.LightingColorFilter;
+import android.graphics.Paint;
+import android.graphics.Picture;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.StateListDrawable;
+import android.graphics.drawable.TransitionDrawable;
+import android.graphics.drawable.VectorDrawable;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.StateSet;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.alsalamegypt.BaseClasses.BaseFragment;
@@ -34,6 +51,7 @@ import com.alsalamegypt.MyApplication;
 import com.alsalamegypt.R;
 import com.alsalamegypt.UI.FragmentDialogs.CarMarkerDetailsFragment;
 import com.alsalamegypt.UI.FragmentDialogs.SameMultipleLatlongMarksFragment;
+import com.alsalamegypt.Utils;
 import com.alsalamegypt.ViewModels.MapViewModel;
 import com.alsalamegypt.databinding.FragmentUserMapBinding;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
@@ -55,6 +73,8 @@ import com.google.android.gms.tasks.OnTokenCanceledListener;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_BLUE;
 
 public class MapFragment extends BaseFragment {
 
@@ -201,6 +221,7 @@ public class MapFragment extends BaseFragment {
                     currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
                     googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 20));
+                    //googleMap.getUiSettings().setMapToolbarEnabled(false);
 
 
                 }
@@ -406,7 +427,8 @@ public class MapFragment extends BaseFragment {
 
         ColorUtils.RGBToHSL(r,g,b,hslColor);
 
-        return BitmapDescriptorFactory.defaultMarker(hslColor[0]);
+        return BitmapDescriptorFactory.fromBitmap(
+                Utils.changeBitmapColor(Utils.getBitmapFromVectorDrawable(getContext(),R.drawable.ic__665633_location_pin_icon), color));
 
     }
     /*private BitmapDescriptor getMark(String carStatus) {

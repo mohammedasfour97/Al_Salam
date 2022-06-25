@@ -66,7 +66,6 @@ public class SplashActivity extends BaseActivity {
                         if (!user.isError()) {
 
                             intent.putExtra(Constants.KEY_USER_TYPE, user.getType());
-                            MyApplication.getTinyDB().putString(Constants.KEY_USER_TYPE, user.getType());
                         }
 
                         else {

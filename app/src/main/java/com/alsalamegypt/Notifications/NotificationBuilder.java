@@ -10,6 +10,7 @@ import android.media.AudioAttributes;
 import android.media.RingtoneManager;
 
 import com.alsalamegypt.R;
+import com.alsalamegypt.UI.SplashActivity;
 import com.alsalamegypt.Utils;
 
 import androidx.core.app.NotificationCompat;
@@ -27,6 +28,7 @@ public class NotificationBuilder {
     private String uploadingFlName;
 
     public NotificationBuilder(Context context) {
+
         this.context = context;
 
         notificationManager = NotificationManagerSingleton.getInstance(context).getNotificationManager();
@@ -37,25 +39,42 @@ public class NotificationBuilder {
 
     public NotificationBuilder buildSimpleNotification(String title, String body){
 
-        mBuilder = new NotificationCompat.Builder(context, Constants.channelId)
-                .setSmallIcon(R.mipmap.ic_launcher)
+        mBuilder = new NotificationCompat.Builder(context, Constants.CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification_icon)
                 .setContentTitle(title)
                 .setContentText(body)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(body));
 
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        /*TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
+        Intent intent = new Intent(context, SplashActivity.class);
+        stackBuilder.addNextIntent(intent);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(
+                0,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
 
+        mBuilder.setContentIntent(resultPendingIntent);
+
+         */
+
+        Intent notificationIntent = new Intent(context, SplashActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+
+        mBuilder.setContentIntent(pendingIntent);
 
         return this;
     }
 
     public NotificationBuilder buildSimpleNotification(String title, String body, Intent intent){
 
-        mBuilder = new NotificationCompat.Builder(context, Constants.channelId)
-                .setSmallIcon(R.mipmap.ic_launcher)
+        mBuilder = new NotificationCompat.Builder(context, Constants.CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification_icon)
                 .setContentTitle(title)
                 .setContentText(body)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION));
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setStyle(new NotificationCompat.BigTextStyle().bigText(body));;
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(context);
         stackBuilder.addNextIntent(intent);
@@ -75,8 +94,8 @@ public class NotificationBuilder {
 
         this.uploadingFlName = uploadingFlName;
 
-        mBuilder = new NotificationCompat.Builder(context, Constants.channelId)
-                .setSmallIcon(R.mipmap.ic_launcher)
+        mBuilder = new NotificationCompat.Builder(context, Constants.CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification_icon)
                 .setContentTitle(context.getResources().getString(R.string.loading) + "0%")
                 .setContentText(context.getResources().getString(R.string.loading) + " " + uploadingFlName);
 
@@ -113,6 +132,12 @@ public class NotificationBuilder {
         mBuilder.setProgress(0,(int)(prog),false);
 
         notificationManager.notify(notificationId, mBuilder.build());
+    }
+
+
+    public void hideNotification(){
+
+        notificationManager.cancel(notificationId);
     }
 
     public Context getContext() {

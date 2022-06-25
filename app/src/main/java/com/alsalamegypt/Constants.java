@@ -23,18 +23,24 @@ public class Constants {
     public static String KEY_USERNAME = "username";
     public static String KEY_USER_PASSWORD = "user_password";
     public static String KEY_USER_TYPE = "user_type";
+    public static String KEY_USER_FULLNAME = "user_fname";
 
     public static String KEY_UID = "uid";
 
     public static int PAGE_SIZE = 10;
 
+    public static String KEY_REC_TIME = "rec_time";
+
+    //// Listener token for recorder to send notification for him /////
+    public static String LISTENER_TOKEN;
+
     /// Vars for notifications ////
 
-    public static String channelId = Utils.getStringRandomCode();
-    public static String channelName =  channelId + "_channel";
-    public static int importance = NotificationManager.IMPORTANCE_HIGH;
+    public static String CHANNEL_ID = Utils.getStringRandomCode();
+    public static String CHANNEL_NAME =  CHANNEL_ID + "_channel";
+    public static int IMPORTANCE = NotificationManager.IMPORTANCE_LOW;
 
-    public static AudioAttributes audioAttributes ;
+    public static AudioAttributes AUDIO_ATTRIBUTES ;
 
     public static NotificationChannel mChannel() {
 
@@ -42,14 +48,14 @@ public class Constants {
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
 
-            audioAttributes = new AudioAttributes.Builder()
+            AUDIO_ATTRIBUTES = new AudioAttributes.Builder()
                     .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                     .setUsage(AudioAttributes.USAGE_NOTIFICATION)
                     .build();
 
-            c =  new NotificationChannel(Constants.channelId, Constants.channelName, Constants.importance);
+            c =  new NotificationChannel(Constants.CHANNEL_ID, Constants.CHANNEL_NAME, Constants.IMPORTANCE);
 
-            c.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), audioAttributes);
+            c.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), AUDIO_ATTRIBUTES);
         }
 
         return c;

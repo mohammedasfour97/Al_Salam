@@ -176,7 +176,7 @@
                 android:id="@+id/item_record_map"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/_150sdp"
-                map:liteMode="true"/>
+                map:liteMode="true" />
 
             <androidx.coordinatorlayout.widget.CoordinatorLayout
                 android:layout_width="match_parent"

@@ -4,7 +4,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.alsalamegypt.BaseClasses.BaseRepository;
+import com.alsalamegypt.Constants;
 import com.alsalamegypt.Models.User;
+import com.alsalamegypt.MyApplication;
 import com.alsalamegypt.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -97,6 +99,13 @@ public class LoginRepository extends BaseRepository {
                         userData.get("USERPASS"), userData.get("TYPE"), userData.get("Adress"), userData.get("Phone"),
                         userData.get("Email"), userData.get("Note"), userData.get("Img"), userData.get("ID_USER"),
                         userData.get("ID_Listen"), userData.get("DateEdite"), userData.get("MODIFICATION_DATE"), false);
+
+                MyApplication.getTinyDB().putString(Constants.KEY_USERID, user.getId());
+                MyApplication.getTinyDB().putString(Constants.KEY_USERNAME, username);
+                MyApplication.getTinyDB().putString(Constants.KEY_USER_PASSWORD, password);
+                MyApplication.getTinyDB().putString(Constants.KEY_USER_TYPE, user.getType());
+                MyApplication.getTinyDB().putString(Constants.KEY_USER_FULLNAME, user.getFullName());
+                Constants.LISTENER_TOKEN = userData.get("Listen");
 
                 new GetUpdateFirebaseTokenAsyncClass(user, firebaseToken).execute();
 

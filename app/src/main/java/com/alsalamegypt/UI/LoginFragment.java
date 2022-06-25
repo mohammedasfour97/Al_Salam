@@ -114,9 +114,6 @@ public class LoginFragment extends BaseFragment {
 
                         if (!user.isError()) {
 
-                            MyApplication.getTinyDB().putString(Constants.KEY_USERID, user.getId());
-
-
                             switch (user.getType()) {
 
                                 case "Observed":
@@ -137,13 +134,6 @@ public class LoginFragment extends BaseFragment {
                                             (R.id.action_fragment_login_to_fragment_listen_records, bundle);
                                     break;
                             }
-
-                            MyApplication.getTinyDB().putString(Constants.KEY_USERID, user.getId());
-                            MyApplication.getTinyDB().putString(Constants.KEY_USERNAME, fragmentLoginBinding.
-                                    fragmentLoginUsernameEdt.getText().toString());
-                            MyApplication.getTinyDB().putString(Constants.KEY_USER_PASSWORD, fragmentLoginBinding.
-                                    fragmentLoginPasswordEdt.getText().toString());
-                            MyApplication.getTinyDB().putString(Constants.KEY_USER_TYPE, user.getType());
 
                             hideKeyboard();
                         }

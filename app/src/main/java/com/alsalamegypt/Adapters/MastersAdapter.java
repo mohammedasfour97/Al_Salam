@@ -27,6 +27,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -345,6 +346,7 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
         // init map
         holder.itemRecordBinding.itemRecordMap.onCreate(null);
         holder.itemRecordBinding.itemRecordMap.onResume();
+        holder.itemRecordBinding.itemRecordMap.setClickable(false);
         holder.itemRecordBinding.itemRecordMap.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(@NonNull @NotNull GoogleMap googleMap) {
@@ -353,6 +355,7 @@ public class MastersAdapter extends RecyclerView.Adapter<MastersAdapter.MastersV
                 googleMap.addMarker(new MarkerOptions().position(latLng));
                 googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                googleMap.getUiSettings().setMapToolbarEnabled(false);
 
             }
         });

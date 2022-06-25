@@ -11,20 +11,31 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.LightingColorFilter;
+import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.OpenableColumns;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import dagger.Module;
 import dagger.Provides;
 
@@ -42,7 +53,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -238,15 +251,41 @@ public class Utils {
 
         DateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         DateFormat outputFormat = new SimpleDateFormat(format);
-        Date date1 = null;
         try {
-            date1 = inputFormat.parse(date);
-            return  outputFormat.format(date1);
+            return  outputFormat.format(inputFormat.parse(date));
         } catch (Exception e) {
 
             return "";
         }
     }
+
+
+    public static String getCurrentDateTime(String format){
+
+        DateFormat outputFormat = new SimpleDateFormat(format);
+        try {
+            return  outputFormat.format(Calendar.getInstance().getTime());
+        } catch (Exception e) {
+
+            return "";
+        }
+    }
+
+
+    public static long getSubstractedDateTime(String firstDT, String secondDT, String format){
+
+        DateFormat df = new SimpleDateFormat(format);
+        Date date1 = null, date2 = null;
+        try {
+            date1 = df.parse(firstDT);
+            date2 = df.parse(secondDT);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+            return date2.getTime() - date1.getTime();
+        }
+
 
 
     public static byte[] getBytes(InputStream inputStream) throws IOException {
@@ -259,6 +298,90 @@ public class Utils {
             byteBuffer.write(buffer, 0, len);
         }
         return byteBuffer.toByteArray();
+    }
+
+
+    public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {
+        Drawable drawable = ContextCompat.getDrawable(context, drawableId);
+        Drawable drwNewCopy = drawable.getConstantState().newDrawable().mutate();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            drwNewCopy = (DrawableCompat.wrap(drwNewCopy)).mutate();
+        }
+
+
+        Bitmap bitmap = Bitmap.createBitmap(drwNewCopy.getIntrinsicWidth(),
+                drwNewCopy.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        drwNewCopy.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drwNewCopy.draw(canvas);
+
+        return bitmap;
+    }
+
+
+    public static Bitmap getBitmapFromVectorDrawable(Context context, Drawable drawable) {
+        Drawable drwNewCopy = drawable.getConstantState().newDrawable().mutate();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            drwNewCopy = (DrawableCompat.wrap(drwNewCopy)).mutate();
+        }
+
+
+        Bitmap bitmap = Bitmap.createBitmap(drwNewCopy.getIntrinsicWidth(),
+                drwNewCopy.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        drwNewCopy.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drwNewCopy.draw(canvas);
+
+        return bitmap;
+    }
+
+
+
+
+    public static class Hsl {
+        public float h, s, l;
+
+        public Hsl(float h, float s, float l) {
+            this.h = h;
+            this.s = s;
+            this.l = l;
+        }
+    }
+
+
+    public static Hsl rgbToHsl(float r, float g, float b) {
+        r /= 255d; g /= 255d; b /= 255d;
+
+        float max = Math.max(Math.max(r, g), b), min = Math.min(Math.min(r, g), b);
+        float h, s, l = (max + min) / 2;
+
+        if (max == min) {
+            h = s = 0; // achromatic
+        } else {
+            float d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+            if (max == r) h = (g - b) / d + (g < b ? 6 : 0);
+            else if (max == g) h = (b - r) / d + 2;
+            else h = (r - g) / d + 4; // if (max == b)
+
+            h /= 6;
+        }
+
+        return new Hsl(h, s, l);
+    }
+
+    public static Bitmap changeBitmapColor(Bitmap sourceBitmap, int color)
+    {
+        Bitmap resultBitmap = sourceBitmap.copy(sourceBitmap.getConfig(),true);
+        Paint paint = new Paint();
+        ColorFilter filter = new LightingColorFilter(color, 1);
+        paint.setColorFilter(filter);
+        Canvas canvas = new Canvas(resultBitmap);
+        canvas.drawBitmap(resultBitmap, 0, 0, paint);
+        return resultBitmap;
     }
 
 

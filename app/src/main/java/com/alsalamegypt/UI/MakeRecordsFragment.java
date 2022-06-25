@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -487,6 +488,7 @@ public class MakeRecordsFragment extends BaseFragment implements Serializable {
                 MylatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
                 googleMap.moveCamera(CameraUpdateFactory.newLatLng(MylatLng));
                 googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MylatLng, 20));
+                googleMap.getUiSettings().setMapToolbarEnabled(false);
 
                 ///// Get daily recorded cars ///////
 
@@ -838,6 +840,7 @@ public class MakeRecordsFragment extends BaseFragment implements Serializable {
 
                                 recordHistory.setRecordName(task.getResult().toString());
                                 addUploadedRecordToMaster(recordHistory);
+                                notificationBuilder.hideNotification();
 
                             } else {
 
@@ -917,7 +920,7 @@ public class MakeRecordsFragment extends BaseFragment implements Serializable {
 
     public void addUploadedRecordToMaster(RecordHistory recordHistory){
 
-        makeRecordsViewModel.insertRecordToMasterLiveDatag(master.getId(), recordHistory.getRecordName(),
+        makeRecordsViewModel.insertRecordToMasterLiveDatag(String.valueOf(recordHistory.getMasterId()), recordHistory.getRecordName(),
                 "3gp", String.valueOf(Utils.getImageSizeFromUriInMegaByte(recordFileUri, getContext()))
                 , MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(),
                 uploadRecordToMasterObserver(recordHistory));

@@ -57,6 +57,7 @@ public class WebServices {
         request_params.add("ID_Listen");
         request_params.add("DateEdite");
         request_params.add("MODIFICATION_DATE");
+        request_params.add("Listen");
         MS.setRequest_paramName(request_params);
         /** 3 - any image */
         // MS.setIsImage1("ProductPicture");
@@ -700,6 +701,41 @@ public class WebServices {
         // MS.setIsImage2("Voice");
 
         return MS.Call();
+    }
+
+
+    public ArrayList<HashMap<String, String>> sendFCM(String title, String message, String firebaseToken) {
+
+        SoupRequest MS = new SoupRequest("PushNotification");
+        /**1 - any parameter send */
+        ArrayList<String> send_params = new ArrayList<String>();
+
+        /// title ///
+        send_params.add("TagMsg");
+        //// message ////
+        send_params.add("Message");
+        //// firebase token ////
+        send_params.add("deviceId");
+
+        ArrayList<String> send_params_value = new ArrayList<String>();
+
+        send_params_value.add(title);
+        send_params_value.add(message);
+        send_params_value.add(firebaseToken);
+
+        MS.addsendparam(send_params, send_params_value);
+
+        /**2 - request */
+        ArrayList<String> request_params = new ArrayList<String>();
+
+        request_params.add("result");
+
+        MS.setRequest_paramName(request_params);
+        /** 3 - any image */
+        // MS.setIsImage1("ProductPicture");
+        // MS.setIsImage2("Voice");
+
+        return MS.Call_result();
     }
 
 

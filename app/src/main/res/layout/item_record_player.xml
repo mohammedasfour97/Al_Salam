@@ -1,33 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout
+<layout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        xmlns:app="http://schemas.android.com/apk/res-auto">
+        android:layout_height="wrap_content">
 
         <me.jagar.chatvoiceplayerlibrary.VoicePlayerView
             android:id="@+id/voicePlayerView"
             android:layout_width="@dimen/_200sdp"
-            android:layout_margin="@dimen/_5sdp"
-            android:layout_centerVertical="true"
             android:layout_height="wrap_content"
-            app:visualizationPlayedColor="@color/colorPrimary"
-            app:visualizationNotPlayedColor="#727171"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/_5sdp"
+            android:layout_marginTop="@dimen/_5sdp"
+            android:layout_marginEnd="@dimen/_5sdp"
+            android:layout_marginBottom="@dimen/_5sdp"
             app:playPauseBackgroundColor="@color/colorPrimary"
-            app:timingBackgroundColor="@color/colorPrimary"
-            app:seekBarProgressColor="#000"
-            app:showShareButton="true"
-            app:shareCornerRadius="100"
             app:playPauseCornerRadius="100"
-            app:showTiming="true"
-            app:viewCornerRadius="100"
-            app:viewBackground="#C6C4CF"
+            app:playProgressbarColor="#ff7700"
             app:progressTimeColor="@color/white"
+            app:seekBarProgressColor="#000"
             app:seekBarThumbColor="@color/white"
             app:shareBackgroundColor="@color/colorPrimary"
-            app:playProgressbarColor="#ff7700" />
+            app:shareCornerRadius="100"
+            app:showShareButton="true"
+            app:showTiming="true"
+            app:timingBackgroundColor="@color/colorPrimary"
+            app:viewBackground="#C6C4CF"
+            app:viewCornerRadius="100"
+            app:visualizationNotPlayedColor="#727171"
+            app:visualizationPlayedColor="@color/colorPrimary" />
 
         <ImageView
             android:id="@+id/share_record"
@@ -40,7 +42,9 @@
             android:layout_toEndOf="@id/voicePlayerView"
             android:background="@drawable/prim_solid_circle"
             android:layout_marginLeft="@dimen/_10sdp"
-            android:layout_marginRight="@dimen/_10sdp" />
+            android:layout_marginRight="@dimen/_10sdp"
+            android:visibility="gone"
+            />
 
         <ImageView
             android:id="@+id/delete_record"
@@ -60,8 +64,8 @@
             android:layout_margin="@dimen/_5sdp"
             android:layout_toEndOf="@id/delete_record"
             android:layout_centerInParent="true"
-            android:visibility="visible"
-            app:buttonTint="@color/colorPrimary"/>
+            android:visibility="gone"
+            app:buttonTint="@color/colorPrimary" />
 
 
     </RelativeLayout>

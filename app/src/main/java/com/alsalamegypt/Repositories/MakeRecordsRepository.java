@@ -3,6 +3,7 @@ package com.alsalamegypt.Repositories;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -10,8 +11,10 @@ import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.alsalamegypt.BaseClasses.BaseRepository;
+import com.alsalamegypt.Constants;
 import com.alsalamegypt.Models.IDName;
 import com.alsalamegypt.Models.Master;
+import com.alsalamegypt.MyApplication;
 import com.alsalamegypt.RecordHistory;
 import com.alsalamegypt.RoomDB.RecordHistoryDao;
 import com.alsalamegypt.UploadRecordFirebase.MainActivity;
@@ -373,9 +376,47 @@ public class MakeRecordsRepository extends BaseRepository {
 
                 insertRecordMasterLiveData.postValue(insertMasterRecord.get(0).get("ID"));
 
+                ///// Send FCM to listener if the last send was more than 6 hours ////
+                if (TextUtils.isEmpty(MyApplication.getTinyDB().getString(Constants.KEY_REC_TIME)) ||
+                        Utils.getSubstractedDateTime(Utils.getCurrentDateTime("dd/MM/yyyy hh:mm:ss"),
+                                MyApplication.getTinyDB().getString(Constants.KEY_REC_TIME), "dd/MM/yyyy hh:mm:ss") / 3600000 > 6){
+
+                    new SendFCMToUser("تسجيلات جديدة", "يوجد تسجيلات جديدة من قبل " +
+                            MyApplication.getTinyDB().getString(Constants.KEY_USER_FULLNAME), Constants.LISTENER_TOKEN).execute();
+
+                    MyApplication.getTinyDB().putString(Constants.KEY_REC_TIME, Utils.getCurrentDateTime("dd/MM/yyyy hh:mm:ss"));
+                }
             }
 
             else insertRecordMasterLiveData.postValue("error");
+        }
+
+    }
+
+
+    private class SendFCMToUser extends AsyncTask<Void, Void, List<HashMap<String,String>>> {
+
+        private String title, message, token;
+
+        public SendFCMToUser(String title, String message, String token) {
+            this.title = title;
+            this.message = message;
+            this.token = token;
+        }
+
+        @Override
+        protected List<HashMap<String,String>> doInBackground(Void... voids) {
+            return webServices.sendFCM(title, message, token);
+        }
+
+        @Override
+        protected void onPostExecute(List<HashMap<String,String>> getSendFCM) {
+
+            if (getSendFCM != null) {
+
+                Log.d("Fcm_message_status", getSendFCM.get(0).get("result"));
+
+            }
         }
 
     }
