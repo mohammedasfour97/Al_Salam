@@ -33,6 +33,37 @@ public class BaseDialog {
         this.context = context;
     }
 
+    public AwesomeInfoDialog awesomeInfoWithThreeButtonsDialog(String title, String message, String positive_button_message,
+                                                             String negative_text_message, String neutral_text_msg,
+                                                               Closure positive_button_click, Closure negative_button_click,
+                                                               Closure neutral_button_click, boolean cancelable){
+
+
+        awesomeInfoDialog =  new AwesomeInfoDialog(context)
+                .setTitle(getSpanningString(title, R.style.Bold_Primary_Color_TextView_style))
+                .setMessage(getSpanningString(message, R.style.Regular_Default_TextView_style))
+                .setColoredCircle(R.color.purple_500)
+                .setDialogIconAndColor(R.drawable.ic_dialog_info, R.color.white)
+                .setCancelable(cancelable)
+                .setPositiveButtonText(positive_button_message)
+                .setPositiveButtonbackgroundColor(R.color.purple_500)
+                .setPositiveButtonTextColor(R.color.white)
+
+                .setNegativeButtonText(negative_text_message)
+                .setNegativeButtonbackgroundColor(R.color.purple_500)
+                .setNegativeButtonTextColor(R.color.white)
+
+                .setNeutralButtonText(neutral_text_msg)
+                .setNegativeButtonbackgroundColor(R.color.purple_500)
+                .setNegativeButtonTextColor(R.color.white)
+
+                .setPositiveButtonClick(positive_button_click)
+                .setNegativeButtonClick(negative_button_click)
+                .setNeutralButtonClick(neutral_button_click);
+
+        return awesomeInfoDialog;
+    }
+
     public AwesomeInfoDialog awesomeInfoWithTwoButtonsDialog(String title, String message, String positive_button_message,
                                                       String negative_text_message, Closure positive_button_click,
                                                       Closure negative_button_click, boolean cancelable){

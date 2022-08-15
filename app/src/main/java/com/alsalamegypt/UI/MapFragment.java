@@ -27,31 +27,49 @@ import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.graphics.drawable.VectorDrawable;
+import android.inputmethodservice.Keyboard;
+import android.inputmethodservice.KeyboardView;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.StateSet;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alsalamegypt.BaseClasses.BaseFragment;
 import com.alsalamegypt.Constants;
+import com.alsalamegypt.Interfaces.IOnBackPressed;
 import com.alsalamegypt.Models.Car;
+import com.alsalamegypt.Models.IDName;
 import com.alsalamegypt.MyApplication;
 import com.alsalamegypt.R;
 import com.alsalamegypt.UI.FragmentDialogs.CarMarkerDetailsFragment;
 import com.alsalamegypt.UI.FragmentDialogs.SameMultipleLatlongMarksFragment;
 import com.alsalamegypt.Utils;
+import com.alsalamegypt.ViewModels.MakeRecordsViewModel;
 import com.alsalamegypt.ViewModels.MapViewModel;
 import com.alsalamegypt.databinding.FragmentUserMapBinding;
 import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
@@ -76,19 +94,32 @@ import java.util.List;
 
 import static com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_BLUE;
 
-public class MapFragment extends BaseFragment {
+public class MapFragment extends BaseFragment implements IOnBackPressed {
 
     // vars for google map
     private FusedLocationProviderClient fusedLocationProviderClient;
     private FragmentUserMapBinding fragmentMapBinding;
     private SupportMapFragment mapFragment;
     private OnMapReadyCallback callback;
-    private LatLng currentLatLng;
-    private List<Car> carsList, cars;
+    private Location currentLocation;
+    private List<Car> carsList, cars, filteredList, bridgeList;
     private Marker selectedMarker;
+    private GoogleMap googleMap;
 
-    // vars for api
+    // vars for spinners ///
+    private List<IDName> regionsList, carTypesList;
+    private ArrayAdapter<IDName> regionsArrayAdapter, carTypesArrayAdapter;
+    private IDName selectedRegion, selectedCarType;
+
+    private Keyboard keyboard;
+
+    // vars for api //
     private MapViewModel mapViewModel;
+    private MakeRecordsViewModel makeRecordsViewModel;
+    private Observer<List<IDName>> regionsObserver, carTypesObserver;
+    private Observer<List<Car>> carsListObserver;
+
+    private String[] filters = new String[3];
 
     @Nullable
     @Override
@@ -101,16 +132,90 @@ public class MapFragment extends BaseFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
         setListeners();
-
-        mapViewModel = ViewModelProviders.of(MapFragment.this).get(MapViewModel.class);
+        initSpinners();
+        initObservers();
 
         fetchCurrentLocation();
     }
 
 
     private void setListeners() {
+
+        fragmentMapBinding.searchBar.setInputType(InputType.TYPE_NULL);
+        keyboard = new Keyboard(getContext(), R.xml.qwerty);
+        fragmentMapBinding.fragmentMapKeyboardView.setKeyboard(keyboard);
+        fragmentMapBinding.fragmentMapKeyboardView.setOnKeyboardActionListener(new KeyboardView.OnKeyboardActionListener() {
+            @Override
+            public void onPress(int i) {
+
+            }
+
+            @Override
+            public void onRelease(int i) {
+
+            }
+
+            @Override
+            public void onKey(int primaryCode, int[] keyCodes) {
+
+                if (fragmentMapBinding.searchBar.getText() == null) return;
+
+                int start = fragmentMapBinding.searchBar.getSelectionStart();
+
+                switch (primaryCode) {
+                    case -5:
+                        if(fragmentMapBinding.searchBar.getText()!=null && start>0 )
+                            fragmentMapBinding.searchBar.getText().delete(start - 1, start);
+                        break;
+                    case -4:
+
+                        drawFilteredMarksOnMap(fragmentMapBinding.searchBar.getText().toString());
+                        break;
+                    default:
+                        fragmentMapBinding.searchBar.getText().insert(start, Character.toString((char) primaryCode));
+                }
+            }
+
+            @Override
+            public void onText(CharSequence charSequence) {
+
+            }
+
+            @Override
+            public void swipeLeft() {
+
+            }
+
+            @Override
+            public void swipeRight() {
+
+            }
+
+            @Override
+            public void swipeDown() {
+
+            }
+
+            @Override
+            public void swipeUp() {
+
+            }
+        });
+
+        fragmentMapBinding.searchBar.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override public void onFocusChange(View v, boolean hasFocus) {
+                if( hasFocus ) showCustomKeyboard(v, fragmentMapBinding.fragmentMapKeyboardView);
+                else hideCustomKeyboard(fragmentMapBinding.fragmentMapKeyboardView);
+            }
+        });
+
+        fragmentMapBinding.searchBar.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                showCustomKeyboard(v, fragmentMapBinding.fragmentMapKeyboardView);
+            }
+        });
+
 
         fragmentMapBinding.fragmentMapLogoutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -187,6 +292,8 @@ public class MapFragment extends BaseFragment {
                 public void onSuccess(Location location) {
                     if (location != null) {
 
+                        currentLocation = location;
+
                         setGoogleMap(location);
                     }
                 }
@@ -218,7 +325,7 @@ public class MapFragment extends BaseFragment {
 
                     googleMap.setMyLocationEnabled(true);
 
-                    currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                    LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
                     googleMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng));
                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng, 20));
                     //googleMap.getUiSettings().setMapToolbarEnabled(false);
@@ -226,11 +333,23 @@ public class MapFragment extends BaseFragment {
 
                 }
 
-                requestCarsLocations(googleMap);
+                MapFragment.this.googleMap = googleMap;
+
+                setSpinnersListener();
+                requestCarsLocations();
 
                 final int[] click = {0};
 
                 cars = new ArrayList<>();
+
+                googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(@NonNull LatLng latLng) {
+
+                        if (fragmentMapBinding.searchBar.hasFocus())
+                            fragmentMapBinding.searchBar.clearFocus();
+                    }
+                });
 
                 googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
@@ -250,7 +369,7 @@ public class MapFragment extends BaseFragment {
 
                             FragmentManager fm = getActivity().getSupportFragmentManager();
                             SameMultipleLatlongMarksFragment sameMultipleLatlongMarksFragment =
-                                    new SameMultipleLatlongMarksFragment(cars, currentLatLng);
+                                    new SameMultipleLatlongMarksFragment(cars, currentLocation);
                             sameMultipleLatlongMarksFragment.show(fm, "fragment_new_activity");
 
                         } else {
@@ -267,7 +386,7 @@ public class MapFragment extends BaseFragment {
 
                                     FragmentManager fm = getActivity().getSupportFragmentManager();
                                     CarMarkerDetailsFragment carMarkerDetailsFragment = new CarMarkerDetailsFragment(
-                                            (Car) marker.getTag(), currentLatLng);
+                                            (Car) marker.getTag(), currentLocation);
                                     carMarkerDetailsFragment.show(fm, "fragment_new_activity");
 
                                     click[0] = 0;
@@ -294,125 +413,355 @@ public class MapFragment extends BaseFragment {
     }
 
 
-    private void requestCarsLocations(GoogleMap googleMap) {
+    private void initSpinners(){
+
+        regionsList = new ArrayList<>();
+        carTypesList = new ArrayList<>();
+
+        resetSpinners();
+
+        regionsArrayAdapter = new ArrayAdapter<IDName>(getContext(), android.R.layout.simple_spinner_item, regionsList);
+        regionsArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down vieww
+        fragmentMapBinding.regionSpinner.setAdapter(regionsArrayAdapter);
+
+        carTypesArrayAdapter = new ArrayAdapter<IDName>(getContext(), android.R.layout.simple_spinner_item, carTypesList);
+        carTypesArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down vieww
+        fragmentMapBinding.carTypesSpinner.setAdapter(carTypesArrayAdapter);
+    }
+
+
+    private void setSpinnersListener(){
+
+        fragmentMapBinding.regionSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                selectedRegion = ((IDName)parent.getSelectedItem());
+                drawFilteredMarksOnMap(fragmentMapBinding.searchBar.getText().toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        fragmentMapBinding.carTypesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                selectedCarType = ((IDName)parent.getSelectedItem());
+
+                drawFilteredMarksOnMap(fragmentMapBinding.searchBar.getText().toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+    }
+
+
+    private void configureSearchBar(){
+
+        fragmentMapBinding.searchBar.setVisibility(View.VISIBLE);
+//        fragmentMapBinding.searchBar.addTextChangedListener(new TextWatcher() {
+//
+//            @Override
+//            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+//
+////                if (!drawFilteredMarksOnMap(cs.toString()))
+////                    Toast.makeText(getContext(), getResources().getString(R.string.no_cars), Toast.LENGTH_SHORT).show();
+//            }
+//
+//            @Override
+//            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable arg0) {
+//
+////                if (!drawFilteredMarksOnMap(arg0.toString()))
+////                    Toast.makeText(getContext(), getResources().getString(R.string.no_cars), Toast.LENGTH_SHORT).show();
+//            }
+//        });
+        fragmentMapBinding.searchBar.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+
+                    if (!drawFilteredMarksOnMap(v.getText().toString()))
+                        Toast.makeText(getContext(), getResources().getString(R.string.no_cars), Toast.LENGTH_SHORT).show();
+
+                    return true;
+                }
+                return false;
+            }
+        });
+//        fragmentMapBinding.searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//
+//                if (!drawFilteredMarksOnMap(query))
+//                    Toast.makeText(getContext(), getResources().getString(R.string.no_cars), Toast.LENGTH_SHORT).show();
+//
+//
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String newText) {
+//
+//                drawFilteredMarksOnMap(newText);
+//
+//                return false;
+//            }
+//        });
+
+    }
+
+
+    private void resetSpinners(){
+
+        regionsList.clear();
+        regionsList.add(new IDName("-1", getResources().getString(R.string.choose_region)));
+        selectedRegion = regionsList.get(0);
+
+        carTypesList.clear();
+        carTypesList.add(new IDName("-1", getResources().getString(R.string.choose_car_type)));
+        selectedCarType = carTypesList.get(0);
+
+    }
+
+
+    private void requestCarsLocations() {
 
         showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg), false);
 
         mapViewModel.getCarsList(MyApplication.getTinyDB().getString(Constants.KEY_USERID)).observe(getViewLifecycleOwner(),
-                carMarkObserver(googleMap));
+                carMarkObserver());
     }
 
 
-    private Observer<List<Car>> carMarkObserver(GoogleMap googleMap) {
+    private void fillRegionsSpinner(){
 
-        return new Observer<List<Car>>() {
+        makeRecordsViewModel.getGetRegionsLiveData(MyApplication.getTinyDB().getString(Constants.KEY_USERID))
+                .observe(getViewLifecycleOwner(), regionsObserver);
+    }
+
+
+    private void fillCarTypesSpinner(){
+
+        showProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg), false);
+
+        mapViewModel.getCarTypes(MyApplication.getTinyDB().getString(Constants.KEY_USERID))
+                .observe(getViewLifecycleOwner(), carTypesObserver);
+    }
+
+
+    private boolean drawFilteredMarksOnMap(String query) {
+
+        if (filteredList == null)
+            filteredList = new ArrayList<>();
+
+        if (bridgeList == null)
+            bridgeList = new ArrayList<>();
+
+        filteredList.clear();
+        bridgeList.clear();
+
+        googleMap.clear();
+
+        if(TextUtils.isEmpty(query) && selectedRegion.getId().equals("-1") && selectedCarType.getId().equals("-1")){
+
+            filteredList.addAll(carsList);
+        }
+
+        else{
+
+            filteredList.addAll(carsList);
+
+            if(!TextUtils.isEmpty(query)){
+
+                for (Car car: filteredList){
+
+                    if ((car.getPlateNumber().contains(query) || car.getKind().contains(query) || car.getNotes().contains(query)
+                            || car.getBank().contains(query))){
+
+                        bridgeList.add(car);
+                    }
+                }
+
+                filteredList.clear();
+                filteredList.addAll(bridgeList);
+                bridgeList.clear();
+
+            }
+
+            if (!selectedRegion.getId().equals("-1")){
+
+                for (Car car: filteredList){
+
+                    if (car.getRegions().equals(selectedRegion.getName())){
+
+                        bridgeList.add(car);
+                    }
+                }
+
+                filteredList.clear();
+                filteredList.addAll(bridgeList);
+                bridgeList.clear();
+            }
+
+            if (!selectedCarType.getId().equals("-1")){
+
+                for (Car car: filteredList){
+
+                    if (car.getVehicleType().equals(selectedCarType.getName())){
+
+                        bridgeList.add(car);
+                    }
+                }
+
+                filteredList.clear();
+                filteredList.addAll(bridgeList);
+                bridgeList.clear();
+            }
+
+        }
+
+        Marker marker;
+        boolean isExist = false;
+
+        for(Car car : filteredList){
+
+            marker = googleMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(
+                            car.getLatitude()), Double.parseDouble(car.getLongitude()))).icon(getMark(car.getColors()))
+                    .title(car.getPlateNumber() + " , " + car.getKind() + " , " + car.getNotes()
+                            + " , " + car.getBank()));
+
+            marker.showInfoWindow();
+            marker.setTag(car);
+
+            if (filteredList.indexOf(car) == filteredList.size()-1){
+
+                LatLng markLatLng = new LatLng(Double.parseDouble(car.getLatitude()),Double.parseDouble(car.getLongitude()));
+
+                googleMap.moveCamera(CameraUpdateFactory.newLatLng(markLatLng));
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markLatLng, 13));
+            }
+
+
+
+            isExist = true;
+        }
+
+        return isExist;
+    }
+
+
+    private void initObservers(){
+
+        mapViewModel = ViewModelProviders.of(MapFragment.this).get(MapViewModel.class);
+        makeRecordsViewModel = ViewModelProviders.of(MapFragment.this).get(MakeRecordsViewModel.class);
+
+        regionsObserver = new Observer<List<IDName>>() {
             @Override
-            public void onChanged(List<Car> cars) {
+            public void onChanged(List<IDName> idNames) {
 
-                if (cars != null) {
-
-                    carsList = new ArrayList<>();
+                if (idNames!=null){
 
                     if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
 
-                        hideProgress();
+                        if (idNames.isEmpty()) {
 
-                        if (!cars.isEmpty()) {
+                            Toast.makeText(getContext(), getResources().getString(R.string.err_loading), Toast.LENGTH_SHORT).show();
+                        } else {
 
-                            if (!cars.get(0).getId().equals("")) {
+                            resetSpinners();
+                            regionsList.addAll(idNames);
+                            regionsArrayAdapter.notifyDataSetChanged();
 
-                                googleMap.clear();
-
-                                Marker marker;
-
-                                for (Car car : cars) {
-
-                                    marker = googleMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(
-                                            car.getLatitude()), Double.parseDouble(car.getLongitude()))).icon(getMark(car.getColors()))
-                                            .title(car.getPlateNumber() + " , " + car.getKind() + " , " + car.getNotes() + " ," +
-                                                    car.getBank()));
-
-                                    marker.setTag(car);
-                                    marker.showInfoWindow();
-
-                                }
-
-                                carsList.clear();
-                                carsList.addAll(cars);
-
-                                configureSearchBar(googleMap);
-
-                            } else {
-
-                                showFailedDialog(getResources().getString(R.string.fail_load_cars), true);
-                            }
-                        } else
-                            showFailedDialog(getResources().getString(R.string.no_cars), true);
+                            fillCarTypesSpinner();
+                        }
                     }
+
+                }
+            }
+        };
+
+        carTypesObserver = new Observer<List<IDName>>() {
+            @Override
+            public void onChanged(List<IDName> idNames) {
+
+                if (idNames!=null){
+
+                    hideProgress();
+
+                    if (idNames.isEmpty()){
+
+                        Toast.makeText(getContext(), getResources().getString(R.string.err_loading), Toast.LENGTH_SHORT).show();
+                    }
+
+                    else {
+
+                        carTypesList.addAll(idNames);
+                        carTypesArrayAdapter.notifyDataSetChanged();
+                    }
+
                 }
             }
         };
     }
 
 
-    private void configureSearchBar(GoogleMap googleMap){
+    private Observer<List<Car>> carMarkObserver() {
 
-        fragmentMapBinding.searchBar.setVisibility(View.VISIBLE);
+        if (carsListObserver == null) {
 
-        fragmentMapBinding.searchBar.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
+            carsListObserver = new Observer<List<Car>>() {
+                @Override
+                public void onChanged(List<Car> cars) {
 
-                if (query.equals(""))
+                    if (cars != null) {
 
-                    requestCarsLocations(googleMap);
+                        if (carsList == null)
+                            carsList = new ArrayList<>();
 
-                else {
+                        if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
 
-                    boolean isExist = false;
+                            hideProgress();
 
-                    googleMap.clear();
+                            if (!cars.isEmpty()) {
 
-                    for (Car car: carsList){
+                                if (!cars.get(0).getId().equals("")) {
 
-                        if (car.getPlateNumber().contains(query) || car.getKind().contains(query) || car.getNotes().contains(query)
-                        || car.getBank().contains(query)){
+                                    carsList.clear();
+                                    carsList.addAll(cars);
 
-                            Marker marker = googleMap.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(
-                                    car.getLatitude()), Double.parseDouble(car.getLongitude()))).icon(getMark(car.getColors()))
-                                    .title(car.getPlateNumber() + " , " + car.getKind() + " , " + car.getNotes()
-                                     + " , " + car.getBank()));
+                                    drawFilteredMarksOnMap("");
 
-                            marker.showInfoWindow();
-                            marker.setTag(car);
+                                    configureSearchBar();
 
-                            LatLng markLatLng = new LatLng(Double.parseDouble(car.getLatitude()),Double.parseDouble(car.getLongitude()));
+                                } else {
 
-                            googleMap.moveCamera(CameraUpdateFactory.newLatLng(markLatLng));
-                            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(markLatLng, 13));
-
-
-                            isExist = true;
+                                    showFailedDialog(getResources().getString(R.string.fail_load_cars), true);
+                                }
+                            } else
+                                showFailedDialog(getResources().getString(R.string.no_cars), true);
                         }
 
+                        mapViewModel.getCarsList(MyApplication.getTinyDB().getString(Constants.KEY_USERID)).removeObserver(this);
+
+                        fillRegionsSpinner();
                     }
-
-                    if (!isExist)
-                        Toast.makeText(getContext(), getResources().getString(R.string.no_cars), Toast.LENGTH_SHORT).show();
                 }
+            };
+        }
 
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-
-                if (newText.equals(""))
-                    requestCarsLocations(googleMap);
-
-                return false;
-            }
-        });
+        return carsListObserver;
     }
 
 
@@ -504,5 +853,11 @@ public class MapFragment extends BaseFragment {
                 break;
         }
     }
+
+    @Override
+    public boolean onBackPressed() {
+        return fragmentMapBinding.fragmentMapKeyboardView.getVisibility() == View.VISIBLE;
+    }
+
 
 }

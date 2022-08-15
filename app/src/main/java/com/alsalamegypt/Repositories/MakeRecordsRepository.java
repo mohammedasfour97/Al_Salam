@@ -334,11 +334,11 @@ public class MakeRecordsRepository extends BaseRepository {
                         idName = new IDName(hashMap.get("ID"), hashMap.get("Regions"));
                         list.add(idName);
 
-                }
-
-                getRegionsLiveData.postValue(list);
+                    }
 
             }
+
+            getRegionsLiveData.postValue(list);
         }
 
     }

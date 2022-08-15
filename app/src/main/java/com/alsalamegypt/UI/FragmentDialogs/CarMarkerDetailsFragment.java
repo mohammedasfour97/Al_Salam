@@ -2,13 +2,18 @@ package com.alsalamegypt.UI.FragmentDialogs;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.alsalamegypt.BaseClasses.BaseDialog;
+import com.alsalamegypt.Constants;
 import com.alsalamegypt.Models.Car;
+import com.alsalamegypt.MyApplication;
 import com.alsalamegypt.R;
 import com.alsalamegypt.ViewModels.MapViewModel;
 import com.alsalamegypt.databinding.FragmentDialogAddCarInfoBinding;
@@ -17,6 +22,10 @@ import com.awesomedialog.blennersilva.awesomedialoglibrary.interfaces.Closure;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,11 +43,11 @@ public class CarMarkerDetailsFragment extends DialogFragment {
 
     // vars for api
     private MapViewModel mapViewModel;
-    private LatLng latLng;
+    private Location location;
 
-    public CarMarkerDetailsFragment(Car car, LatLng latLng) {
+    public CarMarkerDetailsFragment(Car car, Location location) {
         this.car = car;
-        this.latLng = latLng;
+        this.location = location;
     }
 
     @Override
@@ -101,7 +110,16 @@ public class CarMarkerDetailsFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
 
-                sendCarReport(true);
+                sendCarReport(true, "0");
+
+            }
+        });
+
+        fragmentDialogCarMarkerDetailsBinding.confirmWithChangeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                sendCarReport(true, car.getIdRegions());
 
             }
         });
@@ -110,7 +128,7 @@ public class CarMarkerDetailsFragment extends DialogFragment {
             @Override
             public void onClick(View v) {
 
-                sendCarReport(false);
+                sendCarReport(false, "0");
             }
         });
     }
@@ -142,7 +160,7 @@ public class CarMarkerDetailsFragment extends DialogFragment {
     }
 
 
-    private void sendCarReport(boolean confirmation){
+    private void sendCarReport(boolean confirmation, String idRegion){
 
         String conf , sureMessage;
 
@@ -158,6 +176,25 @@ public class CarMarkerDetailsFragment extends DialogFragment {
             sureMessage = getResources().getString(R.string.sure_no_car);
         }
 
+//        baseDialog.awesomeInfoWithTwoButtonsDialog(getResources().getString(R.string.sure), sureMessage, getResources().getString(R.string.yes),
+//                getResources().getString(R.string.no), new Closure() {
+//                    @Override
+//                    public void exec() {
+//
+//                        baseDialog.awesomeProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg),
+//                                false).show();
+//
+//                        mapViewModel.getConfirmCarMutableLiveData(car.getId(), conf, String.valueOf(latLng.latitude),
+//                                String.valueOf(latLng.longitude)).observe(getViewLifecycleOwner(), confirmCarObserver());
+//                    }
+//                }, new Closure() {
+//                    @Override
+//                    public void exec() {
+//
+//                        baseDialog.hideInfoDialogWithTwoButton();
+//                    }
+//                }, true).show();
+//    }
         baseDialog.awesomeInfoWithTwoButtonsDialog(getResources().getString(R.string.sure), sureMessage, getResources().getString(R.string.yes),
                 getResources().getString(R.string.no), new Closure() {
                     @Override
@@ -166,8 +203,11 @@ public class CarMarkerDetailsFragment extends DialogFragment {
                         baseDialog.awesomeProgressDialog(getResources().getString(R.string.loading), getResources().getString(R.string.loading_msg),
                                 false).show();
 
-                        mapViewModel.getConfirmCarMutableLiveData(car.getId(), conf, String.valueOf(latLng.latitude),
-                                String.valueOf(latLng.longitude)).observe(getViewLifecycleOwner(), confirmCarObserver());
+                        mapViewModel.getConfirmCarMutableLiveData(car.getId(), conf, String.valueOf(location.getLatitude()),
+                                String.valueOf(location.getLongitude()), idRegion, MyApplication.getTinyDB().getString(Constants.KEY_USERID),
+                                        getAdressDetailsFromLatLong(new LatLng(location.getLatitude(), location.getLongitude())).getAddressLine(0),
+                                        getAdressDetailsFromLatLong(new LatLng(location.getLatitude(), location.getLongitude())).getSubAdminArea(),
+                                        car.getVehicleType()).observe(getViewLifecycleOwner(), confirmCarObserver());
                     }
                 }, new Closure() {
                     @Override
@@ -176,6 +216,32 @@ public class CarMarkerDetailsFragment extends DialogFragment {
                         baseDialog.hideInfoDialogWithTwoButton();
                     }
                 }, true).show();
+    }
+
+    private Address getAdressDetailsFromLatLong(LatLng latLng) {
+
+        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        List<Address> addresses = null;
+        try {
+            addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Address address = null;
+        if (addresses != null && addresses.size() > 0) {
+
+
+            /*address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+            city = addresses.get(0).getLocality();
+            state = addresses.get(0).getAdminArea();
+            country = addresses.get(0).getCountryName();
+            */
+            address = addresses.get(0);
+
+        }
+
+        return address;
     }
 }
 

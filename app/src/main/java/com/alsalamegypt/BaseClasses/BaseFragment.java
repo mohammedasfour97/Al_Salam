@@ -1,12 +1,16 @@
 package com.alsalamegypt.BaseClasses;
 
+import android.app.Activity;
 import android.content.Context;
+import android.inputmethodservice.KeyboardView;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import com.alsalamegypt.LocaleHelper;
 import com.alsalamegypt.R;
@@ -159,4 +163,26 @@ public class BaseFragment extends Fragment {
 
 
     }
+
+    public void hideCustomKeyboard(KeyboardView keyboardView) {
+        keyboardView.setVisibility(View.GONE);
+        keyboardView.setEnabled(false);
+    }
+
+    public void showCustomKeyboard(View v, KeyboardView keyboardView) {
+
+        keyboardView.setVisibility(View.VISIBLE);
+        keyboardView.setEnabled(true);
+        if(v!=null) ((InputMethodManager)getActivity().getSystemService(Activity.INPUT_METHOD_SERVICE))
+                .hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+        getActivity().getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+    }
+
+    public boolean isCustomKeyboardVisible(KeyboardView keyboardView) {
+        return keyboardView.getVisibility() == View.VISIBLE;
+    }
+
+
 }

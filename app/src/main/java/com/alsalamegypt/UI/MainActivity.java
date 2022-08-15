@@ -2,18 +2,26 @@ package com.alsalamegypt.UI;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.alsalamegypt.Components.DaggerNavigationControllerComponent;
 import com.alsalamegypt.Constants;
+import com.alsalamegypt.Interfaces.IOnBackPressed;
 import com.alsalamegypt.Modules.NavigationControllerModule;
 import com.alsalamegypt.R;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -23,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     NavHostFragment navHostFragment;
     public NavController navController;
     private boolean doubleBackToExitPressedOnce;
+    private List<Fragment> fragments;
+    private Fragment currentFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,13 +50,13 @@ public class MainActivity extends AppCompatActivity {
         checkPreviousLoginToNavigate();
     }
 
-    private void checkPreviousLoginToNavigate(){
+    private void checkPreviousLoginToNavigate() {
 
         if (getIntent().getStringExtra(Constants.KEY_USER_TYPE) != null) {
 
             switch (getIntent().getStringExtra(Constants.KEY_USER_TYPE)) {
 
-                case "Observed":
+                case "USER":
                     navController.navigate(R.id.action_fragment_login_to_fragment_map);
                     break;
 
@@ -61,6 +71,10 @@ public class MainActivity extends AppCompatActivity {
 
                     navController.navigate(R.id.action_fragment_login_to_fragment_listen_records, bundle);
                     break;
+
+                case "Observed":
+                    navController.navigate(R.id.action_fragment_login_to_fragment_map);
+                    break;
                 default:
                     break;
             }
@@ -70,19 +84,34 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        if (doubleBackToExitPressedOnce) {
-            finish();
+        if (fragments == null){
+
+            fragments = getSupportFragmentManager().getFragments();
         }
 
-        this.doubleBackToExitPressedOnce = true;
-        Toast.makeText(this, getResources().getString(R.string.please_press_back_again), Toast.LENGTH_SHORT).show();
-
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                doubleBackToExitPressedOnce=false;
+        for(Fragment fragment : fragments){
+            if(fragment != null && fragment.isVisible())
+                currentFragment = fragment;
             }
-        }, 2000);
+
+        if (!(currentFragment instanceof IOnBackPressed) || !((IOnBackPressed) currentFragment).onBackPressed()) {
+
+            if (doubleBackToExitPressedOnce) {
+                finish();
+            }
+
+            this.doubleBackToExitPressedOnce = true;
+            Toast.makeText(this, getResources().getString(R.string.please_press_back_again), Toast.LENGTH_SHORT).show();
+
+            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+
+                @Override
+                public void run() {
+                    doubleBackToExitPressedOnce=false;
+                }
+            }, 2000);
+        }
+
+
     }
 }

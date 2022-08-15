@@ -3,6 +3,7 @@ package com.alsalamegypt.Adapters;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.location.Location;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 public class SameMultipleMarksAdapter extends RecyclerView.Adapter<SameMultipleMarksAdapter.SameMultipleMarksViewHolder> {
     private List<Car> carList;
     private Fragment fragment;
-    private LatLng latLng;
+    private Location location;
 
     public class SameMultipleMarksViewHolder extends RecyclerView.ViewHolder {
 
@@ -36,10 +37,10 @@ public class SameMultipleMarksAdapter extends RecyclerView.Adapter<SameMultipleM
         }
     }
 
-    public SameMultipleMarksAdapter(List<Car> carList, Fragment fragment, LatLng latLng) {
+    public SameMultipleMarksAdapter(List<Car> carList, Fragment fragment, Location location) {
         this.carList = carList;
         this.fragment = fragment;
-        this.latLng = latLng;
+        this.location = location;
     }
 
     @Override
@@ -72,7 +73,7 @@ public class SameMultipleMarksAdapter extends RecyclerView.Adapter<SameMultipleM
             public void onClick(View v) {
 
                 FragmentManager fm = fragment.getActivity().getSupportFragmentManager();
-                CarMarkerDetailsFragment carMarkerDetailsFragment = new CarMarkerDetailsFragment(car, latLng);
+                CarMarkerDetailsFragment carMarkerDetailsFragment = new CarMarkerDetailsFragment(car, location);
                 carMarkerDetailsFragment.show(fm, "fragment_new_activity");
             }
         });

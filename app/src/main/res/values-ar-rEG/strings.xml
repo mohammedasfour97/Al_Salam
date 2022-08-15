@@ -67,6 +67,7 @@
     <string name="sure_delete_record">هل تريد بالفعل حذف التسجيل ؟</string>
     <string name="delete">حذف</string>
     <string name="confirm">تــأكــيــد</string>
+    <string name="confirm_with_chnge">تأكيد مع تغيير الموقع</string>
     <string name="car_kind">موديل السيارة : </string>
     <string name="car_color">لون السيارة : </string>
     <string name="bank">البنك : </string>
@@ -98,6 +99,7 @@
     <string name="choose_point_firstly">يجب اختيار نقطة للتسجيل أولاُ</string>
     <string name="choose_region_message">لا يمكن ارسال تسجيل قبل إختيار المنطقة</string>
     <string name="choose_region">--اختر المنطقة--</string>
+    <string name="choose_car_type">--اختر نوع السيارة--</string>
     <string name="cut_upload_record_warn_msg">برجاء عدم ترك الصفحة لعدم توقف التحميل</string>
     <string name="enable_gps_msg">يجب تفعيل الموقع للتمكن من الوصول للموقع الحالى</string>
     <string name="enable_gps">تفعيل الموقع</string>
@@ -130,5 +132,7 @@
 ملحوظة : الأفضل هو التسجيل من الجوال</string>
     <string name="open_fl_exp">التسجيل من الجوال</string>
     <string name="rec_from_app">التسجيل من التطبيق</string>
+    <string name="clear">مسح</string>
+    <string name="search">بحث</string>
 
 </resources>

@@ -18,7 +18,7 @@
                 android:layout_width="@dimen/_20sdp"
                 android:layout_height="@dimen/_20sdp"
                 android:background="@drawable/prim_solid_circle"
-                android:src="@drawable/ic_baseline_close_red_24"
+                android:src="@drawable/ic_baseline_close_white_24"
                 android:layout_gravity="start"/>
 
 
@@ -155,6 +155,20 @@
                 android:textColor="@color/white"
                 android:padding="@dimen/_5sdp"
                 android:textSize="15sp"
+                style="@style/Bold_White_Color_TextView_style"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/confirm_with_change_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/_30sdp"
+                android:layout_marginLeft="@dimen/_30sdp"
+                android:layout_marginBottom="@dimen/_10sdp"
+                android:text="@string/confirm_with_chnge"
+                app:icon="@drawable/ic_baseline_check_24"
+                android:textColor="@color/white"
+                android:padding="@dimen/_5sdp"
+                android:textSize="13sp"
                 style="@style/Bold_White_Color_TextView_style"/>
 
             <com.google.android.material.button.MaterialButton

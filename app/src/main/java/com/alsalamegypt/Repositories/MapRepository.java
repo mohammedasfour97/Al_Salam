@@ -4,6 +4,7 @@ import android.os.AsyncTask;
 
 import com.alsalamegypt.BaseClasses.BaseRepository;
 import com.alsalamegypt.Models.Car;
+import com.alsalamegypt.Models.IDName;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ public class MapRepository extends BaseRepository {
 
     private MutableLiveData<List<Car>> carsListMutableLiveData;
     private MutableLiveData<String> confirmCarMutableLiveData;
+    private MutableLiveData<List<IDName>> carTypesMutableLiveData;
 
     public MapRepository() {
         super();
@@ -30,11 +32,31 @@ public class MapRepository extends BaseRepository {
         return carsListMutableLiveData;
     }
 
+    public MutableLiveData<List<IDName>> getCarTypesMutableLiveData(String id) {
+
+        carTypesMutableLiveData = new MutableLiveData<>();
+
+        new GetCarTypesAsyncClass(id).execute();
+
+        return carTypesMutableLiveData;
+    }
+
     public MutableLiveData<String> getConfirmCarMutableLiveData(String id, String confirmation, String latitude, String longitude) {
 
         confirmCarMutableLiveData = new MutableLiveData<>();
 
         new ConfirmCarAsyncClass(id, confirmation, latitude, longitude).execute();
+
+        return confirmCarMutableLiveData;
+    }
+
+    public MutableLiveData<String> getConfirmCarMutableLiveData(String id, String confirmation, String latitude, String longitude,
+                                                                String regionId, String userId, String location, String district,
+                                                                String vehicleType) {
+
+        confirmCarMutableLiveData = new MutableLiveData<>();
+
+        new ConfirmCarAsyncClass(id, confirmation, latitude, longitude, regionId, userId, location, district, vehicleType).execute();
 
         return confirmCarMutableLiveData;
     }
@@ -99,7 +121,7 @@ public class MapRepository extends BaseRepository {
 
     private class ConfirmCarAsyncClass extends AsyncTask<Void, Void, List<HashMap<String, String>>> {
 
-        private String id, confirmation, latitude, longitude;
+        private String id, confirmation, latitude, longitude, idRegion, idUser, location, district, vehicleType ;
 
         public ConfirmCarAsyncClass(String id, String confirmation, String latitude, String longitude) {
             this.id = id;
@@ -108,9 +130,23 @@ public class MapRepository extends BaseRepository {
             this.longitude = longitude;
         }
 
+        public ConfirmCarAsyncClass(String id, String confirmation, String latitude, String longitude, String idRegion, String idUser,
+                                    String location, String district, String vehicleType) {
+            this.id = id;
+            this.confirmation = confirmation;
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.idRegion = idRegion;
+            this.idUser = idUser;
+            this.location = location;
+            this.district = district;
+            this.vehicleType = vehicleType;
+        }
+
         @Override
         protected List<HashMap<String, String>> doInBackground(Void... voids) {
-            return webServices.confirmCar(id, confirmation, latitude, longitude);
+
+            return webServices.confirmCar(id, confirmation, latitude, longitude, idRegion, idUser, location, district, vehicleType);
         }
 
         @Override
@@ -127,6 +163,43 @@ public class MapRepository extends BaseRepository {
             }
 
             confirmCarMutableLiveData.postValue(result);
+        }
+
+    }
+
+
+    private class GetCarTypesAsyncClass extends AsyncTask<Void, Void, List<HashMap<String, String>>> {
+
+        private String id;
+
+        public GetCarTypesAsyncClass(String id) {
+            this.id = id;
+        }
+
+        @Override
+        protected List<HashMap<String, String>> doInBackground(Void... voids) {
+            return webServices.getCarTypes(id);
+        }
+
+        @Override
+        protected void onPostExecute(List<HashMap<String, String>> carTypesList) {
+
+            List<IDName> list = new ArrayList<>();
+
+            if (carTypesList != null && !carTypesList.isEmpty()) {
+
+                IDName idName;
+
+                for (HashMap<String, String> hashMap : carTypesList) {
+
+                    idName = new IDName(hashMap.get("ID"), hashMap.get("Word"));
+                    list.add(idName);
+
+                }
+
+            }
+
+            carTypesMutableLiveData.postValue(list);
         }
 
     }

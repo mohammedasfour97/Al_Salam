@@ -26,7 +26,6 @@ public class LoginRepository extends BaseRepository {
 
     public LoginRepository() {
         super();
-
     }
 
     public MutableLiveData<User> getUserMutableLiveData(String username, String password, String uid) {

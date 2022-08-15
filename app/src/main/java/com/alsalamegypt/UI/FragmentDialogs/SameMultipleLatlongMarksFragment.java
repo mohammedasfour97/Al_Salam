@@ -2,6 +2,7 @@ package com.alsalamegypt.UI.FragmentDialogs;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,11 +30,11 @@ public class SameMultipleLatlongMarksFragment extends DialogFragment {
     private FragmentDialogSameMultipleMarksBinding fragmentDialogSameMultipleMarksBinding;
     private List<Car> carList;
     private SameMultipleMarksAdapter sameMultipleMarksAdapter;
-    private LatLng latLng;
+    private Location location;
 
-    public SameMultipleLatlongMarksFragment(List<Car> carList, LatLng latLng) {
+    public SameMultipleLatlongMarksFragment(List<Car> carList, Location location) {
         this.carList = carList;
-        this.latLng = latLng;
+        this.location = location;
     }
 
     @Override
@@ -62,7 +63,7 @@ public class SameMultipleLatlongMarksFragment extends DialogFragment {
 
     private void initRecyclerView(){
 
-        sameMultipleMarksAdapter = new SameMultipleMarksAdapter(carList, this, latLng);
+        sameMultipleMarksAdapter = new SameMultipleMarksAdapter(carList, this, location);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         fragmentDialogSameMultipleMarksBinding.marksRecycler.recyclerview.setLayoutManager(mLayoutManager);
         fragmentDialogSameMultipleMarksBinding.marksRecycler.recyclerview.setAdapter(sameMultipleMarksAdapter);

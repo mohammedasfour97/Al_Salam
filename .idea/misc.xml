@@ -4,17 +4,25 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/drawable/ic__665633_location_pin_icon.xml" value="0.153" />
+        <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/drawable/ic_baseline_close_red_24.xml" value="0.127" />
+        <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/drawable/ic_baseline_close_white_24.xml" value="0.127" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/drawable/ic_baseline_gray_email_24.xml" value="0.114" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/drawable/ic_baseline_location_on_24.xml" value="0.114" />
+        <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/drawable/ic_baseline_search_24.xml" value="0.127" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/drawable/ic_location_pin_svgrepo_com.xml" value="0.153" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/drawable/ic_location_pin_svgrepo_com2.xml" value="0.153" />
+        <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/drawable/key_background.xml" value="0.127" />
+        <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/drawable/normal.xml" value="0.127" />
+        <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/drawable/pressed.xml" value="0.127" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/drawable/prim_solid_top_redius.xml" value="0.13177083333333334" />
+        <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/activity_main2.xml" value="0.12158054711246201" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/content_main.xml" value="0.24320652173913043" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/fragment_dialog_add_car_info.xml" value="0.1" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/fragment_dialog_car_marker_details.xml" value="0.12158054711246201" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/fragment_listen_masters.xml" value="0.2" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/fragment_listener_add_recorded_car.xml" value="0.12158054711246201" />
+        <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/fragment_login.xml" value="0.25" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/fragment_main_records.xml" value="0.1" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/fragment_make_records.xml" value="0.264" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/fragment_map.xml" value="0.1" />
@@ -24,9 +32,13 @@
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/item_master.xml" value="0.2" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/item_record_player.xml" value="0.12158054711246201" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/item_same_multiple_latlong_marks.xml" value="0.25" />
+        <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/key_preview.xml" value="0.24895833333333334" />
+        <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/keyboard.xml" value="0.25" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/layout/recycler.xml" value="0.12158054711246201" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/menu/menu_main.xml" value="0.25" />
         <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1315" />
+        <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/xml/method.xml" value="0.25" />
+        <entry key="..\:/Users/20120/AndroidStudioProjects/AlSalam/app/src/main/res/xml/qwerty.xml" value="0.25" />
       </map>
     </option>
   </component>

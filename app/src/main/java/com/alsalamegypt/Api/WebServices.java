@@ -121,6 +121,31 @@ public class WebServices {
     }
 
 
+    public ArrayList<HashMap<String, String>> getCarTypes(String id) {
+        SoupRequest MS = new SoupRequest("GetChit_Words");
+        /**1 - any parameter send */
+        ArrayList<String> send_params = new ArrayList<String>();
+        send_params.add("ID");
+
+        ArrayList<String> send_params_value = new ArrayList<String>();
+        send_params_value.add(id);
+
+
+        MS.addsendparam(send_params, send_params_value);
+
+        /**2 - request */
+        ArrayList<String> request_params = new ArrayList<String>();
+        request_params.add("ID");
+        request_params.add("Word");
+        MS.setRequest_paramName(request_params);
+        /** 3 - any image */
+        // MS.setIsImage1("ProductPicture");
+        // MS.setIsImage2("Voice");
+
+        return MS.Call();
+    }
+
+
     public ArrayList<HashMap<String, String>> insertRecordMaster(String vehicleNumber, String vehicleType, String location, String district,
                                                                 String longitude, String latitude, String idUSER, String idRegions,
                                                                 String notes , boolean type) {
@@ -382,6 +407,48 @@ public class WebServices {
         send_params_value.add(confirmation);
         send_params_value.add(longitude);
         send_params_value.add(latitude);
+
+        MS.addsendparam(send_params, send_params_value);
+
+        /**2 - request */
+        ArrayList<String> request_params = new ArrayList<String>();
+        request_params.add("ID");
+        MS.setRequest_paramName(request_params);
+        /** 3 - any image */
+        // MS.setIsImage1("ProductPicture");
+        // MS.setIsImage2("Voice");
+
+        return MS.Call();
+    }
+
+    public ArrayList<HashMap<String, String>> confirmCar(String id, String confirmation, String latitude, String longitude, String regionId,
+                                                         String userId, String location, String district, String vehicleType) {
+
+        SoupRequest MS = new SoupRequest("UpdateMapNew");
+        /**1 - any parameter send */
+        ArrayList<String> send_params = new ArrayList<String>();
+
+        send_params.add("ID");
+        send_params.add("Confirmation");
+        send_params.add("Longitude");
+        send_params.add("Latitude");
+        send_params.add("ID_Regions");
+        send_params.add("ID_USER");
+        send_params.add("Location");
+        send_params.add("District");
+        send_params.add("Vehicle_Type");
+
+        ArrayList<String> send_params_value = new ArrayList<String>();
+
+        send_params_value.add(id);
+        send_params_value.add(confirmation);
+        send_params_value.add(longitude);
+        send_params_value.add(latitude);
+        send_params_value.add(regionId);
+        send_params_value.add(userId);
+        send_params_value.add(location);
+        send_params_value.add(district);
+        send_params_value.add(vehicleType);
 
         MS.addsendparam(send_params, send_params_value);
 

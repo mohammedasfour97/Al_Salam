@@ -1,15 +1,25 @@
 package com.alsalamegypt.UI;
 
+import android.app.Activity;
+import android.inputmethodservice.Keyboard;
+import android.inputmethodservice.KeyboardView;
 import android.os.Bundle;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.alsalamegypt.BaseClasses.BaseFragment;
 import com.alsalamegypt.Constants;
+import com.alsalamegypt.Interfaces.IOnBackPressed;
 import com.alsalamegypt.MyApplication;
 import com.alsalamegypt.R;
 import com.alsalamegypt.Models.User;
@@ -24,7 +34,7 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
-public class LoginFragment extends BaseFragment {
+public class LoginFragment extends BaseFragment{
 
     private FragmentLoginBinding fragmentLoginBinding;
     private String usernameText, passwordText;
@@ -71,7 +81,6 @@ public class LoginFragment extends BaseFragment {
         initObservers();
     }
 
-
     private void setListeners(){
 
         fragmentLoginBinding.fragmentLoginLoginBtn.setOnClickListener(new View.OnClickListener() {
@@ -115,6 +124,10 @@ public class LoginFragment extends BaseFragment {
                         if (!user.isError()) {
 
                             switch (user.getType()) {
+
+                                case "USER":
+                                    ((MainActivity) getActivity()).navController.navigate(R.id.action_fragment_login_to_fragment_map);
+                                    break;
 
                                 case "Observed":
                                     ((MainActivity) getActivity()).navController.navigate(R.id.action_fragment_login_to_fragment_map);
@@ -171,4 +184,5 @@ public class LoginFragment extends BaseFragment {
         }
         else return true;
     }
+
 }

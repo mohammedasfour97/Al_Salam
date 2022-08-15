@@ -2,61 +2,120 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clickable="false">
+        android:layout_height="match_parent">
 
-
-        <include
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            layout="@layout/fragment_map"/>
+            android:clickable="false">
 
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            <include
+                android:id="@+id/map"
+                android:name="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                layout="@layout/fragment_map"/>
 
-            <ImageView
-                android:id="@+id/fragment_map_logout_btn"
-                android:layout_width="@dimen/_30sdp"
-                android:layout_height="@dimen/_30sdp"
-                android:layout_margin="@dimen/_10sdp"
-                android:padding="@dimen/_5sdp"
-                android:background="@drawable/prim_solid_circle"
-                android:layout_centerVertical="true"
-                android:src="@drawable/ic_baseline_power_settings_new_24"/>
-
-            <ImageView
-                android:id="@+id/fragment_map_reload_btn"
-                android:layout_width="@dimen/_30sdp"
-                android:layout_height="@dimen/_30sdp"
-                android:layout_marginTop="@dimen/_10sdp"
-                android:padding="@dimen/_5sdp"
-                android:background="@drawable/prim_solid_circle"
-                android:layout_toEndOf="@id/fragment_map_logout_btn"
-                android:layout_centerVertical="true"
-                android:src="@drawable/ic_baseline_autorenew_24"/>
-
-            <androidx.appcompat.widget.SearchView
-                android:id="@+id/search_bar"
-                android:layout_width="wrap_content"
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/_10sdp"
-                android:layout_marginStart="@dimen/_10sdp"
-                android:layout_marginEnd="@dimen/_50sdp"
-                android:background="@drawable/white_solid_prim_stroke"
-                android:layout_toEndOf="@id/fragment_map_reload_btn"
-                app:iconifiedByDefault="false"
-                style="@style/Regular_Primary_Color_TextView_style"
-                android:visibility="gone"/>
+                android:orientation="vertical">
 
-        </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/fragment_map_logout_btn"
+                        android:layout_width="@dimen/_30sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:layout_margin="@dimen/_10sdp"
+                        android:padding="@dimen/_5sdp"
+                        android:background="@drawable/prim_solid_circle"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_baseline_power_settings_new_24"/>
+
+                    <ImageView
+                        android:id="@+id/fragment_map_reload_btn"
+                        android:layout_width="@dimen/_30sdp"
+                        android:layout_height="@dimen/_30sdp"
+                        android:layout_marginTop="@dimen/_10sdp"
+                        android:padding="@dimen/_5sdp"
+                        android:background="@drawable/prim_solid_circle"
+                        android:layout_toEndOf="@id/fragment_map_logout_btn"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/ic_baseline_autorenew_24"/>
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/search_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginVertical="@dimen/_10sdp"
+                        android:layout_marginStart="@dimen/_10sdp"
+                        android:layout_marginEnd="@dimen/_50sdp"
+                        android:background="@drawable/white_solid_prim_stroke"
+                        android:layout_toEndOf="@id/fragment_map_reload_btn"
+                        android:padding="@dimen/_5sdp"
+                        android:singleLine="true"
+                        android:textColor="@color/purple_500"
+                        android:textSize="17sp"
+                        android:drawableStart="@drawable/ic_baseline_search_24"
+                        android:drawablePadding="@dimen/_5sdp"
+                        style="@style/Regular_Primary_Color_TextView_style"
+                        android:imeOptions="actionSearch"
+                        android:visibility="gone"/>
+
+                </RelativeLayout>
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/region_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/_10sdp"
+                        android:layout_marginEnd="@dimen/_5sdp"
+                        android:layout_marginTop="@dimen/_5sdp"
+                        android:padding="@dimen/_10sdp"
+                        android:background="@drawable/white_solid_prim_stroke_30"/>
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/car_types_spinner"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/_5sdp"
+                        android:layout_marginEnd="@dimen/_10sdp"
+                        android:layout_marginTop="@dimen/_5sdp"
+                        android:padding="@dimen/_10sdp"
+                        android:background="@drawable/white_solid_prim_stroke_30"/>
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
 
 
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+        <android.inputmethodservice.KeyboardView
+            android:id="@+id/fragment_map_keyboard_view"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+
+
+
 
 </layout>

@@ -1,6 +1,7 @@
 package com.alsalamegypt.ViewModels;
 
 import com.alsalamegypt.Models.Car;
+import com.alsalamegypt.Models.IDName;
 import com.alsalamegypt.Repositories.MapRepository;
 
 import java.util.List;
@@ -17,6 +18,11 @@ public class MapViewModel extends ViewModel {
         mapRepository = new MapRepository();
     }
 
+    public MutableLiveData<List<IDName>> getCarTypes(String id){
+
+        return mapRepository.getCarTypesMutableLiveData(id);
+    }
+
     public MutableLiveData<List<Car>> getCarsList(String id){
 
         return mapRepository.getCarsListMutableLiveData(id);
@@ -25,5 +31,13 @@ public class MapViewModel extends ViewModel {
     public MutableLiveData<String> getConfirmCarMutableLiveData(String id, String confirmation, String latitude, String longitude) {
 
         return mapRepository.getConfirmCarMutableLiveData(id, confirmation, latitude, longitude);
+    }
+
+    public MutableLiveData<String> getConfirmCarMutableLiveData(String id, String confirmation, String latitude, String longitude,
+                                                                String regionId, String userId, String location, String district,
+                                                                String vehicleType) {
+
+        return mapRepository.getConfirmCarMutableLiveData(id, confirmation, latitude, longitude, regionId, userId, location, district,
+                vehicleType);
     }
 }

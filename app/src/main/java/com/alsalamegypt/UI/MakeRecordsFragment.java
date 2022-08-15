@@ -278,7 +278,11 @@ public class MakeRecordsFragment extends BaseFragment implements Serializable {
 
     private void initRegionSpinner(){
 
-        regionList = new ArrayList<>();
+        if(regionList == null)
+            regionList = new ArrayList<>();
+
+        regionList.clear();
+
         regionList.add(new IDName("0", getResources().getString(R.string.choose_region)));
 
         spinnerArrayAdapter = new ArrayAdapter<IDName>(getContext(), android.R.layout.simple_spinner_item, regionList);
